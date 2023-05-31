@@ -18,6 +18,8 @@ class Parsing
         std::vector<std::string> content;
     public:
         void ReadFile(char *path);
+        void lineJoin(std::string &line);
+        void splitLine(std::vector<std::string> &content, std::string &line, char delim);
         void checkBrackets(std::vector<std::string> content);
 };
 

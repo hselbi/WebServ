@@ -1,23 +1,41 @@
 #include "Parsing.hpp"
 
-void Parsing::checkBrackets(std::vector<std::string> content)
+// make lines into one line
+void Parsing::lineJoin(std::string &line)
 {
-    auto it = content.begin();
-    int count = 0;
-    while (it != content.end())
+    int pos = line.find('#');
+    if (pos != std::string::npos)
+        line.erase(pos);
+    for (std::string::iterator it = line.begin(); it != line.end(); ++it)
     {
-        for (char c: *it)
-        {
-            if (c == '{')
-                count++;
-            else if (c == '}')
-                count--;
-        }
-        ++it;
+        if (*it == '\t' || *it == '\n' || *it == '\r')
+            line.replace(it, it + 1, " ");
+        
     }
-    std::cout << "count: " << count << std::endl;
-    if (count != 0)
-        throw std::runtime_error("Error: Brackets are not balanced");
+    pos = line.find(';');
+    if (pos != std::string::npos)
+        line.insert(pos, 1, ' ');
+}
+
+// split line into words
+void Parsing::splitLine(std::vector<std::string> &content, std::string &line, char delim)
+{
+    size_t size = line.size();
+    size_t start = 0;
+    (void)delim;
+    size_t end;
+    while (start < size)
+    {
+        while (start < size && isspace(line[start]))
+            ++start;
+        if (start == size)
+            break;
+        end = start + 1;
+        while (end < size && !isspace(line[end]))
+            ++end;
+        content.push_back(line.substr(start, end - start));
+        start = end;
+    }
 }
 
 void Parsing::ReadFile(char *path)
