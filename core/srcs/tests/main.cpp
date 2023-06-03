@@ -61,7 +61,7 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	printf("Server listening on port %d ...\n", PORT);
+	std::cout << "server listening on port " <<  PORT << "\n";
 
 	FD_ZERO(&master_set);
 	FD_ZERO(&readfds_set); // Clears all file descriptors in the set, initializing it to an empty set.
