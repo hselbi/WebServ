@@ -1,15 +1,17 @@
 #include "webServ.hpp"
 #include "readFiles.hpp"
+#include "config.hpp"
 
 
 int		main(int ac, char **av)
 {
 	if (ac == 2)
 	{
-		readFiles		cluster;
+		config	cluster(av[1]);
 
 		try {
-			cluster.config(av[1]);
+			cluster.print();
+			// cluster.print();
 			// if (cluster.setup() == -1)
 			// 	return (1);
 			// cluster.run();
@@ -21,7 +23,7 @@ int		main(int ac, char **av)
 	}
 	else
 	{
-		std::cerr << RED << "Invalid number of arguments." << RESET << std::endl;
+		std::cerr << "\033[0;31m" << "Invalid number of arguments." << "\033[0m" << std::endl;
 		return (1);
 	}
 	return (0);

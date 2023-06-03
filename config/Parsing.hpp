@@ -17,6 +17,8 @@ class Parsing
         std::string _path;
         std::vector<std::string> content;
     public:
+        void config(char *path);
+        void print();
         void ReadFile(char *path);
         void lineJoin(std::string &line);
         void splitLine(std::vector<std::string> &content, std::string &line, char delim);

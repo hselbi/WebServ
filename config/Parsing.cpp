@@ -63,9 +63,7 @@ void Parsing::ReadFile(char *path)
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
-    }
-
-   
+    }   
     req_file.close();
 }
 

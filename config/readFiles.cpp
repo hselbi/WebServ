@@ -50,7 +50,7 @@ std::vector<std::string> readFiles::readingFile(const char *filename)
     // std::vector<std::string> token;
 
     for (size_t i = 0; i < 1025; i++)
-        buf[i] = '/0';
+        buf[i] = '\0';
     
     if ((fd = open(filename, O_RDONLY)) <= 0)
         throw readFiles::FileNotFoundException();
