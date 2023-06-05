@@ -11,6 +11,7 @@ int		main(int ac, char **av)
 
 		try {
 			cluster.print();
+			cluster.setup();
 			// cluster.print();
 			// if (cluster.setup() == -1)
 			// 	return (1);
