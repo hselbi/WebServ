@@ -11,13 +11,12 @@ private:
     std::vector<std::string> content;
     std::vector<std::string> ser;
     std::vector<std::string> _servers;
+    unsigned int contentSize;
 public:
     config(char *char_path);
     ~config();
     void print();
     config &operator=(config const &src);
-    int setup();
-    int parse(int i, std::vector<std::string> content);
     // std::vector<std::string> readingFile(const char *filename);
     std::vector<std::string> spliter(std::string line, std::string delim);
     

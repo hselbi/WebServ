@@ -5,7 +5,10 @@ config::config(char *char_path)
     // std::cout << "config constructor" << std::endl;
     this->_path = char_path;
     this->content = readFiles::readingFile(char_path);
+    this->contentSize = content.size();
 }
+
+
 
 config::~config()
 {
