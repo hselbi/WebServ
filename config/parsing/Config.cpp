@@ -287,7 +287,7 @@ ConfLoca Config::parse_location(size_t *i)
 
 int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::string value)
 {
-	// std::cout << "key: " << key << " value: " << value << std::endl;
+	std::cout << "key: " << key << " value: " << value << std::endl;
     if (key == "root")
     {
         loca->root = value;
