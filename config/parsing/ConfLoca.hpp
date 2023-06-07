@@ -15,6 +15,7 @@ public:
 	std::string root;
 	std::vector<std::string> index;
 	std::vector<MethodType> allow_methods;
+    std::map<std::string, std::string> cgi_infos;
 
     ConfLoca();
     ~ConfLoca();

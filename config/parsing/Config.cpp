@@ -324,6 +324,14 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 	{
 		loca->client_body_limit = atoi(value.c_str());
 	}
+	else if (key == "cgi_info")
+	{
+		unsigned long i = value.find_first_of(" ");
+		if (i == std::string::npos)
+			return -1;
+		int j = value.find_first_not_of(" ", i);
+		loca->cgi_infos[value.substr(0, i)] = value.substr(j, value.length());
+	}
 	else
 	{
 		return -1;
