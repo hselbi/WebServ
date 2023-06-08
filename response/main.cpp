@@ -16,8 +16,7 @@ int main() {
 	int 		clientSocketFD;
 	char 		buffer[MAX_BUFFER_SIZE];
 	ssize_t 	bytesRead;
-	ssize_t 	bytesSent;
-	const char *responseStr;
+
    
     try
 	{
@@ -42,16 +41,12 @@ int main() {
 			}
 
 			buffer[bytesRead] = '\0';
-			std::cout << "Received request:\n" << buffer << std::endl;
+			// std::cout << "Received request:\n" << buffer << std::endl;
 
 			Response response(clientSocketFD);
-			responseStr = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello World!";
-			bytesSent = response.send(responseStr);
-			if (bytesSent == -1) {
-				std::cerr << "Failed to send response\n";
-			}
-
+			response.processing();
 			response.close();
+
 		}
 	}
 	catch(const std::exception& e)

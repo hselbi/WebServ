@@ -4,6 +4,7 @@ SRCS = main.cpp\
 		Request.cpp\
 		Response.cpp\
 		Socket.cpp\
+		Utils.cpp\
 
 OBJ =$(subst .cpp,.o,$(SRCS))
 
