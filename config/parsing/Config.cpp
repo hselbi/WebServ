@@ -61,10 +61,56 @@ std::vector<ConfServer> *Config::parser()
 		ConfServer server = parse_server(&cur);
 		result->push_back(server);
 	}
-
+	if (check_server_syntax(result) == -1)
+	{
+		std::cout << "[ERROR] config parsing failed. 3" << std::endl;
+		exit(1);
+	}
 	std::cout << "> config file parsing finish\n";
 	return result;
 }
+
+int Config::check_server_syntax(std::vector<ConfServer> *result)
+{
+	system("Color 02");
+	std::cout << "check server syntax" << std::endl;
+	std::vector<ConfServer>::iterator it = result->begin();
+	std::vector<ConfServer>::iterator next_it = it + 1;
+	std::vector<ConfServer>::iterator ite = result->end();
+	for (; it != ite; it++)
+	{
+		if (next_it != ite && it->server_name == next_it->server_name)
+		{
+			if (it->host != next_it->host || it->port != next_it->port)
+			{
+				std::cout << "\e[0;31m the port or the host differents.\n\e[0m";
+				return 1;
+			}
+			else if (it->host == next_it->host && it->port == next_it->port)
+			{
+				std::cout << "\e[0;31m *** the port or the host the same.\n\e[0m";
+				return -1;
+			}
+		}
+		else if(next_it != ite && it->server_name != next_it->server_name)
+		{
+			if (it->host == next_it->host && it->port == next_it->port)
+			{
+				std::cout << "\e[0;31m the port or the host the same.\n\e[0m";
+				return -1;
+			}
+			else
+			{
+				std::cout << "\e[0;31m the port or the host differents.\n\e[0m";
+				return 1;}
+
+		}
+		it->print_server_info();
+	}
+
+	return 1;
+}
+
 
 ConfServer Config::parse_server(size_t *t)
 {
@@ -287,7 +333,7 @@ ConfLoca Config::parse_location(size_t *i)
 
 int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::string value)
 {
-	std::cout << "key: " << key << " value: " << value << std::endl;
+	// std::cout << "key: " << key << " value: " << value << std::endl;
     if (key == "root")
     {
         loca->root = value;

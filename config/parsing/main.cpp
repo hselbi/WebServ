@@ -17,6 +17,7 @@ int main(int argc, char **argv)
 	// std::cout << "====================" << i << "====================\n";
 	std::vector<ConfServer>::iterator it = servers[0].begin();
 	std::vector<ConfServer>::iterator ite = servers[0].end();
+	int i = 0;
 	for (; it != ite; it++)
 	{
 		(*it).print_server_info();

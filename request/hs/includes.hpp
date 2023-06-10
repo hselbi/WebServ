@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <list>
 #include <sstream>
 #include <ctime>
 #include <dirent.h>
