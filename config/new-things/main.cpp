@@ -12,11 +12,11 @@ int main(int argc, char **argv)
 	std::string config = (argc == 1) ? "./test.config" : argv[1];
 	Config configParser(config.c_str());
 	std::vector<ConfServer> *servers = configParser.parser();
-    // std::vector<ConfServer>::iterator it;
-    // for (it = servers->begin(); it != servers->end(); it++)
-    // {
-    //     std::cout << *it << std::endl;
-    // }
+    std::vector<ConfServer>::iterator it;
+    for (it = servers->begin(); it != servers->end(); it++)
+    {
+        std::cout << *it << std::endl;
+    }
 	
 
 
