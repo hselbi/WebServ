@@ -11,6 +11,7 @@ class Socket
 {
 	private:
 		int serverSocket;
+		int clientSocket;
 		struct sockaddr_in serverAddress;
 		struct sockaddr_in clientAddress;
 	public:
@@ -19,9 +20,12 @@ class Socket
 		void create();
 		void bind(int port);
 		void listen(int backlog);
-		void accept(Socket& clientSocket);
+		int accept();
 		void close();
-		int getSocket() const;
+		int getServerSocket() const;
+		int getClientSocket() const;
+		void closeServerSocket();
+		void closeClientSocket();
 };
 
 

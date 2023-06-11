@@ -14,9 +14,10 @@ void Socket::create() {
 }
 
 void Socket::bind(int port) {
+	memset(&serverAddress, 0, sizeof(serverAddress));
 	serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
-    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+    serverAddress.sin_addr.s_addr = INADDR_ANY;
 
 	if (::bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == -1) 
         throw std::runtime_error("Failed to bind socket");
@@ -27,12 +28,12 @@ void Socket::listen(int backlog) {
 		throw std::runtime_error("Failed to listen on socket");
 }
 
-void Socket::accept(Socket& clientSocket) {
+int Socket::accept() {
     socklen_t clientAddressLength = sizeof(clientAddress);
     int clientSocketFD = ::accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLength);
     if (clientSocketFD == -1)
 		throw std::runtime_error("Failed to accept connection");
-    clientSocket.serverSocket = clientSocketFD;
+	return clientSocketFD;
 }
 
 void Socket::close() {
@@ -42,6 +43,24 @@ void Socket::close() {
     }
 }
 
-int Socket::getSocket() const {
+int Socket::getServerSocket() const {
     return serverSocket;
+}
+
+int Socket::getClientSocket() const {
+	return clientSocket;
+}
+
+void Socket::closeServerSocket() {
+	if (serverSocket != -1) {
+		::close(serverSocket);
+		serverSocket = -1;
+	}
+}
+
+void Socket::closeClientSocket() {
+	if (clientSocket != -1) {
+		::close(clientSocket);
+		clientSocket = -1;
+	}
 }

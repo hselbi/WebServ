@@ -11,7 +11,8 @@
 #include <unistd.h>
 #include <sstream>
 #include "Utils.hpp"
-#include <vector>
+
+# define RES_BUFFER_SIZE 1024
 typedef struct ResponseHeader {
     int statusCode;
     std::string statusMessage;
@@ -22,13 +23,12 @@ class Response {
 	public:
 		Response(int clientSocket);
 		void processing();
-		void	close();
 
 	private:
 		int clientSocket;
-		ssize_t	send(const std::string& response);
 		std::string ResponseHeaderToString(const t_responseHeader& responseHeader);
-		std::string simpleFileToString(const std::string& path);
+		std::string getContentType(const std::string& filePath);
+		void		readFile(std::string filePath);
 
 };
 

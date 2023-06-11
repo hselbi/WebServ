@@ -4,56 +4,42 @@
 
 #include <iostream>
 #include <cstring>
+#include <cstdlib>
+#include <exception>
 
 #define MAX_BUFFER_SIZE 1024
-#define PORT 8080
 
-int main() {
-   
-   	Socket 		serverSocket;
-   	Socket 		clientSocket;
-
-	int 		clientSocketFD;
-	char 		buffer[MAX_BUFFER_SIZE];
-	ssize_t 	bytesRead;
-
-   
-    try
+int main(int argc, char *argv[])
+{
+	if (argc != 2)
 	{
-		
-		serverSocket.create();
-		serverSocket.bind(PORT);
-		serverSocket.listen(5);
-		std::cout << "Server started. Listening on http://127.0.0.1:" << PORT << std::endl;
+		std::cerr << "Usage: ./server <port>" << std::endl;
+		return 1;
+	}
 
-		while (true) {
-			
-			serverSocket.accept(clientSocket);
-			clientSocketFD = clientSocket.getSocket();
-			
-			Request request(clientSocketFD);
-			bytesRead = request.receive(buffer, sizeof(buffer) - 1);
-			
-			if (bytesRead == -1) {
-				std::cerr << "Failed to receive request\n";
-				clientSocket.close();
-				return 1;
-			}
+	try
+	{
+		Socket socket;
+		socket.create();
+		socket.bind(std::atoi(argv[1]));
+		socket.listen(5);
+		std::cout << "Server is listening on port " << argv[1] << std::endl;
+		while (true)
+		{
+			int clientSocket = socket.accept();
 
-			buffer[bytesRead] = '\0';
-			// std::cout << "Received request:\n" << buffer << std::endl;
-
-			Response response(clientSocketFD);
+			Request request(clientSocket);
+			char requestBuffer[MAX_BUFFER_SIZE];
+			request.receive(requestBuffer, sizeof(requestBuffer));
+			Response response(clientSocket);
 			response.processing();
-			response.close();
-
 		}
+		socket.closeServerSocket();
 	}
-	catch(const std::exception& e)
+	catch (std::exception &e)
 	{
-		std::cerr << e.what() << '\n';
+		std::cerr << e.what() << std::endl;
+		return 1;
 	}
-	
-
-    return 0;
+	return 0;
 }
