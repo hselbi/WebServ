@@ -20,24 +20,7 @@ Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(2
 {
 	defaultReq();
 	m_env_cgi.clear();
-
-	std::string line;
-    std::ifstream req_file;
-    req_file.open(str, std::ios::in);
-	if (!req_file) {
-		std::cout << "No such file" << std::endl;
-        std::exit(0);
-	}
-	while(std::getline(req_file, line))
-    {
-        if (!line.empty())
-        {
-            std::cout << line << std::endl;
-			parseReq(line);
-        }
-	}
-
-    req_file.close();
+	parseReq(str);
 	if (m_code_ret != 200)
 		std::cerr << "Parsing Error: " << m_code_ret << std::endl;
 
@@ -73,7 +56,7 @@ void Request::defaultReq()
 	m_headers["Server"] = "";
 	m_headers["Accept"] = "";
 	m_headers["Accept-Language"] = "";
-	m_headers["Accept-encoding"] = "";
+	m_headers["Accept-Encoding"] = "";
 	m_headers["Referer"] = "";
 	m_headers["Connection"] = "keep-alive";
 	m_headers["Host"] = "";
@@ -142,6 +125,9 @@ void	Request::setCodeRet(int code) {
 
 void	Request::setBody(const std::string& str)
 {
+	std::cout << "setBody" << std::endl;
+	if (str.size() == 0)
+		return ;
 	char	strip[] = {'\n', '\r'};
 
 	this->m_body.assign(str);
@@ -183,19 +169,25 @@ int Request::setPort()
 	return m_port;
 }
 
+#include <map>
+
 std::ostream&		operator<<(std::ostream& os, const Request& re)
 {
 	std::map<std::string, std::string>::const_iterator	it;
 
-	os << ">Method : " << re.getMethod() << "\n>HTTP version : ";
-	os << re.getVersion() << '\n';
-	os << "Port : " << re.getPort() << '\n';
-	os << ">Path : " << re.getPath() << '\n';
-
-	for (it = re.getHeaders().begin(); it != re.getHeaders().end(); it++)
-		os << it->first << ": " << it->second << '\n';
-
-	os << '\n' << "Request body :\n" << re.getBody() << '\n';
+	os << YELLOW << ">Method : " << GREEN << re.getMethod() << "\n" << RESET;
+	os << YELLOW << ">HTTP version : " << GREEN << re.getVersion() << '\n' << RESET;
+	os << YELLOW << ">Port : " << GREEN << re.getPort() << '\n' << RESET;
+	os << YELLOW << ">Path : " << GREEN << re.getPath() << '\n' << RESET;
+	
+	std::map<std::string, std::string> tmp = re.getHeaders();
+	for (it = tmp.begin(); it != tmp.end(); it++)
+	{
+		if (it->second != "")
+			os << YELLOW << it->first << RED << ": " << it->second << RESET << '\n';
+	}
+	if (re.getBody() != "")
+		os << '\n' << "Request body :\n" << GREEN << re.getBody() << '\n' << RESET;
 
 	return os;
 }

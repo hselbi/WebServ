@@ -1,16 +1,23 @@
 #include "Request.hpp"
 
 
-
 int Request::parseReq(const std::string &str)
 {
     std::string key;
     std::string value;
     std::string line;
     size_t i(0);
-
-    reqLine(lineNext(str, i));
-    while ((line = lineNext(str, i)) != "\r" && line != "" && this->m_code_ret != 400)
+    std::ifstream file;
+    file.open(str, std::ios::in);
+    
+    if (!file)
+    {
+        std::cerr << "Error: no file" << std::endl;
+        exit(1);
+    }
+    std::string tmp(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
+    reqLine(lineNext(tmp, i));
+    while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret != 400)
 	{
 		key = keyReader(line);
 		value = valueReader(line);
@@ -20,9 +27,10 @@ int Request::parseReq(const std::string &str)
 		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
 	}
     setLanguage();
-    setBody(str.substr(i, std::string::npos));
+    if (i != std::string::npos)
+        setBody(str.substr(i, std::string::npos));
     setQuery();
-    
+    file.close();
 
     return m_code_ret;
 }
@@ -50,12 +58,12 @@ void    Request::setLanguage()
     std::vector<std::string> vec;
     size_t i;
     std::string lang;
-    header = m_headers["Content-Language"];
+    header = m_headers["Accept-Language"];
 
     if (header != "")
     {
         vec = split(header, ',');
-        for (std::vector<std::string>::iterator it = vec.begin(); it < vec.end(); i++)
+        for (std::vector<std::string>::iterator it = vec.begin(); it < vec.end(); it++)
         {
             float w = 0.0;
             std::string lang;
@@ -78,7 +86,6 @@ std::string&					capitalize(std::string& str)
 {
 	size_t	i = 0;
 
-	// to_lower(str);
     std::transform(str.begin(), str.end(),str.begin(), ::tolower);
 	str[i] = std::toupper(str[i]);
 	while((i = str.find_first_of('-', i + 1)) != std::string::npos)
