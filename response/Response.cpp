@@ -97,10 +97,18 @@ void Response::readFile(std::string filePath)
 
 
 
+
+
+
+
 void Response::processing()
 {
+	std::map <std::string, std::string> request;
 
-	std::string filePath = "./www/test.pdf";
+	request["method"] = "GET";
+	request["uri"] = "/test.pdsdf";
+	
+	std::string filePath = "./www/test.pdsdf";
 	readFile(filePath);
 	
 }
