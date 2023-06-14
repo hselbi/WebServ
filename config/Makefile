@@ -1,4 +1,4 @@
-SRCS = webServ.c 
+SRCS = ConfLoca.cpp ConfServer.cpp Config.cpp Tools.cpp main.cpp
 
 NAME = webserv
 
