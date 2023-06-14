@@ -95,20 +95,38 @@ void Response::readFile(std::string filePath)
 	close(clientSocket);
 }
 
-
-
-
-
-
-
-void Response::processing()
+std::map <std::string, std::string> Response::tmpRequest()
 {
 	std::map <std::string, std::string> request;
 
-	request["method"] = "GET";
-	request["uri"] = "/test.pdsdf";
-	
-	std::string filePath = "./www/test.pdsdf";
-	readFile(filePath);
-	
+	std::ifstream reqFile("./request_file_test/test_request.txt");
+	std::string line;
+
+	while (std::getline(reqFile, line))
+	{
+		std::string key = line.substr(0, line.find(":"));
+		std::string value = line.substr(line.find(":") + 1);
+		request[key] = value;
+	}
+
+	return request;
 }
+
+bool Response::checkRequestIsFormed()
+{
+	return true;	
+}
+
+void Response::processing()
+{
+	// std::map <std::string, std::string> request;
+	// std::string filePath = "./www" + tmpRequest()["path"];
+	// std::cout << filePath << std::endl;
+	// readFile(filePath);
+}
+
+
+
+
+
+

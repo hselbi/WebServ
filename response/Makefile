@@ -10,7 +10,8 @@ OBJ =$(subst .cpp,.o,$(SRCS))
 
 CXXFLAGS = -Wall -Wextra -Werror  -std=c++98  #-g3 -fsanitize=address
 
-NAME = server
+# pgrep WebServ | xargs kill -9
+NAME = WebServ
 
 $(NAME): $(OBJ)
 	$(CXX) $(CXXFLAGS)  $(OBJ) -o $(NAME)
@@ -18,7 +19,10 @@ $(NAME): $(OBJ)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $^ -o $@
 
-all : $(NAME)
+kill: all
+	pgrep WebServ | xargs kill -9
+
+all: $(NAME)
 
 clean:
 	rm -f $(OBJ) 

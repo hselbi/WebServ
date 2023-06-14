@@ -8,22 +8,16 @@
 #include <exception>
 
 #define MAX_BUFFER_SIZE 1024
-
-int main(int argc, char *argv[])
+#define PORT 8080
+int main()
 {
-	if (argc != 2)
-	{
-		std::cerr << "Usage: ./server <port>" << std::endl;
-		return 1;
-	}
-
 	try
 	{
 		Socket socket;
 		socket.create();
-		socket.bind(std::atoi(argv[1]));
+		socket.bind(PORT);
 		socket.listen(5);
-		std::cout << "Server is listening on port " << argv[1] << std::endl;
+		std::cout << "Server is listening on port " << PORT << std::endl;
 		while (true)
 		{
 			int clientSocket = socket.accept();

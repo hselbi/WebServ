@@ -29,6 +29,8 @@ class Response {
 		std::string ResponseHeaderToString(const t_responseHeader& responseHeader);
 		std::string getContentType(const std::string& filePath);
 		void		readFile(std::string filePath);
+		std::map <std::string, std::string> tmpRequest();
+		bool checkRequestIsFormed();
 
 };
 
