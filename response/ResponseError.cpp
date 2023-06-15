@@ -2,6 +2,21 @@
 
 Response::Response(int clientSocket) : clientSocket(clientSocket) {}
 
+std::string Response::ResponseHeaderToString(const t_responseHeader &responseHeader)
+{
+	std::stringstream ss;
+
+	ss << "HTTP/1.1 " << responseHeader.statusCode << " " << responseHeader.statusMessage << "\r\n";
+
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = responseHeader.headers.begin(); it != responseHeader.headers.end(); ++it)
+	{
+		ss << it->first << ": " << it->second << "\r\n";
+	}
+	ss << "\r\n";
+
+	return ss.str();
+}
 
 std::string Response::getContentType(const std::string &filePath)
 {
@@ -64,10 +79,9 @@ void Response::readFile(std::string filePath)
 
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-	responseHeader.headers["Server"] = "WebServ";
 	
 
-	strHeader = Utils::ResponseHeaderToString(responseHeader);
+	strHeader = ResponseHeaderToString(responseHeader);
 	send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
 
 	char buffer[RES_BUFFER_SIZE];
@@ -111,4 +125,9 @@ void Response::processing()
 	std::cout << filePath << std::endl;
 	readFile(filePath);
 }
+
+
+
+
+
 

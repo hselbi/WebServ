@@ -10,6 +10,9 @@ void Socket::create() {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1)
         throw std::runtime_error("Failed to create socket");
+	int reuse = 1;
+	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) == -1) // socket, level, level options
+		 throw std::runtime_error("setsockopt SO_REUSEADDR failed");
 	
 }
 
