@@ -5,6 +5,7 @@ SRCS = main.cpp\
 		Response.cpp\
 		Socket.cpp\
 		Utils.cpp\
+		ResponseError.cpp\
 
 OBJ =$(subst .cpp,.o,$(SRCS))
 

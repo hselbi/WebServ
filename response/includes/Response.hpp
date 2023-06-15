@@ -15,10 +15,11 @@ class Response {
 
 	private:
 		int clientSocket;
-		std::string getContentType(const std::string& filePath);
-		void		readFile(std::string filePath);
-		std::map <std::string, std::string> tmpRequest();
-		bool checkRequestIsFormed();
+		std::map <std::string, std::string>	tmpRequest();
+		void								readFile(std::string filePath);
+		bool								checkRequestIsFormed();
+		std::string							getContentType(const std::string& filePath);
+		std::string							errorPages(int statusCode, std::string statusMessage);
 
 		// Response error handlers
 		

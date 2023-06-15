@@ -20,6 +20,7 @@ class Utils
 	public:
 		static std::string toString(int value);
 		static std::string ResponseHeaderToString(const t_responseHeader &responseHeader);
+		static bool isValidURI(const std::string& uri);
 };
 
 #endif

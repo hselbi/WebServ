@@ -35,41 +35,28 @@ void Response::readFile(std::string filePath)
 	t_responseHeader	responseHeader;
 	std::string			strHeader;
 	std::ifstream		file;
-	bool				isFileOpen = true;
 
 	file.open(filePath.c_str(), std::ios::binary);
 	if (!file.is_open())
 	{
-		isFileOpen = false;
-		filePath = "./www/404.html";
-		file.open("./www/404.html", std::ios::binary);
-		if (!file.is_open())
-			throw std::runtime_error("Failed to open file: 404.html");
+		errorPages(404, "Not Founded");
+		close(clientSocket);
+		return ;
 	}
 
 	file.seekg(0, std::ios::end);
 	std::streampos fileSize = file.tellg();
 	file.seekg(0, std::ios::beg);
 
-	if (!isFileOpen)
-	{
-		responseHeader.statusCode = 404;
-		responseHeader.statusMessage = "Not Found";
-	}
-	else
-	{
-		responseHeader.statusCode = 200;
-		responseHeader.statusMessage = "OK";
-	}
 
+	responseHeader.statusCode = 200;
+	responseHeader.statusMessage = "OK";
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	responseHeader.headers["Server"] = "WebServ";
-	
 
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
 	send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
-
 	char buffer[RES_BUFFER_SIZE];
 	while (!file.eof())
 	{
@@ -100,7 +87,29 @@ std::map <std::string, std::string> Response::tmpRequest()
 
 bool Response::checkRequestIsFormed()
 {
+	std::map <std::string, std::string> request = tmpRequest();
 
+	if (request.find("Transfer-Encoding") != request.end() && request["Transfer-Encoding"] != "chunked")
+	{
+		errorPages(501, "Not Implemented");
+		return false;
+	}
+	else if (request.find("Transfer-Encoding") == request.end() && request.find("Content-Length") == request.end() 
+		&& reques.find("method") != request.end() && request["method"] == "POST")
+	{
+		errorPages(400, "Bad Request");
+		return false;
+	}
+	else if (!Utils::isValidURI(request["path"]))
+	{
+		errorPages(400, "Bad Request");
+		return false;
+	}
+	else if (strlen(request["path"]) > 2048)
+	{
+		errorPages(414, "Request-URI Too Long");
+		return false;
+	}
 	return true;	
 }
 
@@ -109,6 +118,7 @@ void Response::processing()
 	std::map <std::string, std::string> request;
 	std::string filePath = "./www" + tmpRequest()["path"];
 	std::cout << filePath << std::endl;
-	readFile(filePath);
+	if (checkRequestIsFormed())
+		readFile(filePath);
 }
 
