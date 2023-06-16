@@ -2,6 +2,17 @@
     "files.associations": {
         "fstream": "cpp",
         "ostream": "cpp",
+<<<<<<< HEAD
+        "array": "cpp",
+        "atomic": "cpp",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cmath": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+=======
         "string": "cpp",
         "iostream": "cpp",
         "vector": "cpp",
@@ -29,16 +40,36 @@
         "chrono": "cpp",
         "cmath": "cpp",
         "complex": "cpp",
+>>>>>>> aedaab5c062d9ccf6f46925b1ad35752d005ef4e
         "cstdarg": "cpp",
         "cstddef": "cpp",
         "cstdint": "cpp",
         "cstdio": "cpp",
         "cstdlib": "cpp",
+<<<<<<< HEAD
+=======
         "cstring": "cpp",
+>>>>>>> aedaab5c062d9ccf6f46925b1ad35752d005ef4e
         "ctime": "cpp",
         "cwchar": "cpp",
         "cwctype": "cpp",
         "deque": "cpp",
+<<<<<<< HEAD
+        "list": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "exception": "cpp",
+        "algorithm": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+=======
         "exception": "cpp",
         "functional": "cpp",
         "initializer_list": "cpp",
@@ -61,12 +92,29 @@
         "stack": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
+>>>>>>> aedaab5c062d9ccf6f46925b1ad35752d005ef4e
         "string_view": "cpp",
         "system_error": "cpp",
         "tuple": "cpp",
         "type_traits": "cpp",
+<<<<<<< HEAD
+        "utility": "cpp",
+        "initializer_list": "cpp",
+        "iomanip": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "new": "cpp",
+        "numbers": "cpp",
+        "sstream": "cpp",
+        "stdexcept": "cpp",
+        "streambuf": "cpp",
+        "typeinfo": "cpp"
+=======
         "typeinfo": "cpp",
         "unordered_map": "cpp",
         "utility": "cpp"
+>>>>>>> aedaab5c062d9ccf6f46925b1ad35752d005ef4e
     }
 }
