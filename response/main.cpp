@@ -1,6 +1,4 @@
-#include "includes/Socket.hpp"
-#include "includes/Request.hpp"
-#include "includes/Response.hpp"
+#include "../includes/response/Response.hpp"
 
 #include <iostream>
 #include <cstring>
