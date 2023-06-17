@@ -31,3 +31,19 @@ bool	Utils::isValidURI(const std::string& uri) {
 	}
     return true;
 }
+
+bool Utils::isDirectory(const std::string& path)
+{
+	DIR* dir = opendir(path.c_str());
+    if (dir) {
+        closedir(dir);
+        return true;
+    }
+    return false;
+}
+
+bool Utils::fileExists(const std::string& path)
+{
+	std::ifstream file(path.c_str());
+    return file.good();
+}
