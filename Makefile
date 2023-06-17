@@ -9,8 +9,7 @@ SRCS_RESP		= ./response
 SRCS			= ./main.cpp \
 					$(addprefix $(SRCS_REQ)/, Request.cpp MemRequest.cpp) \
 					$(addprefix $(SRCS_CONF)/, ConfLoca.cpp ConfServer.cpp Config.cpp Tools.cpp) \
-					$(addprefix $(SRCS_POST)/, Post.cpp) \
-					$(addprefix $(SRCS_POST)/, Response.cpp ResponseError.cpp Utils.cpp) \
+					$(addprefix $(SRCS_RESP)/, Response.cpp ResponseError.cpp Utils.cpp) \
 
 OBJS			= $(SRCS:.cpp=.o)
 
