@@ -1,4 +1,4 @@
-#include "Config.hpp"
+#include "../includes/config/Config.hpp"
 
 
 Config::Config(const char* filename)

@@ -1,7 +1,7 @@
 #ifndef POST_HPP
 #define POST_HPP
 
-#include "../request/Request.hpp"
+#include "../includes/request/Request.hpp"
 
 class Post
 {
