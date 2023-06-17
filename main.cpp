@@ -2,7 +2,6 @@
 #include "includes/request/Request.hpp"
 #include "config/Config.hpp"
 #include "config/Tools.hpp"
-#include "postMethod/Post.hpp"
 
 void test(std::vector<ConfServer> &servers)
 {
@@ -40,7 +39,6 @@ int main(int ac, char *av[])
     Request r(test[0]);
     std::cout << r << std::endl;
 
-    Post p(r);
 
     std::cout << YELLOW << "****************** " << test[1] << " ******************" << RESET << std::endl;
     Request s(test[1]);

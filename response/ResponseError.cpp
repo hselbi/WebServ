@@ -1,5 +1,4 @@
-#include "../response/includes/Response.hpp"
-
+#include "../includes/response/Response.hpp"
 
 std::string	Response::errorPages(int statusCode, std::string statusMessage)
 {
