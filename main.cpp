@@ -2,7 +2,6 @@
 #include "includes/request/Request.hpp"
 #include "config/Config.hpp"
 #include "config/Tools.hpp"
-#include "postMethod/Post.hpp"
 
 #include "./response/includes/Socket.hpp"
 #include "./response/includes/Request.hpp"
@@ -45,7 +44,6 @@ int main(int ac, char *av[])
     Request r(test[0]);
     std::cout << r << std::endl;
 
-    Post p(r);
 
     std::cout << YELLOW << "****************** " << test[1] << " ******************" << RESET << std::endl;
     Request s(test[1]);
