@@ -1,7 +1,7 @@
 #ifndef CONFLOCA_HPP
 #define CONFLOCA_HPP
 
-#include "../includes.hpp"
+#include "../includes/includes.hpp"
 #include "Tools.hpp"
 
 
