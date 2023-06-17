@@ -1,1 +1,8 @@
 .vscode/
+webserv
+*.o
+*.out
+*/*.o
+*/*.out
+*/*/*.o
+*/*/*.out
