@@ -1,7 +1,6 @@
-#include "includes/Response.hpp"
+#include "../includes/response/Response.hpp"
 
-Response::Response(int clientSocket) : clientSocket(clientSocket) {}
-
+Response::Response(Request &request): request(request) {}
 
 std::string Response::getContentType(const std::string &filePath)
 {
