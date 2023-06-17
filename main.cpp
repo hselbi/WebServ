@@ -3,6 +3,11 @@
 #include "config/Config.hpp"
 #include "config/Tools.hpp"
 
+#include "./response/includes/Socket.hpp"
+#include "./response/includes/Request.hpp"
+#include "./response/includes/Response.hpp"
+
+
 void test(std::vector<ConfServer> &servers)
 {
 	std::vector<ConfServer>::iterator it = servers.begin();
