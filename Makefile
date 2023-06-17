@@ -1,22 +1,32 @@
-SRCS = Request.cpp MemRequest.cpp main.cpp
-
 NAME = webserv
 
-CC = c++
-CFLANG = -Wall -Wextra -Werror -g3 -fsanitize=address -std=c++98
-OBJS = $(SRCS:.cpp=.o)
+SRCS_REQ		= ./request
+SRCS_CONF		= ./config
+SRCS_POST		= ./postMethod
 
-all: $(NAME)
 
-$(NAME) :
-	$(CC) $(CFLANG) $(SRCS)  -o $(NAME)
+SRCS			= ./main.cpp \
+					$(addprefix $(SRCS_REQ)/, Request.cpp MemRequest.cpp) \
+					$(addprefix $(SRCS_CONF)/, ConfLoca.cpp ConfServer.cpp Config.cpp Tools.cpp) \
+					$(addprefix $(SRCS_POST)/, Post.cpp)
+
+OBJS			= $(SRCS:.cpp=.o)
+
+CXX				= clang++
+CXXFLAGS		= -Wall -Werror -Wextra -std=c++98
+CXXFLAGS		= -std=c++98 -fsanitize=address
+
+all:			$(NAME)
+
+$(NAME):		$(OBJS)
+				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
 
 clean:
-	rm -f $(OBJS)
+				rm -f $(OBJS)
 
-fclean: clean
-	rm -f $(NAME)
+fclean:			clean
+				rm -f $(NAME)
 
-re: fclean all
+re:				fclean $(NAME)
 
-.PHONY: all clean fclean re
+.PHONY:			all clean fclean re

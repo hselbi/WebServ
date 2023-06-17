@@ -11,6 +11,7 @@ class ConfServer
         std::string content;
     public:
 
+        int     server_id;
         int		client_body_limit;
         bool	autoindex;
         std::string root;
@@ -34,10 +35,11 @@ class ConfServer
 
         ConfServer();
         ~ConfServer();
-
+        void set_server_id(int id);
+        int get_server_id();
         static MethodType strtoMethod(std::string str);
         void print_server_info();
-        // print server infos
+
 
 };
 

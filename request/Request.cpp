@@ -1,5 +1,5 @@
 #include "Request.hpp"
-#include "includes.hpp"
+#include "../includes.hpp"
 
 
 
@@ -125,7 +125,6 @@ void	Request::setCodeRet(int code) {
 
 void	Request::setBody(const std::string& str)
 {
-	std::cout << "setBody" << std::endl;
 	if (str.size() == 0)
 		return ;
 	char	strip[] = {'\n', '\r'};
@@ -188,8 +187,7 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 		if (it->second != "")
 			os << YELLOW << it->first << RED << ": " << it->second << RESET << '\n';
 	}
-	if (re.getBody() != "")
-		os << '\n' << "Request body :\n" << GREEN << re.getBody() << '\n' << RESET;
+	os << '\n' << "Request body :\n" << GREEN << re.getBody() << '\n' << RESET;
 
 	return os;
 }
