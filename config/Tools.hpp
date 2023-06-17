@@ -1,7 +1,7 @@
 #ifndef TOOLS_HPP
 #define TOOLS_HPP
 
-#include "../includes.hpp"
+#include "../includes/includes.hpp"
 
 int		replace(std::string &original, std::string word1, std::string word2);
 std::vector<std::string> split(std::string input, char delimiter);
