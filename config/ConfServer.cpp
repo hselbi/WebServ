@@ -1,4 +1,4 @@
-#include "ConfServer.hpp"
+#include "../includes/config/ConfServer.hpp"
 
 ConfServer::ConfServer()
 {

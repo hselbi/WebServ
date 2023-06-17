@@ -1,4 +1,4 @@
-#include "Tools.hpp"
+#include "../includes/config/Tools.hpp"
 
 int replace(std::string &original, std::string word1, std::string word2)
 {
