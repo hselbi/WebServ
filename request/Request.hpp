@@ -1,7 +1,7 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include "includes.hpp"
+#include "../includes.hpp"
 
 
 class Request
@@ -13,6 +13,7 @@ private:
         std::string m_body;
         std::string m_query;
         std::string m_raw;
+        std::map<std::string, std::string> m_body_query;
         std::map<std::string, std::string> m_headers;
         std::map<std::string, std::string> m_env_cgi;
         std::list<std::pair<std::string, float> > m_language;

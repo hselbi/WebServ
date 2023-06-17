@@ -28,7 +28,6 @@ Config::Config(const char* filename)
     // std::cout << "====================================================" << std::endl;
 }
 
-// void 
 
 Config::~Config()
 {
@@ -81,6 +80,7 @@ ConfServer Config::parse_server(size_t *t)
     }
 		
 	pre++;
+	std::cout << "==> " << pre << std::endl;
 	size_t cur = content.find_first_not_of(" \t\n", pre);
 	while (cur != std::string::npos)
 	{
@@ -98,6 +98,7 @@ ConfServer Config::parse_server(size_t *t)
 		std::string key = content.substr(pre, cur - pre);
 		if (key == "}")
 		{
+			// std::cout << RED << "==> " << cur << RESET << std::endl;
 			*t = content.find_first_not_of(" \n\t", cur + 1);
 			break;
 		}
@@ -213,6 +214,8 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
     {
         return -1;
     }
+
+	// need to add cgi_path
     return 1;
 }
 

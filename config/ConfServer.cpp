@@ -14,6 +14,17 @@ ConfServer::ConfServer()
 	host = "";
 	port = "";
 	redirect_status = -1;
+	server_id = 0;
+}
+
+int ConfServer::get_server_id()
+{
+	return server_id;
+}
+
+void ConfServer::set_server_id(int id)
+{
+	server_id = id;
 }
 
 ConfServer::~ConfServer()
