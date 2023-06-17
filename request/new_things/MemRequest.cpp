@@ -8,10 +8,12 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
-
+    std::cout << "###########" << std::endl;
     reqLine(lineNext(str, i));
+    std::cout << "###########" << std::endl;
     while ((line = lineNext(str, i)) != "\r" && line != "" && this->m_code_ret != 400)
 	{
+        std::cout << "###########" << std::endl;
 		key = keyReader(line);
 		value = valueReader(line);
         if (m_headers.count(key))

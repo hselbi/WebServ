@@ -32,8 +32,10 @@ Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(2
     {
         if (!line.empty())
         {
+			std::cout << "********" << std::endl;
             std::cout << line << std::endl;
 			parseReq(line);
+			std::cout << "********" << std::endl;
         }
 	}
 
