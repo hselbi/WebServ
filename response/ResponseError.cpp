@@ -1,5 +1,4 @@
-#include "includes/Response.hpp"
-
+#include "../includes/response/Response.hpp"
 
 std::string	Response::errorPages(int statusCode, std::string statusMessage)
 {
@@ -22,15 +21,17 @@ std::string	Response::errorPages(int statusCode, std::string statusMessage)
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
 
-	send(clientSocket, strHeader.c_str(), strHeader.size(), 0);
+	sendResponse(strHeader, strHeader.length());
+	// send(clientSocket, strHeader.c_str(), strHeader.size(), 0);
 
 	char buffer[RES_BUFFER_SIZE];
 	while (!file.eof())
 	{
 		file.read(buffer, sizeof(buffer));
-		send(clientSocket, buffer, file.gcount(), 0);
+		// send(clientSocket, buffer, file.gcount(), 0);
+		sendResponse(buffer, file.gcount());
 	}
 	file.close();
-	close(clientSocket);
+	// close(clientSocket);
 	return "";
 }
