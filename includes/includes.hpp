@@ -1,5 +1,5 @@
-#ifndef INCLUDES_HPP
-#define INCLUDES_HPP
+#pragma once
+
 
 
 #define RESET   "\033[0m"
@@ -14,7 +14,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <sstream>
 #include <map>
 #include <list>
 #include <sstream>
@@ -37,7 +36,7 @@
 #include <fstream>
 
 #include <unistd.h>
-
+#include <signal.h>
 
 
 enum MethodType
@@ -48,4 +47,4 @@ enum MethodType
 	INVALID,
 };
 
-#endif
+

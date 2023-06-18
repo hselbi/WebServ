@@ -58,8 +58,8 @@ struct Server
 	void accept_new_connection(long server_socket);
 	void handle_incoming_request(long client_socket);
 	void handle_outgoing_response(long client_socket);
-	void feed_request(std::string request); // feed request to the Request class
-	void build_response(long client_socket); // generate a response
+	void feed_request(std::string request, long client_socket); // feed request to the Request class
+	void build_response(Request &request, long client_socket); // generate a response
 	void send_response(long client_socket);
 	std::string get_http_method(std::string &request);
 	bool is_request_completed(std::string &request, long client_socket);

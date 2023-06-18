@@ -1,7 +1,8 @@
 #include "../includes/response/Response.hpp"
+#include "../includes/core/Client.hpp"
 
-
-Response::Response(Request &request) : request(request) {}
+Response::Response() {}
+Response::~Response() {}
 
 
 std::string Response::getContentType(const std::string &filePath)
@@ -134,23 +135,23 @@ void Response::readFile(std::string filePath)
 
 bool Response::checkRequestIsFormed()
 {
-	std::map <std::string, std::string> req = request.getHeaders();
+	std::map <std::string, std::string> req = _client->get_request().getHeaders();
 	if (!req["Transfer-Encoding"].empty() && req["Transfer-Encoding"] != "chunked")
 	{
 		errorPages(501);
 		return false;
 	}
-	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty() && request.getMethod() == "POST")
+	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty() && _client->get_request().getMethod() == "POST")
 	{
 		errorPages(400);
 		return false;
 	}
-	else if (!Utils::isValidURI(request.getPath()))
+	else if (!Utils::isValidURI(_client->get_request().getPath()))
 	{
 		errorPages(400);
 		return false;
 	}
-	else if (request.getPath().length() > 2048)
+	else if (_client->get_request().getPath().length() > 2048)
 	{
 		errorPages(414);
 		return false;
@@ -160,17 +161,38 @@ bool Response::checkRequestIsFormed()
 
 void Response::processing()
 {
-	std::cout << "Response processing" << std::endl;
-	std::cout << request << std::endl;
+
+	// if (_client->status == NOT_STARTED)
+	// {
+	// 	if (!checkRequestIsFormed())
+	// 		return ;
+	// 	_client->status = ON_PROCESS;
+	// }
+	// std::string res;
+	// std::cout << "Response processing" << std::endl;
+	// std::cout << request << std::endl;
 	std::string root_path = "./www";
-	if (checkRequestIsFormed())
-	{
-		readFile(root_path + request.getPath());
-	}
+	// if (checkRequestIsFormed())
+	// {
+	// 	readFile(root_path + request.getPath());
+	// }
+	std::cout << "Path is: " << root_path + _client->get_request().getPath() << std::endl;
+	// readFile(root_path + _client->get_request().getPath());
+	// 
+	sendResponse("HTTP/1.1 200 OK\r\nContent-Type: text/json\r\nContent-Length: 13\r\n\r\n{\"status\": 6}", 17);
+
 }
 
 void Response::sendResponse(std::string response, size_t size)
 {
 	// send(clientSocket, response.c_str(), size, 0);
-	std::cout << response << std::endl;
+	_client->append_response_data(response);
+	std::cout << "Response sent: " << response << std::endl;
+}
+
+
+void Response::setClient(Client &client)
+{
+	this->_client = &client;
+	std::cout << "Response client set" << std::endl;
 }
