@@ -1,6 +1,7 @@
 #include "../../includes/core/Client.hpp"
 
 Client::Client() : _total_payload_received(0), _request_body_size(0), _status(0) { }
+
 // Client::Client(long client_socket) { }
 Client::~Client() { }
 

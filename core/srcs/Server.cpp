@@ -69,7 +69,9 @@ Client *Server::get_client(long client_socket)
 
 Client *Server::create_client()
 {
-	return (new Client());
+	Client *client = new Client();
+	client->get_response().setClient(*client);
+	return (client);
 }
 
 void Server::drop_client(long client_socket)
@@ -89,22 +91,24 @@ void Server::drop_client(long client_socket)
 
 void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
 {
-	get_client(client_socket)->get_request()
+	get_client(client_socket)->get_request().getRequest(request);
 }
 
 std::string generate_response()
 {
 	return std::string("HTTP/1.1 200 OK\r\nContent-Type: text/json\r\nContent-Length: 13\r\n\r\n{\"status\": 6}");
 }
-std:string Server::build_response(Request &request, long client_socket) // generate a response
+void Server::build_response(Request &request, long client_socket) // generate a response
 {
-	get_client(client_socket)->get_response().setRequest(request);
-	get_client(client_socket)->append_response_data();
-	return 
+	get_client(client_socket)->get_response().processing();
 }
 
 void Server::send_response(long client_socket)
 {
+	std::cout << "\33[32m";
+		std::cout << "------> before RESPONSE : <------\n";
+		std::cout << get_client(client_socket)->get_response_data() << "\n";
+
 	/* 	// compare the return value from send() with the number of bytes that we tried to send. If the number of bytes actually sent is less than requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data. */
 	// std::cout << "sending response\n";
 	long bytes_sent;
@@ -134,7 +138,7 @@ void Server::send_response(long client_socket)
 
 		// std::cout << "bytes sent : " << bytes_sent << "\n";
 		// std::cout << "completed response : " << get_client(client_socket)->get_response_data() << "\n";
-		std::cout << get_client(client_socket)->get_response_data() << "\n";
+		// std::cout << get_client(client_socket)->get_response_data() << "\n";
 
 		// handle case where Connection header is set to close or keep-alive
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
@@ -158,7 +162,8 @@ void Server::send_response(long client_socket)
 
 void Server::handle_outgoing_response(long client_socket)
 {
-	send_response(build_response(get_client(client_socket)->get_request(), client_socket));
+	// build_response(get_client(client_socket)->get_request(), client_socket);
+	send_response(client_socket);
 }
 // ! http request line example:
 // !! GET /index.html HTTP/1.1
@@ -263,7 +268,7 @@ void Server::handle_incoming_request(long client_socket) // ready to read socket
 			// ! parsing done? build response, move fd from read_set to write_set
 			// LOG_INFO("parsing done for socket", client_socket);
 			feed_request(get_client(client_socket)->get_request_data(), client_socket); // feed request to the Request class
-			build_response(get_client(client_socket)->get_request());
+			build_response(get_client(client_socket)->get_request(), client_socket);
 
 			FD_SET(client_socket, &_write_set_pool);
 
