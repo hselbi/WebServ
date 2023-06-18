@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../../includes/core/Server.hpp"
 
 Server::Server() : _biggest_socket(0), _server_count(1), _config_file(DEFAULT_CONFIG_FILE) { }
 
@@ -87,18 +87,20 @@ void Server::drop_client(long client_socket)
 	_clients.erase(client_socket);
 }
 
-void Server::feed_request(std::string request) // feed request to the Request class
+void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
 {
-	// _request.feed(request);
+	get_client(client_socket)->get_request()
 }
 
 std::string generate_response()
 {
 	return std::string("HTTP/1.1 200 OK\r\nContent-Type: text/json\r\nContent-Length: 13\r\n\r\n{\"status\": 6}");
 }
-void Server::build_response(long client_socket) // generate a response
+std:string Server::build_response(Request &request, long client_socket) // generate a response
 {
-	get_client(client_socket)->append_response_data(generate_response().c_str());
+	get_client(client_socket)->get_response().setRequest(request);
+	get_client(client_socket)->append_response_data();
+	return 
 }
 
 void Server::send_response(long client_socket)
@@ -156,8 +158,7 @@ void Server::send_response(long client_socket)
 
 void Server::handle_outgoing_response(long client_socket)
 {
-	build_response(client_socket);
-	send_response(client_socket);
+	send_response(build_response(get_client(client_socket)->get_request(), client_socket));
 }
 // ! http request line example:
 // !! GET /index.html HTTP/1.1
@@ -261,8 +262,8 @@ void Server::handle_incoming_request(long client_socket) // ready to read socket
 			std::cout << "Request completed\n";
 			// ! parsing done? build response, move fd from read_set to write_set
 			// LOG_INFO("parsing done for socket", client_socket);
-			// feed_request(std::string(get_client(client_socket)->get_request_data())); // feed request to the Request class
-			build_response(client_socket);
+			feed_request(get_client(client_socket)->get_request_data(), client_socket); // feed request to the Request class
+			build_response(get_client(client_socket)->get_request());
 
 			FD_SET(client_socket, &_write_set_pool);
 
@@ -373,9 +374,12 @@ long Server::monitor_clients()
 	// 	std::cerr << "b is set2\n";
 	// }
 	if ((ready_count = select(_biggest_socket + 1, &_read_set, &_write_set, 0, &timeout)) == -1)
+	{
+		FD_ZERO(&ready_count);
 		restart_server("select failed");
-	else if (ready_count == 0)
-		std::cout << "select timed-out";
+	}
+	// else if (ready_count == 0)
+	// 	std::cout << "select timed-out";
 	// 	restart_server("select timed-out after " + int_to_string(timeout.tv_sec) + " seconds");
 		// restart_server("select timed-out after " + std::to_string(timeout.tv_sec) + " seconds");
 
@@ -415,7 +419,7 @@ void Server::start_server()
 void Server::setup_server()
 {
 	_ports.push_back(5001);
-	_ports.push_back(5002);
+	// _ports.push_back(5002);
 	zero_socket_pool();
 	long server_socket;
 	for (long i  = 0; i < SERVER_BLOCK_COUNT; i++)

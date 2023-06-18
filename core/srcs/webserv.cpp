@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Server.hpp"
+#include "../../includes/core/Server.hpp"
 #include <signal.h>
 
 int main(int ac, char *av[])
@@ -23,7 +23,7 @@ int main(int ac, char *av[])
 		std::cerr << e.what() << '\n';
 		server.cleanup_by_closing_all_sockets(); 
 	}
-
+	
 	return (0);
 }
 
