@@ -21,6 +21,8 @@ class Response {
 		bool								checkRequestIsFormed();
 		std::string							getContentType(const std::string& filePath);
 		std::string							errorPages(int statusCode, std::string statusMessage);
+		void								autoIndex(std::string path);
+		void								sendResponse(std::string response, size_t size);
 
 		// Response error handlers
 		

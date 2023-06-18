@@ -1,7 +1,7 @@
 #include "../includes/response/Response.hpp"
 
 
-Response::Response(int clientSocket) : clientSocket(clientSocket) {}
+Response::Response(Request &request) : request(request) {}
 
 
 std::string Response::getContentType(const std::string &filePath)
@@ -79,9 +79,12 @@ void Response::autoIndex(std::string dirPath)
 	responseHeader.headers["Server"] = "WebServ";
 
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
-	send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
-	send(clientSocket, body.c_str(), body.length(), 0);
-	close(clientSocket);
+	sendResponse(strHeader, strHeader.length());
+	sendResponse(body, body.length());
+
+	// send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
+	// send(clientSocket, body.c_str(), body.length(), 0);
+	// close(clientSocket);
 }
 
 void Response::readFile(std::string filePath)
@@ -116,16 +119,19 @@ void Response::readFile(std::string filePath)
 	responseHeader.headers["Server"] = "WebServ";
 
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
-	send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
+	sendResponse(strHeader, strHeader.length());
+
+	// send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
 	char buffer[RES_BUFFER_SIZE];
 	while (!file.eof())
 	{
 		file.read(buffer, sizeof(buffer));
-		send(clientSocket, buffer, file.gcount(), 0);
+		sendResponse(buffer, file.gcount());
 	}
 
-	file.close();
-	close(clientSocket);
+	// file.close();
+	// close(clientSocket);
+
 }
 
 std::map <std::string, std::string> Response::tmpRequest()
@@ -181,3 +187,7 @@ void Response::processing()
 		readFile(filePath);
 }
 
+void Response::sendResponse(std::string response, size_t size)
+{
+	// send(clientSocket, response.c_str(), size, 0);
+}
