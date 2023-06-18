@@ -1,3 +1,0 @@
-method:GET
-path:/test
-query:test=dsfds&

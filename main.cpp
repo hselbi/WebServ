@@ -2,7 +2,7 @@
 #include "includes/request/Request.hpp"
 #include "includes/config/Config.hpp"
 #include "includes/config/Tools.hpp"
-
+#include "includes/response/Response.hpp"
 
 
 void test(std::vector<ConfServer> &servers)
@@ -50,6 +50,11 @@ int main(int ac, char *av[])
     // std::cout << YELLOW << "****************** " << test[2] << " ******************" << RESET << std::endl;
     // Request q(test[2]);
     // std::cout << q << std::endl;
+
+
+    Request req("./request/tester_files/lvl1_for_response/valid.txt");
+    Response res(req);
+    res.processing();
 
 
     std::cout << "=================================================\n";
