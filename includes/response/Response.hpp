@@ -16,13 +16,12 @@ class Response {
 
 	private:
 		Request &request;
-		std::map <std::string, std::string>	tmpRequest();
 		void								readFile(std::string filePath);
 		bool								checkRequestIsFormed();
-		std::string							getContentType(const std::string& filePath);
-		std::string							errorPages(int statusCode, std::string statusMessage);
 		void								autoIndex(std::string path);
 		void								sendResponse(std::string response, size_t size);
+		std::string							getContentType(const std::string& filePath);
+		std::string							errorPages(int statusCode);
 
 		// Response error handlers
 		
