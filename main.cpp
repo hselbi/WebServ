@@ -1,15 +1,14 @@
 #include "includes/includes.hpp"
 #include "includes/request/Request.hpp"
-#include "config/Config.hpp"
-#include "config/Tools.hpp"
+#include "includes/config/Config.hpp"
+#include "includes/config/Tools.hpp"
 
-#include "./response/includes/Socket.hpp"
-#include "./response/includes/Request.hpp"
-#include "./response/includes/Response.hpp"
+#include "includes/response/Response.hpp"
 
 
 void test(std::vector<ConfServer> &servers)
 {
+    servers[0].set_server_id(15);
 	std::vector<ConfServer>::iterator it = servers.begin();
 	// std::vector<ConfServer>::iterator ite = servers.end();
 	// int i = 0;
@@ -38,20 +37,20 @@ int main(int ac, char *av[])
 	std::vector<ConfServer> *servers = configParser.parser();
 	test(*servers);
 
-    const char *test[3] = {"./request/tester_files/lvl3/html-form.txt", "./request/tester_files/lvl3/json-data.txt", "./request/tester_files/lvl3/xml-data.txt"};
+    // const char *test[3] = {"./request/tester_files/lvl3/html-form.txt", "./request/tester_files/lvl3/json-data.txt", "./request/tester_files/lvl3/xml-data.txt"};
     
-    std::cout << YELLOW << "****************** " << test[0] << " ******************" << RESET << std::endl;
-    Request r(test[0]);
-    std::cout << r << std::endl;
-
-
-    std::cout << YELLOW << "****************** " << test[1] << " ******************" << RESET << std::endl;
-    Request s(test[1]);
-    std::cout << s << std::endl;
+    // std::cout << YELLOW << "****************** " << test[0] << " ******************" << RESET << std::endl;
+    // Request r(test[0]);
+    // std::cout << r << std::endl;
     
-    std::cout << YELLOW << "****************** " << test[2] << " ******************" << RESET << std::endl;
-    Request q(test[2]);
-    std::cout << q << std::endl;
+
+    // std::cout << YELLOW << "****************** " << test[1] << " ******************" << RESET << std::endl;
+    // Request s(test[1]);
+    // std::cout << s << std::endl;
+    
+    // std::cout << YELLOW << "****************** " << test[2] << " ******************" << RESET << std::endl;
+    // Request q(test[2]);
+    // std::cout << q << std::endl;
 
 
     std::cout << "=================================================\n";

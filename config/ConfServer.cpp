@@ -1,4 +1,5 @@
 #include "../includes/config/ConfServer.hpp"
+#include "../includes/includes.hpp"
 
 ConfServer::ConfServer()
 {
@@ -45,29 +46,29 @@ MethodType ConfServer::strtoMethod(std::string str)
 
 void ConfServer::print_server_info()
 {
-	std::cout << "------------------ Server Info ------------------\n";
-	std::cout << "> server_name: " << server_name << "\n";
-	std::cout << "> host: " << host << "\n";
-	std::cout << "> port: " << port << "\n";
+	std::cout << RED << "------------------ Server Info ------------------\n";
+	std::cout << YELLOW << "> server_name: " << GREEN << server_name << "\n";
+	std::cout << YELLOW << "> host: " << GREEN << host << "\n";
+	std::cout << YELLOW << "> port: " << GREEN << port << "\n";
 	if (redirect_status == -1)
 	{
-		std::cout << "> root: " << root << "\n";
-		std::cout << "> client_body_limit: " << client_body_limit << "\n";
-		std::cout << "> autoindex: " << (autoindex ? "on\n" : "off\n");
-		std::cout << "> index: " << index << "\n";
-		std::cout << "> allow_methods: " << allow_methods << "\n";
-		std::cout << "> error pages: ";
+		std::cout << YELLOW << "> root: " << GREEN << root << "\n";
+		std::cout << YELLOW << "> client_body_limit: " << GREEN << client_body_limit << "\n";
+		std::cout << YELLOW << "> autoindex: " << GREEN << (autoindex ? "on\n" : "off\n");
+		std::cout << YELLOW << "> index: " << GREEN << index << "\n";
+		std::cout << YELLOW << "> allow_methods: " << GREEN << allow_methods << "\n";
+		std::cout << YELLOW << "> error pages: ";
 		if (error_pages.size() > 0)
-			std::cout << "\n" << error_pages;
+			std::cout << GREEN << "\n" << error_pages;
 		else
-			std::cout << "(empty)\n";
+			std::cout << GREEN << "(empty)\n";
 		for (unsigned long i = 0; i < locations.size(); i++)
 			locations[i].print_loca_info();
 	}
 	else
 	{
-		std::cout << "> redirect_status: " << redirect_status << "\n";
-		std::cout << "> redirect_url: " << redirect_url << "\n";
+		std::cout << YELLOW << "> redirect_status: " << GREEN << redirect_status << "\n";
+		std::cout << YELLOW << "> redirect_url: " << GREEN << redirect_url << "\n";
 	}
-	std::cout << "-------------------------------------------------\n";
+	std::cout << "-------------------------------------------------\n" << RESET;
 }

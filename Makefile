@@ -9,13 +9,12 @@ SRC_RESPONSE	= ./response
 SRCS			= ./main.cpp \
 					$(addprefix $(SRCS_REQ)/, Request.cpp MemRequest.cpp) \
 					$(addprefix $(SRCS_CONF)/, ConfLoca.cpp ConfServer.cpp Config.cpp Tools.cpp) \
-					$(addprefix $(SRCS_POST)/, Post.cpp) \
-					$(addprefix $(SRC_RESPONSE)/, Response.cpp ResponseError.cpp Utils.cpp)
+					$(addprefix $(SRCS_POST)/, Post.cpp)
 
 OBJS			= $(SRCS:.cpp=.o)
 
 CXX				= clang++
-CXXFLAGS		= -Wall -Werror -Wextra -std=c++98
+# CXXFLAGS		= -Wall -Werror -Wextra -std=c++98
 CXXFLAGS		= -std=c++98 -fsanitize=address
 
 all:			$(NAME)

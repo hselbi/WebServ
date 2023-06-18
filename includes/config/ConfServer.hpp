@@ -1,7 +1,7 @@
 #ifndef CONFSERVER_HPP
 #define CONFSERVER_HPP
 
-#include "../includes/includes.hpp"
+#include "../includes.hpp"
 #include "ConfLoca.hpp"
 
 
@@ -19,6 +19,7 @@ class ConfServer
         std::vector<std::string> index;
         std::vector<MethodType> allow_methods;
         std::map<int, std::string> error_pages;
+        std::map<std::string, std::string> cgi_infos;
         
         std::vector<ConfLoca> locations;
         
