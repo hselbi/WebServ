@@ -2,7 +2,7 @@
 #define CONFIG_HPP
 
 
-#include "../includes/includes.hpp"
+#include "../includes.hpp"
 #include "ConfServer.hpp"
 #include "ConfLoca.hpp"
 #include "Tools.hpp"
