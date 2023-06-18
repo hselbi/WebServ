@@ -4,23 +4,23 @@
 Post::Post(Request &req)
 {
     std::cout << "Post" << std::endl;
-    // std::string content_type = req.headers["Content-Type"];
-    // std::cout << content_type << std::endl;
-    // std::cout << req << std::endl;
+    std::string content_type = req.getHeaders()["Content-Type"];
+    std::cout << content_type << std::endl;
+    std::cout << req << std::endl;
     std::cout << "Post" << std::endl;
 }
 
-std::vector<std::string> split(std::string input, char delimiter)
-{
-    std::vector<std::string> answer;
-    std::stringstream ss(input);
-    std::string temp;
+// std::vector<std::string> split(std::string input, char delimiter)
+// {
+//     std::vector<std::string> answer;
+//     std::stringstream ss(input);
+//     std::string temp;
  
-    while (getline(ss, temp, delimiter))
-        answer.push_back(temp);
+//     while (getline(ss, temp, delimiter))
+//         answer.push_back(temp);
  
-    return answer;
-}
+//     return answer;
+// }
 
 
 std::map<std::string, std::string> Post::splitter(std::string body)
