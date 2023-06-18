@@ -47,3 +47,16 @@ bool Utils::fileExists(const std::string& path)
 	std::ifstream file(path.c_str());
     return file.good();
 }
+
+std::string Utils::getStatusMessage(int statusCode)
+{
+	switch (statusCode)
+	{
+		case 200: return "OK";
+		case 501: return "Not Implemented";
+		case 400: return "Bad Request";
+		case 404: return "Not Found";
+		case 414: return "URI Too Long";
+		default: return "Internal Server Error";
+	}
+}

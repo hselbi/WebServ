@@ -2,6 +2,7 @@
 #include "includes/request/Request.hpp"
 #include "includes/config/Config.hpp"
 #include "includes/config/Tools.hpp"
+#include "includes/response/Response.hpp"
 
 
 
@@ -25,35 +26,48 @@ int main(int ac, char *av[])
         exit(1);
     }
 
-    std::cout << "=================================================\n";
-	std::cout << "                 Webserv Start!                  \n";
-	std::cout << "=================================================\n";
+    // std::cout << "=================================================\n";
+	// std::cout << "                 Webserv Start!                  \n";
+	// std::cout << "=================================================\n";
 
-    std::string config = (ac == 1) ? "./config/conf/test.config" : av[1];
+    // std::string config = (ac == 1) ? "./config/conf/test.config" : av[1];
 
-    Config configParser(config.c_str());
-	std::vector<ConfServer> *servers = configParser.parser();
-	test(*servers);
+    // Config configParser(config.c_str());
+	// std::vector<ConfServer> *servers = configParser.parser();
+	// test(*servers);
 
-    const char *test[3] = {"./request/tester_files/lvl3/html-form.txt", "./request/tester_files/lvl3/json-data.txt", "./request/tester_files/lvl3/xml-data.txt"};
+    const char *test[3] = {"./request/tester_files/lvl2/valid.txt", "./request/tester_files/lvl3/json-data.txt", "./request/tester_files/lvl3/xml-data.txt"};
     
     std::cout << YELLOW << "****************** " << test[0] << " ******************" << RESET << std::endl;
     Request r(test[0]);
     std::cout << r << std::endl;
-
-
-    std::cout << YELLOW << "****************** " << test[1] << " ******************" << RESET << std::endl;
-    Request s(test[1]);
-    std::cout << s << std::endl;
-    
-    std::cout << YELLOW << "****************** " << test[2] << " ******************" << RESET << std::endl;
-    Request q(test[2]);
-    std::cout << q << std::endl;
-
-
     std::cout << "=================================================\n";
-	std::cout << "                Webserv Finished                 \n";
-	std::cout << "=================================================\n";
-    delete servers;
+
+
+    // Response 
+    Response response(r);
+    response.processing();
+
+
+
+
+    // std::cout << YELLOW << "****************** " << test[1] << " ******************" << RESET << std::endl;
+    // Request s(test[1]);
+    // std::cout << s << std::endl;
+    
+    // std::cout << YELLOW << "****************** " << test[2] << " ******************" << RESET << std::endl;
+    // Request q(test[2]);
+    // std::cout << q << std::endl;
+
+    
+
+
+
+    // std::cout << "=================================================\n";
+	// std::cout << "                Webserv Finished                 \n";
+	// std::cout << "=================================================\n";
+    // delete servers;
+
+
     return 0;
 }

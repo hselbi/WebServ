@@ -1,22 +1,22 @@
 #include "../includes/response/Response.hpp"
 
-std::string	Response::errorPages(int statusCode, std::string statusMessage)
+std::string	Response::errorPages(int statusCode)
 {
 	t_responseHeader	responseHeader;
 	std::string			strHeader;
-	std::string			filePath = "./config/" + Utils::toString(statusCode) + ".html";
+	std::string			filePath = "./defaultPages/" + Utils::toString(statusCode) + ".html";
 	std::ifstream		file;
 
 	file.open(filePath.c_str(), std::ios::binary);
 	if (!file.is_open())
-		throw std::runtime_error("Failed to open file: 501.html");
+		throw std::runtime_error("Failed to open file: " + filePath);
 
 	file.seekg(0, std::ios::end);
 	std::streampos fileSize = file.tellg();
 	file.seekg(0, std::ios::beg);
 
 	responseHeader.statusCode = statusCode;
-	responseHeader.statusMessage = statusMessage;
+	responseHeader.statusMessage = Utils::getStatusMessage(statusCode);
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	strHeader = Utils::ResponseHeaderToString(responseHeader);

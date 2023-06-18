@@ -67,7 +67,7 @@ void Response::autoIndex(std::string dirPath)
 	else
 	{
 		std::cout << "autoIndex error" << std::endl;
-		errorPages(404, "Not Found");
+		errorPages(404);
 		return ;
 	}
 	std::cout << body << std::endl;
@@ -95,15 +95,13 @@ void Response::readFile(std::string filePath)
 
 	if (Utils::isDirectory(filePath))
 	{
-		autoIndex(filePath);
+		// autoIndex(filePath);
 		return ;
 	}
-	filePath = "./www" + filePath;
 	file.open(filePath.c_str(), std::ios::binary);
 	if (!file.is_open())
 	{
-		std::cout << "readFile error : " << filePath << std::endl;
-		errorPages(404, "Not Found");
+		errorPages(404);
 		return ;
 	}
 
@@ -113,7 +111,7 @@ void Response::readFile(std::string filePath)
 
 
 	responseHeader.statusCode = 200;
-	responseHeader.statusMessage = "OK";
+	responseHeader.statusMessage = Utils::getStatusMessage(200);
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	responseHeader.headers["Server"] = "WebServ";
@@ -134,46 +132,27 @@ void Response::readFile(std::string filePath)
 
 }
 
-std::map <std::string, std::string> Response::tmpRequest()
-{
-	std::map <std::string, std::string> request;
-
-	std::ifstream reqFile("./request_file_test/test_request.txt");
-	std::string line;
-
-	while (std::getline(reqFile, line))
-	{
-		std::string key = line.substr(0, line.find(":"));
-		std::string value = line.substr(line.find(":") + 1);
-		request[key] = value;
-	}
-
-	return request;
-}
-
 bool Response::checkRequestIsFormed()
 {
-	std::map <std::string, std::string> request = tmpRequest();
-
-	if (request.find("Transfer-Encoding") != request.end() && request["Transfer-Encoding"] != "chunked")
+	std::map <std::string, std::string> req = request.getHeaders();
+	if (!req["Transfer-Encoding"].empty() && req["Transfer-Encoding"] != "chunked")
 	{
-		errorPages(501, "Not Implemented");
+		errorPages(501);
 		return false;
 	}
-	else if (request.find("Transfer-Encoding") == request.end() && request.find("Content-Length") == request.end() 
-		&& request.find("method") != request.end() && request["method"] == "POST")
+	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty() && request.getMethod() == "POST")
 	{
-		errorPages(400, "Bad Request");
+		errorPages(400);
 		return false;
 	}
-	else if (!Utils::isValidURI(request["path"]))
+	else if (!Utils::isValidURI(request.getPath()))
 	{
-		errorPages(400, "Bad Request");
+		errorPages(400);
 		return false;
 	}
-	else if (request["path"].length() > 2048)
+	else if (request.getPath().length() > 2048)
 	{
-		errorPages(414, "Request-URI Too Long");
+		errorPages(414);
 		return false;
 	}
 	return true;	
@@ -181,13 +160,17 @@ bool Response::checkRequestIsFormed()
 
 void Response::processing()
 {
-	std::map <std::string, std::string> request;
-	std::string filePath = tmpRequest()["path"];
+	std::cout << "Response processing" << std::endl;
+	std::cout << request << std::endl;
+	std::string root_path = "./www";
 	if (checkRequestIsFormed())
-		readFile(filePath);
+	{
+		readFile(root_path + request.getPath());
+	}
 }
 
 void Response::sendResponse(std::string response, size_t size)
 {
 	// send(clientSocket, response.c_str(), size, 0);
+	std::cout << response << std::endl;
 }
