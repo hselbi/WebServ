@@ -105,9 +105,9 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 
 void Server::send_response(long client_socket)
 {
-	std::cout << "\33[32m";
-		std::cout << "------> before RESPONSE : <------\n";
-		std::cout << get_client(client_socket)->get_response_data() << "\n";
+	// std::cout << "\33[32m";
+	// 	std::cout << "------> before RESPONSE : <------\n";
+	// 	std::cout << get_client(client_socket)->get_response_data() << "\n";
 
 	/* 	// compare the return value from send() with the number of bytes that we tried to send. If the number of bytes actually sent is less than requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data. */
 	// std::cout << "sending response\n";
@@ -126,15 +126,15 @@ void Server::send_response(long client_socket)
 	}
 	else if (bytes_sent < get_client(client_socket)->get_response_data().length()) // if send returns less than the number of bytes requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data.
 	{
-		std::cout << "bytes sent : " << bytes_sent << "\n";
-		std::cout << "response not completed  : " << get_client(client_socket)->get_response_data() << "\n";
+		// std::cout << "bytes sent : " << bytes_sent << "\n";
+		// std::cout << "response not completed  : " << get_client(client_socket)->get_response_data() << "\n";
 
 		get_client(client_socket)->get_response_data().erase(0, bytes_sent);
 	}
 	else
 	{
-		std::cout << "\33[32m";
-		std::cout << "------> RESPONSE : <------\n";
+		// std::cout << "\33[32m";
+		// std::cout << "------> RESPONSE : <------\n";
 
 		// std::cout << "bytes sent : " << bytes_sent << "\n";
 		// std::cout << "completed response : " << get_client(client_socket)->get_response_data() << "\n";
@@ -252,8 +252,8 @@ void Server::handle_incoming_request(long client_socket) // ready to read socket
 		get_client(client_socket)->append_total_bytes_received(bytes_read);
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
 
-		std::cout << "\033[0;35m ------> REQUEST : <------\n";
-		std::cout << " bytes read : " << bytes_read << "\n";
+		// std::cout << "\033[0;35m ------> REQUEST : <------\n";
+		// std::cout << " bytes read : " << bytes_read << "\n";
 		// std::cout << strlen(received_data) << "\n";
 		// std::cout << received_data << "\n";
 
@@ -264,7 +264,7 @@ void Server::handle_incoming_request(long client_socket) // ready to read socket
 
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
 		{
-			std::cout << "Request completed\n";
+			// std::cout << "Request completed\n";
 			// ! parsing done? build response, move fd from read_set to write_set
 			// LOG_INFO("parsing done for socket", client_socket);
 			feed_request(get_client(client_socket)->get_request_data(), client_socket); // feed request to the Request class

@@ -18,7 +18,8 @@ class Response {
 
 	private:
 		std::string 						_buffer;
-		Client *_client;
+		Client 								*_client;
+		std::ifstream						_file;
 		void								readFile(std::string filePath);
 		bool								checkRequestIsFormed();
 		void								autoIndex(std::string path);

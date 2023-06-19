@@ -1,5 +1,6 @@
 #include "../includes/response/Response.hpp"
 #include "../includes/core/Client.hpp"
+#define RES_COLOR "\036[36m"
 
 Response::Response() {}
 Response::~Response() {}
@@ -20,11 +21,11 @@ std::string Response::getContentType(const std::string &filePath)
 	contentTypes[".gif"] = "image/gif";
 	contentTypes[".pdf"] = "application/pdf";
 	contentTypes[".mp4"] = "video/mp4";
-	
+
 	dotPos = filePath.rfind('.');
 	if (dotPos != std::string::npos)
 		extension = filePath.substr(dotPos);
-	
+
 	it = contentTypes.find(extension);
 	if (it != contentTypes.end())
 		return it->second;
@@ -88,6 +89,34 @@ void Response::autoIndex(std::string dirPath)
 	// close(clientSocket);
 }
 
+
+
+bool Response::checkRequestIsFormed()
+{
+	std::map <std::string, std::string> req = _client->get_request().getHeaders();
+	if (!req["Transfer-Encoding"].empty() && req["Transfer-Encoding"] != "chunked")
+	{
+		errorPages(501);
+		return false;
+	}
+	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty() && _client->get_request().getMethod() == "POST")
+	{
+		errorPages(400);
+		return false;
+	}
+	else if (!Utils::isValidURI(_client->get_request().getPath()))
+	{
+		errorPages(400);
+		return false;
+	}
+	else if (_client->get_request().getPath().length() > 2048)
+	{
+		errorPages(414);
+		return false;
+	}
+	return true;	
+}
+
 void Response::readFile(std::string filePath)
 {
 	t_responseHeader	responseHeader;
@@ -133,66 +162,81 @@ void Response::readFile(std::string filePath)
 
 }
 
-bool Response::checkRequestIsFormed()
-{
-	std::map <std::string, std::string> req = _client->get_request().getHeaders();
-	if (!req["Transfer-Encoding"].empty() && req["Transfer-Encoding"] != "chunked")
-	{
-		errorPages(501);
-		return false;
-	}
-	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty() && _client->get_request().getMethod() == "POST")
-	{
-		errorPages(400);
-		return false;
-	}
-	else if (!Utils::isValidURI(_client->get_request().getPath()))
-	{
-		errorPages(400);
-		return false;
-	}
-	else if (_client->get_request().getPath().length() > 2048)
-	{
-		errorPages(414);
-		return false;
-	}
-	return true;	
-}
-
 void Response::processing()
 {
+	t_responseHeader	responseHeader;
+	std::string			strHeader;
+	std::ifstream 		file;
+	std::string path = "./www" + _client->get_request().getPath();	
+	file.open(path, std::ios::binary);
 
-	// if (_client->status == NOT_STARTED)
+	if (file.is_open())
+	{
+		file.seekg(0, std::ios::end);
+		std::streampos fileSize = file.tellg();
+		file.seekg(0, std::ios::beg);
+
+		responseHeader.statusCode = 200;
+		responseHeader.statusMessage = Utils::getStatusMessage(200);
+		responseHeader.headers["Content-Type"] = getContentType(path);
+		responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
+		responseHeader.headers["Server"] = "WebServ";
+
+		strHeader = Utils::ResponseHeaderToString(responseHeader);
+
+		_client->append_response_data(strHeader);
+		// send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
+		char buffer[RES_BUFFER_SIZE];
+		while (file.read(buffer, RES_BUFFER_SIZE))
+        {
+			std::string str(buffer, RES_BUFFER_SIZE);
+            _client->append_response_data(str);
+
+        }
+		std::string str(buffer, file.gcount());
+		_client->append_response_data(str);
+		file.close();
+		// close(clientSocket);
+		return ;
+	}
+
+
+	// sendResponse(Utils::ResponseHeaderToString(responseHeader), 10);
+	// std::string body = "{\"status\": 6}";
+	// sendResponse(body, body.length());
+	// if (_client->get_status() == NOT_STARTED)
 	// {
-	// 	if (!checkRequestIsFormed())
-	// 		return ;
-	// 	_client->status = ON_PROCESS;
+
+		// if (!checkRequestIsFormed())
+		// 	return ;
+		// _client->set_status(ON_PROCESS);
+		// errorPages(400);
+		// return ;
 	// }
 	// std::string res;
 	// std::cout << "Response processing" << std::endl;
 	// std::cout << request << std::endl;
-	std::string root_path = "./www";
+	// std::string root_path = "./www";
 	// if (checkRequestIsFormed())
 	// {
 	// 	readFile(root_path + request.getPath());
 	// }
-	std::cout << "Path is: " << root_path + _client->get_request().getPath() << std::endl;
+	// std::cout << "Path is: " << root_path + _client->get_request().getPath() << std::endl;
 	// readFile(root_path + _client->get_request().getPath());
 	// 
-	sendResponse("HTTP/1.1 200 OK\r\nContent-Type: text/json\r\nContent-Length: 13\r\n\r\n{\"status\": 6}", 17);
+	
+
 
 }
 
 void Response::sendResponse(std::string response, size_t size)
 {
 	// send(clientSocket, response.c_str(), size, 0);
-	_client->append_response_data(response);
-	std::cout << "Response sent: " << response << std::endl;
+
 }
 
 
 void Response::setClient(Client &client)
 {
 	this->_client = &client;
-	std::cout << "Response client set" << std::endl;
 }
