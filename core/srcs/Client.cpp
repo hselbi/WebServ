@@ -52,3 +52,7 @@ void Client::set_request_body_length(long request_body_size) { _request_body_siz
 Request &Client::get_request() { return _request; }
 
 Response &Client::get_response() { return _response; }
+
+int Client::get_status() { return _status; }
+
+void Client::set_status(int status) { _status = status; }

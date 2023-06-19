@@ -43,6 +43,8 @@ struct Client
 
 	Request &get_request();
 	Response &get_response();
+	int get_status();
+	void set_status(int status);
 	private:
 		int _status;
 		Request _request;
