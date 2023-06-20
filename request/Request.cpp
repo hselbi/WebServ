@@ -46,6 +46,11 @@ void Request::defaultReq()
 	// If-None-Match: "c561c68d0ba92bbeb8b0fff2a9199f722e3a621a"
 	// Cache-Control: max-age=0
 
+
+	/*
+	* search more about the empty values
+	*/
+
 	m_headers["Allow"] = "";
 	m_headers["Content-Language"] = "";
 	m_headers["Content-Location"] = "";
