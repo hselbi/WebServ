@@ -1,17 +1,17 @@
 #include "../includes/response/Response.hpp"
 #include "../includes/core/Client.hpp"
+
 #define RES_COLOR "\036[36m"
 
 Response::Response() {}
 Response::~Response() {}
 
-
 std::string Response::getContentType(const std::string &filePath)
 {
-	std::map<std::string, std::string>::const_iterator	it;
-	std::map<std::string, std::string>					contentTypes;
-	std::string 										extension;
-	size_t												dotPos;
+	std::map<std::string, std::string>::const_iterator it;
+	std::map<std::string, std::string> contentTypes;
+	std::string extension;
+	size_t dotPos;
 
 	contentTypes[".html"] = "text/html";
 	contentTypes[".htm"] = "text/html";
@@ -33,26 +33,25 @@ std::string Response::getContentType(const std::string &filePath)
 	return "text/plain";
 }
 
-
-void Response::autoIndex(std::string dirPath)
+void Response::autoIndex()
 {
-	DIR 				*dir;
-	struct dirent 		*ent;
-	std::string 		strHeader;
-	t_responseHeader 	responseHeader;
-	std::string path = "./www" + dirPath;
-	std::string body = "<html><head><title>Index of " + dirPath + "</title></head><body><h1>Index of " + dirPath + "</h1><hr><pre>";
+	DIR *dir;
+	struct dirent *ent;
+	std::string strHeader;
+	t_responseHeader responseHeader;
+	std::string path = "./www" + _client->get_request().getPath();
+	std::string body = "<html><head><title>Index of " + _client->get_request().getPath() + "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
 	std::string tmp;
 
 	std::string defaultPages[] = {"index.html", "index.htm", "index.php"};
 	for (size_t i = 0; i < 3; i++)
 	{
-		std::string tmpPath = (path.back() == '/') ? path + defaultPages[i] : path + "/" + defaultPages[i];
-		std::cout << tmpPath << std::endl;
+		char lastChar = path[path.length() - 1];
+		std::string tmpPath = (lastChar == '/') ? path + defaultPages[i] : path + "/" + defaultPages[i];
 		if (Utils::fileExists(tmpPath))
 		{
-			readFile("/" + defaultPages[i]);
-			return ;
+			readFileByPath(tmpPath);
+			return;
 		}
 	}
 	if ((dir = opendir(path.c_str())) != NULL)
@@ -60,20 +59,21 @@ void Response::autoIndex(std::string dirPath)
 		while ((ent = readdir(dir)) != NULL)
 		{
 			tmp = ent->d_name;
-			if (tmp != "." && tmp != "..")
-				body += "<a href=\"" + tmp + "\">" + tmp + "</a><br>";
+			if (Utils::isDirectory(path + "/" + tmp))
+				body.append("<a href=\"" + tmp + "/\">" + tmp + "/</a><br>");
+			else
+				body.append("<a href=\"" + tmp + "\">" + tmp + "</a><br>");
+				
 		}
-		body += "</pre><hr></body></html>";
+		body.append("</pre><hr></body></html>");
 		closedir(dir);
 	}
 	else
 	{
-		std::cout << "autoIndex error" << std::endl;
+		std::cout << RED << "autoIndex error" << RESET << std::endl;
 		errorPages(404);
-		return ;
+		return;
 	}
-	std::cout << body << std::endl;
-
 	responseHeader.statusCode = 200;
 	responseHeader.statusMessage = "OK";
 	responseHeader.headers["Content-Type"] = "text/html";
@@ -81,19 +81,14 @@ void Response::autoIndex(std::string dirPath)
 	responseHeader.headers["Server"] = "WebServ";
 
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
-	sendResponse(strHeader, strHeader.length());
-	sendResponse(body, body.length());
-
-	// send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
-	// send(clientSocket, body.c_str(), body.length(), 0);
-	// close(clientSocket);
+	_client->append_response_data(strHeader);
+	_client->append_response_data(body);
+	_client->set_status(DONE);
 }
-
-
 
 bool Response::checkRequestIsFormed()
 {
-	std::map <std::string, std::string> req = _client->get_request().getHeaders();
+	std::map<std::string, std::string> req = _client->get_request().getHeaders();
 	if (!req["Transfer-Encoding"].empty() && req["Transfer-Encoding"] != "chunked")
 	{
 		errorPages(501);
@@ -114,31 +109,31 @@ bool Response::checkRequestIsFormed()
 		errorPages(414);
 		return false;
 	}
-	return true;	
+	return true;
 }
 
-void Response::readFile(std::string filePath)
+void Response::readFile()
 {
-	t_responseHeader	responseHeader;
-	std::string			strHeader;
-	std::ifstream		file;
+	t_responseHeader responseHeader;
+	std::string strHeader;
+	std::string filePath = "./www" + _client->get_request().getPath();
+	std::streampos fileSize;
 
 	if (Utils::isDirectory(filePath))
 	{
-		// autoIndex(filePath);
-		return ;
+		autoIndex();
+		return;
 	}
-	file.open(filePath.c_str(), std::ios::binary);
-	if (!file.is_open())
+	_file.open(filePath.c_str(), std::ios::binary);
+	if (!_file.is_open())
 	{
 		errorPages(404);
-		return ;
+		return;
 	}
 
-	file.seekg(0, std::ios::end);
-	std::streampos fileSize = file.tellg();
-	file.seekg(0, std::ios::beg);
-
+	_file.seekg(0, std::ios::end);
+	fileSize = _file.tellg();
+	_file.seekg(0, std::ios::beg);
 
 	responseHeader.statusCode = 200;
 	responseHeader.statusMessage = Utils::getStatusMessage(200);
@@ -147,94 +142,70 @@ void Response::readFile(std::string filePath)
 	responseHeader.headers["Server"] = "WebServ";
 
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
-	sendResponse(strHeader, strHeader.length());
+	_client->append_response_data(strHeader);
+	_client->set_status(ON_PROCESS);
+}
 
-	// send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
-	char buffer[RES_BUFFER_SIZE];
-	while (!file.eof())
+void Response::readFileByPath(std::string filePath)
+{
+	t_responseHeader responseHeader;
+	std::string strHeader;
+	std::streampos fileSize;
+
+	if (Utils::isDirectory(filePath))
 	{
-		file.read(buffer, sizeof(buffer));
-		sendResponse(buffer, file.gcount());
+		autoIndex();
+		return;
+	}
+	_file.open(filePath.c_str(), std::ios::binary);
+	if (!_file.is_open())
+	{
+		errorPages(404);
+		return;
 	}
 
-	// file.close();
-	// close(clientSocket);
+	_file.seekg(0, std::ios::end);
+	fileSize = _file.tellg();
+	_file.seekg(0, std::ios::beg);
 
+	responseHeader.statusCode = 200;
+	responseHeader.statusMessage = Utils::getStatusMessage(200);
+	responseHeader.headers["Content-Type"] = getContentType(filePath);
+	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
+	responseHeader.headers["Server"] = "WebServ";
+
+	strHeader = Utils::ResponseHeaderToString(responseHeader);
+	_client->append_response_data(strHeader);
+	_client->set_status(ON_PROCESS);
 }
 
 void Response::processing()
 {
-	t_responseHeader	responseHeader;
-	std::string			strHeader;
-	std::ifstream 		file;
-	std::string path = "./www" + _client->get_request().getPath();	
-	file.open(path, std::ios::binary);
-
-	if (file.is_open())
+	if (_client->get_status() == NOT_STARTED)
 	{
-		file.seekg(0, std::ios::end);
-		std::streampos fileSize = file.tellg();
-		file.seekg(0, std::ios::beg);
+		if (!checkRequestIsFormed())
+			return;
+		readFile();
 
-		responseHeader.statusCode = 200;
-		responseHeader.statusMessage = Utils::getStatusMessage(200);
-		responseHeader.headers["Content-Type"] = getContentType(path);
-		responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-		responseHeader.headers["Server"] = "WebServ";
-
-		strHeader = Utils::ResponseHeaderToString(responseHeader);
-
-		_client->append_response_data(strHeader);
-		// send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
-		char buffer[RES_BUFFER_SIZE];
-		while (file.read(buffer, RES_BUFFER_SIZE))
-        {
-			std::string str(buffer, RES_BUFFER_SIZE);
-            _client->append_response_data(str);
-
-        }
-		std::string str(buffer, file.gcount());
-		_client->append_response_data(str);
-		file.close();
-		// close(clientSocket);
-		return ;
+		// return ; // just for now
 	}
-
-
-	// sendResponse(Utils::ResponseHeaderToString(responseHeader), 10);
-	// std::string body = "{\"status\": 6}";
-	// sendResponse(body, body.length());
-	// if (_client->get_status() == NOT_STARTED)
-	// {
-
-		// if (!checkRequestIsFormed())
-		// 	return ;
-		// _client->set_status(ON_PROCESS);
-		// errorPages(400);
-		// return ;
-	// }
-	// std::string res;
-	// std::cout << "Response processing" << std::endl;
-	// std::cout << request << std::endl;
-	// std::string root_path = "./www";
-	// if (checkRequestIsFormed())
-	// {
-	// 	readFile(root_path + request.getPath());
-	// }
-	// std::cout << "Path is: " << root_path + _client->get_request().getPath() << std::endl;
-	// readFile(root_path + _client->get_request().getPath());
-	// 
-	
-
-
+	if (_client->get_status() == ON_PROCESS) // change if to else if
+	{
+		if (!_file.eof())
+		{
+			_file.read(_buffer, RES_BUFFER_SIZE);
+			std::string str(_buffer, _file.gcount());
+			_client->append_response_data(str);
+			processing(); // just for now
+		}
+		else
+		{
+			_file.close();
+			_buffer[0] = '\0';
+			_client->set_status(DONE);
+		}
+	}
 }
-
-void Response::sendResponse(std::string response, size_t size)
-{
-	// send(clientSocket, response.c_str(), size, 0);
-
-}
-
 
 void Response::setClient(Client &client)
 {
