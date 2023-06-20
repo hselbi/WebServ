@@ -1,11 +1,6 @@
-#include "includes/includes.hpp"
-#include "includes/request/Request.hpp"
-#include "includes/config/Config.hpp"
-#include "includes/config/Tools.hpp"
-#include "includes/response/Response.hpp"
-#include "includes/core/Server.hpp"
-
-
+#include <iostream>
+#include "../../includes/core/Server.hpp"
+#include <signal.h>
 
 int main(int ac, char *av[])
 {

@@ -1,7 +1,9 @@
 #include "../includes/response/Response.hpp"
+#include "../includes/core/Client.hpp"
+#define RES_COLOR "\036[36m"
 
-
-Response::Response(Request &request) : request(request) {}
+Response::Response() {}
+Response::~Response() {}
 
 
 std::string Response::getContentType(const std::string &filePath)
@@ -19,11 +21,11 @@ std::string Response::getContentType(const std::string &filePath)
 	contentTypes[".gif"] = "image/gif";
 	contentTypes[".pdf"] = "application/pdf";
 	contentTypes[".mp4"] = "video/mp4";
-	
+
 	dotPos = filePath.rfind('.');
 	if (dotPos != std::string::npos)
 		extension = filePath.substr(dotPos);
-	
+
 	it = contentTypes.find(extension);
 	if (it != contentTypes.end())
 		return it->second;
@@ -67,7 +69,7 @@ void Response::autoIndex(std::string dirPath)
 	else
 	{
 		std::cout << "autoIndex error" << std::endl;
-		errorPages(404, "Not Found");
+		errorPages(404);
 		return ;
 	}
 	std::cout << body << std::endl;
@@ -87,6 +89,34 @@ void Response::autoIndex(std::string dirPath)
 	// close(clientSocket);
 }
 
+
+
+bool Response::checkRequestIsFormed()
+{
+	std::map <std::string, std::string> req = _client->get_request().getHeaders();
+	if (!req["Transfer-Encoding"].empty() && req["Transfer-Encoding"] != "chunked")
+	{
+		errorPages(501);
+		return false;
+	}
+	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty() && _client->get_request().getMethod() == "POST")
+	{
+		errorPages(400);
+		return false;
+	}
+	else if (!Utils::isValidURI(_client->get_request().getPath()))
+	{
+		errorPages(400);
+		return false;
+	}
+	else if (_client->get_request().getPath().length() > 2048)
+	{
+		errorPages(414);
+		return false;
+	}
+	return true;	
+}
+
 void Response::readFile(std::string filePath)
 {
 	t_responseHeader	responseHeader;
@@ -95,15 +125,13 @@ void Response::readFile(std::string filePath)
 
 	if (Utils::isDirectory(filePath))
 	{
-		autoIndex(filePath);
+		// autoIndex(filePath);
 		return ;
 	}
-	filePath = "./www" + filePath;
 	file.open(filePath.c_str(), std::ios::binary);
 	if (!file.is_open())
 	{
-		std::cout << "readFile error : " << filePath << std::endl;
-		errorPages(404, "Not Found");
+		errorPages(404);
 		return ;
 	}
 
@@ -113,7 +141,7 @@ void Response::readFile(std::string filePath)
 
 
 	responseHeader.statusCode = 200;
-	responseHeader.statusMessage = "OK";
+	responseHeader.statusMessage = Utils::getStatusMessage(200);
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	responseHeader.headers["Server"] = "WebServ";
@@ -134,60 +162,81 @@ void Response::readFile(std::string filePath)
 
 }
 
-std::map <std::string, std::string> Response::tmpRequest()
-{
-	std::map <std::string, std::string> request;
-
-	std::ifstream reqFile("./request_file_test/test_request.txt");
-	std::string line;
-
-	while (std::getline(reqFile, line))
-	{
-		std::string key = line.substr(0, line.find(":"));
-		std::string value = line.substr(line.find(":") + 1);
-		request[key] = value;
-	}
-
-	return request;
-}
-
-bool Response::checkRequestIsFormed()
-{
-	std::map <std::string, std::string> request = tmpRequest();
-
-	if (request.find("Transfer-Encoding") != request.end() && request["Transfer-Encoding"] != "chunked")
-	{
-		errorPages(501, "Not Implemented");
-		return false;
-	}
-	else if (request.find("Transfer-Encoding") == request.end() && request.find("Content-Length") == request.end() 
-		&& request.find("method") != request.end() && request["method"] == "POST")
-	{
-		errorPages(400, "Bad Request");
-		return false;
-	}
-	else if (!Utils::isValidURI(request["path"]))
-	{
-		errorPages(400, "Bad Request");
-		return false;
-	}
-	else if (request["path"].length() > 2048)
-	{
-		errorPages(414, "Request-URI Too Long");
-		return false;
-	}
-	return true;	
-}
-
 void Response::processing()
 {
-	std::map <std::string, std::string> request;
-	std::string filePath = tmpRequest()["path"];
-	if (checkRequestIsFormed())
-		readFile(filePath);
+	t_responseHeader	responseHeader;
+	std::string			strHeader;
+	std::ifstream 		file;
+	std::string path = "./www" + _client->get_request().getPath();	
+	file.open(path, std::ios::binary);
+
+	if (file.is_open())
+	{
+		file.seekg(0, std::ios::end);
+		std::streampos fileSize = file.tellg();
+		file.seekg(0, std::ios::beg);
+
+		responseHeader.statusCode = 200;
+		responseHeader.statusMessage = Utils::getStatusMessage(200);
+		responseHeader.headers["Content-Type"] = getContentType(path);
+		responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
+		responseHeader.headers["Server"] = "WebServ";
+
+		strHeader = Utils::ResponseHeaderToString(responseHeader);
+
+		_client->append_response_data(strHeader);
+		// send(clientSocket, strHeader.c_str(), strHeader.length(), 0);
+		char buffer[RES_BUFFER_SIZE];
+		while (file.read(buffer, RES_BUFFER_SIZE))
+        {
+			std::string str(buffer, RES_BUFFER_SIZE);
+            _client->append_response_data(str);
+
+        }
+		std::string str(buffer, file.gcount());
+		_client->append_response_data(str);
+		file.close();
+		// close(clientSocket);
+		return ;
+	}
+
+
+	// sendResponse(Utils::ResponseHeaderToString(responseHeader), 10);
+	// std::string body = "{\"status\": 6}";
+	// sendResponse(body, body.length());
+	// if (_client->get_status() == NOT_STARTED)
+	// {
+
+		// if (!checkRequestIsFormed())
+		// 	return ;
+		// _client->set_status(ON_PROCESS);
+		// errorPages(400);
+		// return ;
+	// }
+	// std::string res;
+	// std::cout << "Response processing" << std::endl;
+	// std::cout << request << std::endl;
+	// std::string root_path = "./www";
+	// if (checkRequestIsFormed())
+	// {
+	// 	readFile(root_path + request.getPath());
+	// }
+	// std::cout << "Path is: " << root_path + _client->get_request().getPath() << std::endl;
+	// readFile(root_path + _client->get_request().getPath());
+	// 
+	
+
+
 }
 
 void Response::sendResponse(std::string response, size_t size)
 {
 	// send(clientSocket, response.c_str(), size, 0);
+
+}
+
+
+void Response::setClient(Client &client)
+{
+	this->_client = &client;
 }

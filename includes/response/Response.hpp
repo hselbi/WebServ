@@ -1,32 +1,34 @@
-#ifndef RESPONSE_HPP
-#define RESPONSE_HPP
+#pragma once
 
 #include "Utils.hpp"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "Utils.hpp"
-#include "../request/Request.hpp"
 
 # define RES_BUFFER_SIZE 1024
 
+struct Client;
+
 class Response {
 	public:
-		Response(Request &request);
-		void processing();
+		Response();
+		~Response();
+		void 								processing();
+		void 								setClient(Client &client);	
 
 	private:
-		Request &request;
-		std::map <std::string, std::string>	tmpRequest();
+		std::string 						_buffer;
+		Client 								*_client;
+		std::ifstream						_file;
 		void								readFile(std::string filePath);
 		bool								checkRequestIsFormed();
-		std::string							getContentType(const std::string& filePath);
-		std::string							errorPages(int statusCode, std::string statusMessage);
 		void								autoIndex(std::string path);
 		void								sendResponse(std::string response, size_t size);
+		std::string							getContentType(const std::string& filePath);
+		std::string							errorPages(int statusCode);
+		
 
 		// Response error handlers
 		
 
 };
-
-#endif
