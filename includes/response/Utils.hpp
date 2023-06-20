@@ -26,6 +26,7 @@ class Utils
 		static bool isValidURI(const std::string& uri);
 		static bool isDirectory(const std::string& path);
 		static bool fileExists(const std::string& path);
+		static std::string getStatusMessage(int statusCode);
 };
 
 #endif

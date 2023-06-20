@@ -16,21 +16,21 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
-    std::ifstream file;
-    file.open(str, std::ios::in);
+    // std::ifstream file;
+    // file.open(str, std::ios::in);
     
-    if (!file)
-    {
-        std::cerr << "Error: no file" << std::endl;
-        exit(1);
-    }
-    std::string tmp(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
-    reqLine(lineNext(tmp, i));
+    // if (!file)
+    // {
+    //     std::cerr << "Error: no file" << std::endl;
+    //     exit(1);
+    // }
+    // std::string str(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
+    reqLine(lineNext(str, i));
     /*
     *   check if line is not equal to "\r\n" or "" or 400
     */
     // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret != 400)
-    while (!isWhitespace(line = lineNext(tmp, i)) && line != "" && this->m_code_ret != 400)
+    while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret != 400)
 	{
 		key = keyReader(line);
 		value = valueReader(line);
@@ -42,10 +42,10 @@ int Request::parseReq(const std::string &str)
     setLanguage();
     if (i != std::string::npos)
     {
-        setBody(tmp.substr(i, std::string::npos));
+        setBody(str.substr(i, std::string::npos));
     }
     setQuery();
-    file.close();
+    // file.close();
 
     return m_code_ret;
 }

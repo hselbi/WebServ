@@ -16,7 +16,9 @@ std::vector<std::string>		Request::initMethods()
 
 std::vector<std::string>	Request::methods = Request::initMethods();
 
-Request::Request(const std::string &str): m_method(""), m_path(""), m_version(""), m_body(""), m_query(""), m_code_ret(200), m_port(80)
+Request::Request(): m_method(""), m_path(""), m_version(""), m_body(""), m_query(""), m_code_ret(200), m_port(80){}
+
+void Request::getRequest(const std::string &str)
 {
 	defaultReq();
 	m_env_cgi.clear();
@@ -195,4 +197,42 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 	os << '\n' << "Request body :\n" << GREEN << re.getBody() << '\n' << RESET;
 
 	return os;
+}
+
+Request &Request::operator=(const Request &other)
+{
+	if (this != &other)
+	{
+		m_method = other.m_method;
+		m_path = other.m_path;
+		m_version = other.m_version;
+		m_body = other.m_body;
+		m_query = other.m_query;
+		m_raw = other.m_raw;
+		m_headers = other.m_headers;
+		m_env_cgi = other.m_env_cgi;
+		m_language = other.m_language;
+		m_code_ret = other.m_code_ret;
+		m_port = other.m_port;
+	}
+	return *this;
+}
+
+Request::Request(const Request &other)
+{
+	if (this != &other)
+	{
+		m_method = other.m_method;
+		m_path = other.m_path;
+		m_version = other.m_version;
+		m_body = other.m_body;
+		m_query = other.m_query;
+		m_raw = other.m_raw;
+		m_headers = other.m_headers;
+		m_env_cgi = other.m_env_cgi;
+		m_language = other.m_language;
+		m_code_ret = other.m_code_ret;
+		m_port = other.m_port;
+	}
+	*this = other;
 }
