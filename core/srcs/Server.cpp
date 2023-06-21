@@ -101,7 +101,11 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 	get_client(client_socket)->get_response().processing();
 }
 
-void Server::send_response(long client_socket)
+// void Server::send_response(long client_socket)
+// {
+// }
+
+void Server::handle_outgoing_response(long client_socket) // ! send response to client
 {
 	// std::cout << "\33[32m";
 	// 	std::cout << "------> before RESPONSE : <------\n";
@@ -150,18 +154,12 @@ void Server::send_response(long client_socket)
 			FD_CLR(client_socket, &_write_set);
 			FD_CLR(client_socket, &_write_set_pool);
 			// FD_SET(client_socket, &_socket_pool);
+			get_client(client_socket)->reset_request_data();
+			get_client(client_socket)->reset_total_bytes_received();
 			get_client(client_socket)->reset_response_data(); // clear the request buffer for  next request
 
-			get_client(client_socket)->reset_total_bytes_received();
-			get_client(client_socket)->reset_request_data();
 		}
 	}
-}
-
-void Server::handle_outgoing_response(long client_socket)
-{
-	// build_response(get_client(client_socket)->get_request(), client_socket);
-	send_response(client_socket);
 }
 // ! http request line example:
 // !! GET /index.html HTTP/1.1
@@ -404,7 +402,7 @@ void Server::start_server()
 			else if (FD_ISSET(socket, &_write_set)) // ready to write
 			{
 				// ! outgoing response
-				handle_outgoing_response(socket);
+				handle_outgoing_response(socket); // !! send response to client
 			}
 		}
 	}

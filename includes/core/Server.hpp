@@ -60,7 +60,7 @@ struct Server
 	void handle_outgoing_response(long client_socket);
 	void feed_request(std::string request, long client_socket); // feed request to the Request class
 	void build_response(Request &request, long client_socket); // generate a response
-	void send_response(long client_socket);
+	// void send_response(long client_socket);
 	std::string get_http_method(std::string &request);
 	bool is_request_completed(std::string &request, long client_socket);
 	void close_all_sockets();
