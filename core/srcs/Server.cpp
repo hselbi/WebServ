@@ -1,6 +1,6 @@
 #include "../../includes/core/Server.hpp"
 
-Server::Server() : _biggest_socket(0), _server_count(1), _config_file(DEFAULT_CONFIG_FILE) { }
+Server::Server() : _biggest_socket(0), _server_count(1), _config_file(DEFAULT_CONFIG_FILE) {}
 
 Server::~Server()
 {
@@ -37,8 +37,6 @@ void Server::cleanup_by_closing_all_sockets()
 		close(*server_socket);
 	}
 }
-
-
 
 std::vector<long> &Server::get_server_sockets() { return _server_sockets; }
 
@@ -103,7 +101,11 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 	get_client(client_socket)->get_response().processing();
 }
 
-void Server::send_response(long client_socket)
+// void Server::send_response(long client_socket)
+// {
+// }
+
+void Server::handle_outgoing_response(long client_socket) // ! send response to client
 {
 	// std::cout << "\33[32m";
 	// 	std::cout << "------> before RESPONSE : <------\n";
@@ -114,7 +116,7 @@ void Server::send_response(long client_socket)
 	long bytes_sent;
 	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), 0)) == -1)
 	{
-		std::cerr << "Error: send() failed on client socket " << client_socket <<  "\n";
+		std::cerr << "Error: send() failed on client socket " << client_socket << "\n";
 		drop_client(client_socket);
 		return;
 	}
@@ -152,18 +154,12 @@ void Server::send_response(long client_socket)
 			FD_CLR(client_socket, &_write_set);
 			FD_CLR(client_socket, &_write_set_pool);
 			// FD_SET(client_socket, &_socket_pool);
+			get_client(client_socket)->reset_request_data();
+			get_client(client_socket)->reset_total_bytes_received();
 			get_client(client_socket)->reset_response_data(); // clear the request buffer for  next request
 
-			get_client(client_socket)->reset_total_bytes_received();
-			get_client(client_socket)->reset_request_data();
 		}
 	}
-}
-
-void Server::handle_outgoing_response(long client_socket)
-{
-	// build_response(get_client(client_socket)->get_request(), client_socket);
-	send_response(client_socket);
 }
 // ! http request line example:
 // !! GET /index.html HTTP/1.1
@@ -213,9 +209,9 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 			else // erase the request body from the request data
 			{
 				// request doesnt have Content-Length, request_body_length will be 0
-				size_t start_of_body_pos = end_of_headers_pos + 4; // 4 length of \r\n\r\n
+				size_t start_of_body_pos = end_of_headers_pos + 4;																			// 4 length of \r\n\r\n
 				_clients[client_socket]->get_request_data().erase(start_of_body_pos, _clients[client_socket]->get_request_data().length()); // erase the request body from the request data
-				return true; // request done - no payload
+				return true;																												// request done - no payload
 			}
 		}
 		else
@@ -225,7 +221,7 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 	}
 	else //((http_method == "GET" || http_method == "DELETE")) // !! usualy http get request is not more than 1k bytes long -  headers + body
 	{
-		if ((request.find(REQUEST_END) != std::string::npos) )
+		if ((request.find(REQUEST_END) != std::string::npos))
 			return true;
 	}
 
@@ -320,7 +316,7 @@ void Server::bind_socket(long server_socket_id, std::string host, int port)
 {
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
-	_server_addr.sin_port = htons(port);	// _server_addr.sin_addr.s_addr = INADDR_ANY;
+	_server_addr.sin_port = htons(port); // _server_addr.sin_addr.s_addr = INADDR_ANY;
 	// _server_addr.sin_addr.s_addr = inet_addr(host);
 	_server_addr.sin_addr.s_addr = INADDR_ANY;
 
@@ -374,25 +370,16 @@ long Server::monitor_clients()
 
 	_read_set = _socket_pool;
 	_write_set = _write_set_pool;
-	// if (FD_ISSET(b, &_write_set_pool))
-	// {
-	// 	std::cerr << "b is set2\n";
-	// }
 	if ((ready_count = select(_biggest_socket + 1, &_read_set, &_write_set, 0, &timeout)) == -1)
 	{
-		FD_ZERO(&ready_count);
 		restart_server("select failed");
 	}
-	// else if (ready_count == 0)
-	// 	std::cout << "select timed-out";
-	// 	restart_server("select timed-out after " + int_to_string(timeout.tv_sec) + " seconds");
-		// restart_server("select timed-out after " + std::to_string(timeout.tv_sec) + " seconds");
-
 	return ready_count;
 }
 
 void Server::start_server()
 {
+	std::cout << "listening ...\n";
 	for (;;)
 	{
 		long ready_count = monitor_clients(); // monitor socket descriptors for activity
@@ -415,7 +402,7 @@ void Server::start_server()
 			else if (FD_ISSET(socket, &_write_set)) // ready to write
 			{
 				// ! outgoing response
-				handle_outgoing_response(socket);
+				handle_outgoing_response(socket); // !! send response to client
 			}
 		}
 	}
@@ -427,7 +414,7 @@ void Server::setup_server()
 	// _ports.push_back(5002);
 	zero_socket_pool();
 	long server_socket;
-	for (long i  = 0; i < SERVER_BLOCK_COUNT; i++)
+	for (long i = 0; i < SERVER_BLOCK_COUNT; i++)
 	{
 		// std::cout << "server " << i <<  std::endl;
 		create_server_socket();
@@ -455,4 +442,3 @@ std::string generate_request(const std::string &host, const std::string &path)
 {
 	return std::string("GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
 }
-
