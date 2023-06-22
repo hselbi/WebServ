@@ -18,14 +18,74 @@ ConfServer::ConfServer()
 	server_id = 0;
 }
 
-int ConfServer::get_server_id()
+int ConfServer::getServerId()
 {
 	return server_id;
 }
 
-void ConfServer::set_server_id(int id)
+std::string ConfServer::getServerName()
 {
-	server_id = id;
+	return server_name;
+}
+
+std::string ConfServer::getHost()
+{
+	return host;
+}
+
+std::string ConfServer::getPort()
+{
+	return port;
+}
+
+std::string ConfServer::getRoot()
+{
+	return root;
+}
+
+std::vector<std::string> ConfServer::getIndex()
+{
+	return index;
+}
+
+std::vector<MethodType> ConfServer::getAllowMethods()
+{
+	return allow_methods;
+}
+
+std::map<int, std::string> ConfServer::getErrorPages()
+{
+	return error_pages;
+}
+
+std::map<std::string, std::string> ConfServer::getCgiInfos()
+{
+	return cgi_infos;
+}
+
+std::vector<ConfLoca> ConfServer::getLocations()
+{
+	return locations;
+}
+
+int ConfServer::getClientBodyLimit()
+{
+	return client_body_limit;
+}
+
+bool ConfServer::getAutoindex()
+{
+	return autoindex;
+}
+
+int ConfServer::getRedirectStatus()
+{
+	return redirect_status;
+}
+
+std::string ConfServer::getRedirectUrl()
+{
+	return redirect_url;
 }
 
 ConfServer::~ConfServer()
@@ -47,6 +107,7 @@ MethodType ConfServer::strtoMethod(std::string str)
 void ConfServer::print_server_info()
 {
 	std::cout << RED << "------------------ Server Info ------------------\n";
+	std::cout << YELLOW << "> ID: " << GREEN << this->server_id << "\n";
 	std::cout << YELLOW << "> server_name: " << GREEN << server_name << "\n";
 	std::cout << YELLOW << "> host: " << GREEN << host << "\n";
 	std::cout << YELLOW << "> port: " << GREEN << port << "\n";

@@ -46,17 +46,20 @@ std::vector<ConfServer> *Config::parser()
         std::cout << "[ERROR] config parsing failed." << std::endl;
 		exit(1);
     }
+	size_t id = 0;
 	while (cur != std::string::npos)
 	{
+		id += 1;
 		pre = content.find_first_not_of(" \t\n", cur);;
 		cur = content.find_first_of(" \t\n", pre);
 		std::string key = content.substr(pre, cur - pre);
+		// std::cout << "@@@@@@ ==> " << key << std::endl;
 		if (key != "server")
         {
             std::cout << "[ERROR] config parsing failed." << std::endl;
 			exit(1);
         }
-		ConfServer server = parse_server(&cur);
+		ConfServer server = parse_server(&cur, id);
 		result->push_back(server);
 	}
 
@@ -64,7 +67,7 @@ std::vector<ConfServer> *Config::parser()
 	return result;
 }
 
-ConfServer Config::parse_server(size_t *t)
+ConfServer Config::parse_server(size_t *t, size_t id)
 {
     ConfServer result;
 	size_t key_start;
@@ -77,7 +80,7 @@ ConfServer Config::parse_server(size_t *t)
         std::cout << "[ERROR] config parsing failed." << std::endl;
 		exit(1);
     }
-	std::cout << "==> **" << pre << std::endl;
+	// std::cout << "==> **" << pre << std::endl;
 	pre++;
 	// std::cout << "==> " << pre << std::endl;
 	size_t cur = content.find_first_not_of(" \t\n", pre);
@@ -126,7 +129,7 @@ ConfServer Config::parse_server(size_t *t)
 			if ((int)value_end == -2)
 				continue;
 			std::string value = content.substr(pre, value_end - pre + key_start + 1);
-			if (setServValue(&result, key, value) == -1)
+			if (setServValue(&result, key, value, id) == -1)
             {
                 std::cout << "[ERROR] config parsing failed. **" << std::endl;
 				exit(1);
@@ -136,8 +139,10 @@ ConfServer Config::parse_server(size_t *t)
 	return result;
 }
 
-int Config::setServValue(ConfServer *serv, const std::string key, const std::string value)
-{
+int Config::setServValue(ConfServer *serv, const std::string key, const std::string value, size_t id)
+{	
+
+	serv->server_id = id;
 
 	if (key == "server_name")
 	{
@@ -213,8 +218,6 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
     {
         return -1;
     }
-
-	// need to add cgi_path
     return 1;
 }
 
