@@ -16,7 +16,7 @@ std::vector<std::string>		Request::initMethods()
 
 std::vector<std::string>	Request::methods = Request::initMethods();
 
-Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
+Request::Request(const std::string &str): m_method(""), m_path(""), m_version(""), m_body(""), m_query(""), m_code_ret(200), m_port(80)
 {
 	defaultReq();
 	m_env_cgi.clear();
@@ -75,7 +75,7 @@ void Request::defaultReq()
 	m_headers["Server"] = "";
 	m_headers["Accept"] = "";
 	m_headers["Accept-Language"] = "";
-	m_headers["Accept-encoding"] = "";
+	m_headers["Accept-Encoding"] = "";
 	m_headers["Referer"] = "";
 	m_headers["Connection"] = "keep-alive";
 	m_headers["Host"] = "";
@@ -144,6 +144,9 @@ void	Request::setCodeRet(int code) {
 
 void	Request::setBody(const std::string& str)
 {
+	std::cout << "setBody" << std::endl;
+	if (str.size() == 0)
+		return ;
 	char	strip[] = {'\n', '\r'};
 
 	this->m_body.assign(str);
@@ -185,19 +188,27 @@ int Request::setPort()
 	return m_port;
 }
 
+#include <map>
+
 std::ostream&		operator<<(std::ostream& os, const Request& re)
 {
 	std::map<std::string, std::string>::const_iterator	it;
 
-	os << ">Method : " << re.getMethod() << "\n>HTTP version : ";
-	os << re.getVersion() << '\n';
-	os << "Port : " << re.getPort() << '\n';
-	os << ">Path : " << re.getPath() << '\n';
-
-	for (it = re.getHeaders().begin(); it != re.getHeaders().end(); it++)
-		os << it->first << ": " << it->second << '\n';
-
-	os << '\n' << "Request body :\n" << re.getBody() << '\n';
+	os << YELLOW << ">Method : " << GREEN << re.getMethod() << "\n" << RESET;
+	os << YELLOW << ">HTTP version : " << GREEN << re.getVersion() << '\n' << RESET;
+	os << YELLOW << ">Port : " << GREEN << re.getPort() << '\n' << RESET;
+	os << YELLOW << ">Path : " << GREEN << re.getPath() << '\n' << RESET;
+	os << YELLOW << ">Query : " << GREEN << re.getQuery() << '\n' << RESET;
+	
+	
+	std::map<std::string, std::string> tmp = re.getHeaders();
+	for (it = tmp.begin(); it != tmp.end(); it++)
+	{
+		if (it->second != "")
+			os << YELLOW << it->first << RED << ": " << it->second << RESET << '\n';
+	}
+	if (re.getBody() != "")
+		os << '\n' << "Request body :\n" << GREEN << re.getBody() << '\n' << RESET;
 
 	return os;
 }

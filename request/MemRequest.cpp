@@ -1,7 +1,6 @@
 #include "Request.hpp"
 
 
-
 int Request::parseReq(const std::string &str)
 {
     std::string key;
@@ -22,9 +21,10 @@ int Request::parseReq(const std::string &str)
 		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
 	}
     setLanguage();
-    setBody(str.substr(i, std::string::npos));
+    if (i != std::string::npos)
+        setBody(str.substr(i, std::string::npos));
     setQuery();
-    
+    // file.close();
 
     return m_code_ret;
 }
@@ -52,12 +52,12 @@ void    Request::setLanguage()
     std::vector<std::string> vec;
     size_t i;
     std::string lang;
-    header = m_headers["Content-Language"];
+    header = m_headers["Accept-Language"];
 
     if (header != "")
     {
         vec = split(header, ',');
-        for (std::vector<std::string>::iterator it = vec.begin(); it < vec.end(); i++)
+        for (std::vector<std::string>::iterator it = vec.begin(); it < vec.end(); it++)
         {
             float w = 0.0;
             std::string lang;
@@ -80,7 +80,6 @@ std::string&					capitalize(std::string& str)
 {
 	size_t	i = 0;
 
-	// to_lower(str);
     std::transform(str.begin(), str.end(),str.begin(), ::tolower);
 	str[i] = std::toupper(str[i]);
 	while((i = str.find_first_of('-', i + 1)) != std::string::npos)
@@ -96,10 +95,10 @@ std::string plunder(std::string &str, char c)
 	if (!str.size())
 		return str;
 	size_t j = str.size();
-	while (j && str[j - 1] == ' ')
+	while (j && str[j - 1] == c)
 		j--;
 	str.resize(j);
-	for (j = 0; str[j] == ' '; j++);
+	for (j = 0; str[j] == c; j++);
 	str = str.substr(j, std::string::npos);
 	return str;
 }
@@ -182,7 +181,6 @@ int Request::readPath(std::string str, size_t &i)
 
 int Request::readVersion(std::string str, size_t &i)
 {
-    size_t j;
 
     i = str.find_first_not_of(' ', i);
     if (i == std::string::npos)
