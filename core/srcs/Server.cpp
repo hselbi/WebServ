@@ -9,9 +9,8 @@ Server::~Server()
 
 void Server::load_config_file(char *config_file)
 {
-	// _config.parser(config_file);
+	_server_blocks = _config.parser(config_file);
 
-	// set_server_count(_config.get_server_count());
 }
 
 void Server::cleanup_by_closing_all_sockets()
@@ -221,13 +220,13 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 
 void Server::match_client_request_to_server_block(long client_socket)
 {
-	for (std::vector<ConfServer>::iterator server_block = _server_blocks.begin(); server_block != _server_blocks.end(); ++server_block)
+	for (std::vector<ConfServer>::iterator server_block = _server_blocks->begin(); server_block != _server_blocks->end(); ++server_block)
 	{
-		// if (server_block->getHost() == get_client(client_socket)->get_request().getHost() && server_block->getPort() == get_client(client_socket)->get_request().getPort())
-		// {
-		// 	get_client(client_socket)->set_server_block(*server_block);
-		// 	return;
-		// }
+		if (server_block->getHost() == get_client(client_socket)->get_request().getHost() && server_block->getPort() == get_client(client_socket)->get_request().getPort())
+		{
+			get_client(client_socket)->set_server_block(*server_block);
+			return;
+		}
 	}
 }
 
@@ -400,9 +399,10 @@ void Server::setup_server()
 	// _ports.push_back(5002);
 	zero_socket_pool();
 	long server_socket;
-	for (long i = 0; i < SERVER_BLOCK_COUNT; i++)
+	// for (long i = 0; i < SERVER_BLOCK_COUNT; i++)
+	for (long i = 0; i < _server_blocks->size(); i++)
 	{
-		// std::cout << "server " << i <<  std::endl;
+		std::cout << "server " << i <<  std::endl;
 		create_server_socket();
 		bind_socket(i, "127.0.0.1", _ports[i]);
 		listen_on_socket(i);
