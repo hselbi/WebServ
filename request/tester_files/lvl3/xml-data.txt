@@ -1,0 +1,11 @@
+POST /echo/post/xml HTTP/1.1
+Host: reqbin.com
+Content-Type: application/xml
+Accept: application/xml
+Content-Length: 118
+      
+<?xml version="1.0" encoding="utf-8"?>
+<Request>
+    <Login>login</Login>
+    <Password>password</Password>
+</Request>
