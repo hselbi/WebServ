@@ -1,0 +1,86 @@
+##################################################
+# COMPILER
+##################################################
+
+NAME = webserv
+
+CC = clang++
+
+CFLAGS = -Wall -Wextra -Werror -g -std=c++98# -fsanitize=address
+
+##################################################
+# INCLUDES
+##################################################
+
+
+INCLUDES = -I includes
+
+CLASSES = -I includes/config -I includes/core -I includes/request -I includes/response
+
+##################################################
+# directories
+##################################################
+
+MAIN = webserv
+
+SRCS_REQ		= ./request
+SRCS_CONF		= ./config
+SRCS_POST		= ./postMethod
+SRCS_RESPONSE	= ./response
+SRCS_CORE	= ./core/srcs
+
+
+##################################################
+# SRC
+##################################################
+
+SRCS	= ./main.cpp \
+		$(addprefix $(SRCS_REQ)/, Request.cpp MemRequest.cpp) \
+		$(addprefix $(SRCS_CONF)/, ConfLoca.cpp ConfServer.cpp Config.cpp Tools.cpp) \
+		$(addprefix $(SRCS_CORE)/, Client.cpp  Server.cpp  utils.cpp ) \
+		$(addprefix $(SRCS_RESPONSE)/, Response.cpp ResponseError.cpp Utils.cpp)
+
+OBJ	= ./main.cpp \
+		$(addprefix $(OBJ_DIR)/, Request.o MemRequest.o) \
+		$(addprefix $(OBJ_DIR)/, ConfLoca.o ConfServer.o Config.o Tools.o) \
+		$(addprefix $(OBJ_DIR)/, Client.o  Server.o  utils.o ) \
+		$(addprefix $(OBJ_DIR)/, Response.o ResponseError.o Utils.o)
+
+OBJ_DIR = objs
+
+OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
+
+OBJ_SUBDIR = $(addprefix $(OBJ_DIR)/, $(SRCS_REQ) $(SRCS_CONF) $(SRCS_CORE) $(SRCS_RESPONSE))
+
+##################################################
+# MAKING
+##################################################
+
+all: $(NAME)
+
+$(NAME): $(OBJS)
+	@echo "\n"
+	@echo "\033[0;32mCompiling webserv..."
+	@$(CC) $(CFLAGS) $(INCLUDES) $(CLASSES)  -o $(NAME) $(OBJS)
+	@echo "\n\033[0mDone !"
+
+
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_SUBDIR)
+
+##################################################
+# CLEANING
+##################################################
+
+clean:
+	@echo "\n\033[0;31mDeleting objects..."
+	@rm -rf $(OBJ_DIR) $(OBJ_SUBDIR)
+	@echo "\033[0m"
+
+fclean: clean
+	@echo "\033[0;31mDeleting executable..."
+	@rm -f $(NAME)
+	@echo "\033[0m"
+
+re: fclean all

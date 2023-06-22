@@ -1,4 +1,13 @@
-#include "Request.hpp"
+#include "../includes/request/Request.hpp"
+
+bool isWhitespace(const std::string& str) {
+    for (std::size_t i = 0; i < str.length(); i++) {
+        if (!std::isspace(str[i])) {
+            return false;
+        }
+    }
+    return true;
+}
 
 
 int Request::parseReq(const std::string &str)
@@ -7,10 +16,21 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
-    std::cout << "###########" << std::endl;
+    // std::ifstream file;
+    // file.open(str, std::ios::in);
+    
+    // if (!file)
+    // {
+    //     std::cerr << "Error: no file" << std::endl;
+    //     exit(1);
+    // }
+    // std::string str(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
     reqLine(lineNext(str, i));
-    std::cout << "###########" << std::endl;
-    while ((line = lineNext(str, i)) != "\r" && line != "" && this->m_code_ret != 400)
+    /*
+    *   check if line is not equal to "\r\n" or "" or 400
+    */
+    // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret != 400)
+    while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret != 400)
 	{
         std::cout << "###########" << std::endl;
 		key = keyReader(line);
@@ -22,7 +42,9 @@ int Request::parseReq(const std::string &str)
 	}
     setLanguage();
     if (i != std::string::npos)
+    {
         setBody(str.substr(i, std::string::npos));
+    }
     setQuery();
     // file.close();
 
@@ -56,6 +78,7 @@ void    Request::setLanguage()
 
     if (header != "")
     {
+        // std::cout << "header = " << header << std::endl;
         vec = split(header, ',');
         for (std::vector<std::string>::iterator it = vec.begin(); it < vec.end(); it++)
         {
@@ -220,9 +243,11 @@ std::string Request::lineNext(const std::string &str, size_t &i)
     if (i == std::string::npos)
         return "";
     j = str.find_first_of('\n', i);
+    // std::cout << "i = " << i << " j = " << j << std::endl;
     line = str.substr(i, j - i);
     if (line[line.size() - 1] == '\r')
     {
+        // std::cout << "line = " << line << std::endl;
         if (line.size())
 		    line.resize(line.size() - 1);
     }
@@ -230,6 +255,7 @@ std::string Request::lineNext(const std::string &str, size_t &i)
         i = j;
     else
         i = j + 1;
+    
     return line;
 }
 

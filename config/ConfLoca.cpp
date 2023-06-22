@@ -1,4 +1,4 @@
-#include "ConfLoca.hpp"
+#include "../includes/config/ConfLoca.hpp"
 
 ConfLoca::ConfLoca()
 {
