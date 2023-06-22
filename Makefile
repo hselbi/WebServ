@@ -16,7 +16,7 @@ SRCS			= ./main.cpp \
 OBJS = $(SRCS:%.c=objs/%.o)
 
 objs/%.o : %.c
-        $(CC) -o $@ $(CFLAGS) $<
+	$(CC) -o $@ $(CXXFLAGS) $<
 
 CXX				= clang++
 # CXXFLAGS		= -Wall -Werror -Wextra -std=c++98
