@@ -36,8 +36,22 @@ class ConfServer
 
         ConfServer();
         ~ConfServer();
-        void set_server_id(int id);
-        int get_server_id();
+        int getServerId();
+        std::string getServerName();
+        std::string getHost();
+        std::string getPort();
+        std::string getRoot();
+        std::vector<std::string> getIndex();
+        std::vector<MethodType> getAllowMethods();
+        std::map<int, std::string> getErrorPages();
+        std::map<std::string, std::string> getCgiInfos();
+        std::vector<ConfLoca> getLocations();
+        int getClientBodyLimit();
+        bool getAutoindex();
+        int getRedirectStatus();
+        std::string getRedirectUrl();
+        
+
         static MethodType strtoMethod(std::string str);
         void print_server_info();
 

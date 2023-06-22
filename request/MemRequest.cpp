@@ -36,6 +36,7 @@ int Request::parseReq(const std::string &str)
 		value = valueReader(line);
         if (m_headers.count(key))
             m_headers[key] = value;
+        // check_headers(key, value);
 		// if (key.find("Secret") != std::string::npos)
 		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
 	}
