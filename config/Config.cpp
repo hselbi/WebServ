@@ -1,10 +1,12 @@
 #include "../includes/config/Config.hpp"
 
-
-Config::Config(const char* filename)
+Config::Config()
 {
-    // std::cout << filename << std::endl;
-    std::string read;
+}
+
+int Config::openfile(const char* filename)
+{
+	std::string read;
 	std::ifstream fs;
 
 	content.clear();
@@ -15,17 +17,16 @@ Config::Config(const char* filename)
 		{
 			getline(fs, read);
 			content.append(read + '\n');
+			
 		}
 		fs.close();
 	}
 	else
 	{
 		std::cout << "\e[0;31m[ERROR] file open failed.\n\e[0m";
-		exit(1);
+		return 1;
 	}
-    // std::cout << "====================================================" << std::endl;
-    // std::cout << "## ** " << content << std::endl;
-    // std::cout << "====================================================" << std::endl;
+	return 0;
 }
 
 
@@ -33,9 +34,10 @@ Config::~Config()
 {
 }
 
-std::vector<ConfServer> *Config::parser()
+std::vector<ConfServer> *Config::parser(const char* filename)
 {
-
+	if (openfile(filename) == 1)
+		return NULL;
     std::vector<ConfServer> *result = new std::vector<ConfServer>();
 
     std::cout << "> config file parsing start\n";
