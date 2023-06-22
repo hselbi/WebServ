@@ -7,7 +7,7 @@
 class Request
 {
 private:
-     std::string m_method;
+        std::string m_method;
         std::string m_path;
         std::string m_version;
         std::string m_body;

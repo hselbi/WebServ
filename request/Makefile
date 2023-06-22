@@ -1,15 +1,15 @@
-SRCS = ReqParsing.cpp 
+SRCS = Request.cpp MemRequest.cpp main.cpp
 
 NAME = webserv
 
 CC = c++
-CFLANG = -Wall -Wextra -Werror -g -fsanitize=address -std=c++98
+CFLANG = -Wall -Wextra -Werror -g3 -fsanitize=address -std=c++98
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(NAME)
 
-$(NAME) : $(OBJS)
-	$(CC) $(CFLANG) $(OBJS) -o $(NAME)
+$(NAME) :
+	$(CC) $(CFLANG) $(SRCS)  -o $(NAME)
 
 clean:
 	rm -f $(OBJS)
