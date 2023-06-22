@@ -1,6 +1,6 @@
-#include "includes.hpp"
-#include "Request.hpp"
-#include "Post.hpp"
+#include "../includes/request/Request.hpp"
+#include "../includes/includes.hpp"
+
 int main(int ac, char *av[])
 {
     if (ac != 2)
@@ -9,9 +9,8 @@ int main(int ac, char *av[])
         exit(1);
     }
   
-    Request r(av[1]);
+    Request r(av[1].c_str());
     std::cout << r << std::endl;
-    Post p(r);
 
 
     return 0;

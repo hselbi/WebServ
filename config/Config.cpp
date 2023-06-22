@@ -1,4 +1,4 @@
-#include "Config.hpp"
+#include "../includes/config/Config.hpp"
 
 
 Config::Config(const char* filename)
@@ -28,7 +28,6 @@ Config::Config(const char* filename)
     // std::cout << "====================================================" << std::endl;
 }
 
-// void 
 
 Config::~Config()
 {
@@ -42,23 +41,25 @@ std::vector<ConfServer> *Config::parser()
     std::cout << "> config file parsing start\n";
 	size_t pre = 0;
 	size_t cur = content.find_first_not_of(" \t\n", pre);
-    std::cout << "==> "<< cur << std::endl;
 	if (cur == std::string::npos)
     {
         std::cout << "[ERROR] config parsing failed." << std::endl;
 		exit(1);
     }
+	size_t id = 0;
 	while (cur != std::string::npos)
 	{
+		id += 1;
 		pre = content.find_first_not_of(" \t\n", cur);;
 		cur = content.find_first_of(" \t\n", pre);
 		std::string key = content.substr(pre, cur - pre);
+		// std::cout << "@@@@@@ ==> " << key << std::endl;
 		if (key != "server")
         {
             std::cout << "[ERROR] config parsing failed." << std::endl;
 			exit(1);
         }
-		ConfServer server = parse_server(&cur);
+		ConfServer server = parse_server(&cur, id);
 		result->push_back(server);
 	}
 
@@ -66,7 +67,7 @@ std::vector<ConfServer> *Config::parser()
 	return result;
 }
 
-ConfServer Config::parse_server(size_t *t)
+ConfServer Config::parse_server(size_t *t, size_t id)
 {
     ConfServer result;
 	size_t key_start;
@@ -79,8 +80,9 @@ ConfServer Config::parse_server(size_t *t)
         std::cout << "[ERROR] config parsing failed." << std::endl;
 		exit(1);
     }
-		
+	// std::cout << "==> **" << pre << std::endl;
 	pre++;
+	// std::cout << "==> " << pre << std::endl;
 	size_t cur = content.find_first_not_of(" \t\n", pre);
 	while (cur != std::string::npos)
 	{
@@ -98,6 +100,7 @@ ConfServer Config::parse_server(size_t *t)
 		std::string key = content.substr(pre, cur - pre);
 		if (key == "}")
 		{
+			// std::cout << RED << "==> " << cur << RESET << std::endl;
 			*t = content.find_first_not_of(" \n\t", cur + 1);
 			break;
 		}
@@ -126,9 +129,9 @@ ConfServer Config::parse_server(size_t *t)
 			if ((int)value_end == -2)
 				continue;
 			std::string value = content.substr(pre, value_end - pre + key_start + 1);
-			if (setServValue(&result, key, value) == -1)
+			if (setServValue(&result, key, value, id) == -1)
             {
-                std::cout << "[ERROR] config parsing failed." << std::endl;
+                std::cout << "[ERROR] config parsing failed. **" << std::endl;
 				exit(1);
             }
 		}
@@ -136,8 +139,10 @@ ConfServer Config::parse_server(size_t *t)
 	return result;
 }
 
-int Config::setServValue(ConfServer *serv, const std::string key, const std::string value)
-{
+int Config::setServValue(ConfServer *serv, const std::string key, const std::string value, size_t id)
+{	
+
+	serv->server_id = id;
 
 	if (key == "server_name")
 	{
@@ -218,7 +223,7 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 
 ConfLoca Config::parse_location(size_t *i)
 {
-
+	// std::cout << "==> " << *i << std::endl;
 	ConfLoca result;
 	size_t key_start;
 	size_t value_end;
@@ -238,15 +243,16 @@ ConfLoca Config::parse_location(size_t *i)
 	cur = content.find_first_not_of(" \t\n", pre);
 	while (cur != std::string::npos)
 	{
+
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
-            std::cout << "[ERROR] config parsing failed." << std::endl;
+            std::cout << "[ERROR] config parsing failed. 1" << std::endl;
             exit(1);
         }
 		key_start = pre;
 		if ((cur = content.find_first_of(" \t\n", pre)) == std::string::npos)
         {
-            std::cout << "[ERROR] config parsing failed." << std::endl;
+            std::cout << "[ERROR] config parsing failed. 2" << std::endl;
             exit(1);
         }
 		std::string key = content.substr(pre, cur - pre);
@@ -259,17 +265,17 @@ ConfLoca Config::parse_location(size_t *i)
 		{
 			if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
             {
-                std::cout << "[ERROR] config parsing failed." << std::endl;
+                std::cout << "[ERROR] config parsing failed. 3" << std::endl;
                 exit(1);
             }
 			if ((cur = content.find_first_of("\n", pre)) == std::string::npos)
             {
-                std::cout << "[ERROR] config parsing failed." << std::endl;
+                std::cout << "[ERROR] config parsing failed. 4" << std::endl;
                 exit(1);
             }
 			if ((value_end = check_line_syntax(content.substr(key_start, cur - key_start))) == -1)
 			{
-                std::cout << "[ERROR] config parsing failed." << std::endl;
+                std::cout << "[ERROR] config parsing failed. 5" << std::endl;
                 exit(1);
             }
 			if ((int)value_end == -2)
@@ -277,7 +283,7 @@ ConfLoca Config::parse_location(size_t *i)
 			std::string value = content.substr(pre, value_end - pre + key_start + 1);
 			if (setLocaValue(&result, key, value) == -1)
 			{
-                std::cout << "[ERROR] config parsing failed." << std::endl;
+                std::cout << "[ERROR] config parsing failed. 6" << std::endl;
                 exit(1);
             }
 		}
@@ -323,6 +329,13 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
     else if (key == "client_body_limit")
 	{
 		loca->client_body_limit = atoi(value.c_str());
+	}
+	else if (key == "cgi_info")
+	{
+		std::vector<std::string> tmp = split(value, ' ');
+		if (tmp.size() != 2)
+			return -1;
+		loca->cgi_infos[tmp[0]] = tmp[1];
 	}
 	else
 	{
