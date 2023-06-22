@@ -17,6 +17,7 @@ int Config::openfile(const char* filename)
 		{
 			getline(fs, read);
 			content.append(read + '\n');
+			
 		}
 		fs.close();
 	}
