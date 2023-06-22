@@ -27,8 +27,8 @@ int main(int argc, char **argv)
 	std::cout << "=================================================\n";
 
 	std::string config = (argc == 1) ? "./conf/test.config" : argv[1];
-	Config configParser(config.c_str());
-	std::vector<ConfServer> *servers = configParser.parser();
+	Config configParser;
+	std::vector<ConfServer> *servers = configParser.parser(config.c_str());
 	
 	test(*servers);
 
