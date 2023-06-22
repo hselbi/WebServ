@@ -243,7 +243,7 @@ void Server::handle_incoming_request(long client_socket) // ready to read socket
 	}
 	else if (bytes_read == 0)
 	{
-		std::cout << "Connection closed by the client on socket " << client_socket << ", on server " << get_server_id() << ", port " << get_port() << ", host " + get_host() << "\n";
+		// std::cout << "Connection closed by the client on socket " << client_socket << ", on server " << get_server_id() << ", port " << get_port() << ", host " + get_host() << "\n";
 		drop_client(client_socket);
 	}
 	else
