@@ -28,14 +28,13 @@ int main(int argc, char **argv)
 
 	std::string config = (argc == 1) ? "./conf/test.config" : argv[1];
 	Config configParser;
-	std::vector<ConfServer> *servers = configParser.parser(config.c_str());
+	std::vector<ConfServer> servers = configParser.parser(config.c_str());
 	
-	test(*servers);
+	test(servers);
 
 
 	std::cout << "=================================================\n";
 	std::cout << "                Webserv Finished                 \n";
 	std::cout << "=================================================\n";
-	delete servers;
 	return 0;
 }

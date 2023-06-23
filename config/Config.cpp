@@ -34,11 +34,11 @@ Config::~Config()
 {
 }
 
-std::vector<ConfServer> *Config::parser(const char* filename)
+std::vector<ConfServer> Config::parser(const char* filename)
 {
 	if (openfile(filename) == 1)
-		return NULL;
-    std::vector<ConfServer> *result = new std::vector<ConfServer>();
+		return std::vector<ConfServer>();
+    std::vector<ConfServer> result;
 
     std::cout << "> config file parsing start\n";
 	size_t pre = 0;
@@ -62,7 +62,7 @@ std::vector<ConfServer> *Config::parser(const char* filename)
 			exit(1);
         }
 		ConfServer server = parse_server(&cur, id);
-		result->push_back(server);
+		result.push_back(server);
 	}
 
 	std::cout << "> config file parsing finish\n";
