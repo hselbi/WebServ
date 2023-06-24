@@ -148,6 +148,10 @@ void	Request::setCodeRet(int code) {
 	m_code_ret = code;
 }
 
+std::string	Request::getHost() const {
+	return m_host;
+}
+
 
 void	Request::setBody(const std::string& str)
 {
@@ -233,6 +237,7 @@ Request &Request::operator=(const Request &other)
 		m_language = other.m_language;
 		m_code_ret = other.m_code_ret;
 		m_port = other.m_port;
+		m_host = other.m_host;
 	}
 	return *this;
 }
@@ -252,6 +257,7 @@ Request::Request(const Request &other)
 		m_language = other.m_language;
 		m_code_ret = other.m_code_ret;
 		m_port = other.m_port;
+		m_host = other.m_host;
 	}
 	*this = other;
 }
