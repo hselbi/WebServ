@@ -3,24 +3,31 @@
 
 Post::Post(Request &req)
 {
+    std::string _response; /*this one from response */
+
+    // ! 1st etap: check is cgi exist or not
+
+    if (/* ^ cgi exist */)
+    {
+
+    }
+    else {
+        req.setCodeRet(200);
+        _response = "";
+
+    }
+    if (req.getCodeRet() >= 500)
+    {
+        // * check which code
+        _response = 
+    }
+
     std::cout << "Post" << std::endl;
     std::string content_type = req.getHeaders()["Content-Type"];
     std::cout << content_type << std::endl;
     std::cout << req << std::endl;
     std::cout << "Post" << std::endl;
 }
-
-// std::vector<std::string> split(std::string input, char delimiter)
-// {
-//     std::vector<std::string> answer;
-//     std::stringstream ss(input);
-//     std::string temp;
- 
-//     while (getline(ss, temp, delimiter))
-//         answer.push_back(temp);
- 
-//     return answer;
-// }
 
 
 std::map<std::string, std::string> Post::splitter(std::string body)
@@ -38,6 +45,59 @@ std::map<std::string, std::string> Post::splitter(std::string body)
     }
     return ret;
 }
+
+
+
+// ! still testing
+// void			Response::postMethod(Request & request, RequestConfig & requestConf)
+// {
+// 	ResponseHeader	head;
+
+// 	if (requestConf.getCgiPass() != "")
+// 	{
+// 		CgiHandler	cgi(request, requestConf);
+// 		size_t		i = 0;
+// 		size_t		j = _response.size() - 2;
+
+// 		_response = cgi.executeCgi(requestConf.getCgiPass());
+
+// 		while (_response.find("\r\n\r\n", i) != std::string::npos || _response.find("\r\n", i) == i)
+// 		{
+// 			std::string	str = _response.substr(i, _response.find("\r\n", i) - i);
+// 			if (str.find("Status: ") == 0)
+// 				_code = std::atoi(str.substr(8, 3).c_str());
+// 			else if (str.find("Content-Type: ") == 0)
+// 				_type = str.substr(14, str.size());
+// 			i += str.size() + 2;
+// 		}
+// 		while (_response.find("\r\n", j) == j)
+// 			j -= 2;
+
+// 		_response = _response.substr(i, j - i);
+// 	}
+// 	else
+// 	{
+// 		_code = 204;
+// 		_response = "";
+// 	}
+// 	if (_code == 500)
+// 		_response = this->readHtml(_errorMap[_code]);
+// 	_response = head.getHeader(_response.size(), _path, _code, _type, requestConf.getContentLocation(), requestConf.getLang()) + "\r\n" + _response;
+// }
+
+// * part 2
+// std::string		ResponseHeader::getHeader(size_t size, const std::string& path, int code, std::string type, const std::string& contentLocation, const std::string& lang)
+// {
+// 	std::string	header;
+
+// 	resetValues();
+// 	setValues(size, path, code, type, contentLocation, lang);
+
+// 	header = "HTTP/1.1 " + to_string(code) + " " + getStatusMessage(code) + "\r\n";
+// 	header += writeHeader();
+
+// 	return (header);
+// }
 
 // Post::Post(Request &req)
 // {
