@@ -16,10 +16,10 @@ std::vector<std::string>		Request::initMethods()
 
 std::vector<std::string>	Request::methods = Request::initMethods();
 
-Request::Request(): m_method(""), m_path(""), m_version(""), m_body(""), m_query(""), m_code_ret(200), m_port(80){}
 
-void Request::getRequest(const std::string &str)
+Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
+	std::cout << "Request constructor" << std::endl;
 	defaultReq();
 	m_env_cgi.clear();
 	parseReq(str);

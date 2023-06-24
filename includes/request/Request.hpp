@@ -20,6 +20,7 @@ private:
         int m_port;
 public:
     Request();
+    Request(const std::string &str);
     ~Request();
     Request &operator=(const Request &other);
     Request(const Request &other);
@@ -67,6 +68,8 @@ public:
     std::string myGetLine(std::string line, size_t &i);
 
     void getRequest(const std::string &str);
+
+    void check_headers(std::string key, std::string value);
 };
 
 std::string plunder(std::string &str, char c);
