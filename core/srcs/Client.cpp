@@ -1,9 +1,9 @@
 #include "../../includes/core/Client.hpp"
 
-Client::Client() : _total_payload_received(0), _request_body_size(0), _status(0) { }
+Client::Client() : _total_payload_received(0), _request_body_size(0), _status(0) {}
 
 // Client::Client(long client_socket) { }
-Client::~Client() { }
+Client::~Client() {}
 
 long &Client::get_total_bytes_received() { return _total_payload_received; }
 
@@ -40,7 +40,6 @@ void Client::reset_response_data()
 	_response_buffer.clear();
 }
 
-
 std::string &Client::get_request_body() { return _request_body; }
 
 void Client::set_request_body(std::string request_body) { _request_body = request_body; }
@@ -56,3 +55,7 @@ Response &Client::get_response() { return _response; }
 int Client::get_status() { return _status; }
 
 void Client::set_status(int status) { _status = status; }
+
+void Client::set_server_block(ConfServer &config) { _config = config; }
+
+ConfServer &Client::get_server_block() { return _config; }
