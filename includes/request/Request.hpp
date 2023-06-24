@@ -11,6 +11,7 @@ private:
         std::string m_body;
         std::string m_query;
         std::string m_raw;
+        std::string m_host;
         std::map<std::string, std::string> m_body_query;
         std::map<std::string, std::string> m_headers;
         std::map<std::string, std::string> m_env_cgi;
@@ -44,6 +45,7 @@ public:
     std::string		getPath() const;
     std::string		getQuery() const;
     std::string		getRaw() const;
+    std::string		getHost() const;
     std::map<std::string, std::string>	getHeaders() const;
     std::map<std::string, std::string>	getEnvCgi() const;
     std::list<std::pair<std::string, float> >	getLanguage() const;
