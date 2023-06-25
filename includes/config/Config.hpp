@@ -17,7 +17,7 @@ public:
     Config();
     ~Config();
 
-    std::vector<ConfServer> *parser(const char* filename);
+    std::vector<ConfServer> parser(const char* filename);
 
     // hellow
     ConfServer parse_server(size_t *cur, size_t id);
