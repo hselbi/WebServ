@@ -210,7 +210,7 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 			return false; // not completed request
 		}
 	}
-	else //((http_method == "GET" || http_method == "DELETE")) // !! usualy http get request is not more than 1k bytes long -  headers + body
+	else 
 	{
 		if ((request.find(REQUEST_END) != std::string::npos))
 			return true;
@@ -232,7 +232,7 @@ void Server::match_client_request_to_server_block(long client_socket)
 	}
 }
 
-void Server::handle_incoming_request(long client_socket) // ready to read socket descriptor
+void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
