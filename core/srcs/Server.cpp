@@ -224,11 +224,11 @@ void Server::match_client_request_to_server_block(long client_socket)
 	for (std::vector<ConfServer>::iterator server_block = _server_blocks.begin(); server_block != _server_blocks.end(); ++server_block)
 	{
 		// // !! getHost still not implemented
-		// if (server_block->getHost() == get_client(client_socket)->get_request().getHeaders()["Host"] && server_block->getPort() == get_client(client_socket)->get_request().getPort())
-		// {
-		// 	get_client(client_socket)->set_server_block(*server_block);
-		// 	return;
-		// }
+		if (server_block->getHost() == get_client(client_socket)->get_request().getHost() && server_block->getPort() == get_client(client_socket)->get_request().getPort())
+		{
+			get_client(client_socket)->set_server_block(*server_block);
+			return;
+		}
 	}
 }
 
