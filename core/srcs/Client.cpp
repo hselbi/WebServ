@@ -1,16 +1,12 @@
 #include "../../includes/core/Client.hpp"
+#include "../../includes/request/Request.hpp"
 
-Client::Client() : _total_payload_received(0), _request_body_size(0), _status(0) { }
+Client::Client() : _request_body_size(0), _status(0) {}
 
 // Client::Client(long client_socket) { }
-Client::~Client() { }
+Client::~Client() {}
 
-long &Client::get_total_bytes_received() { return _total_payload_received; }
 
-void Client::append_total_bytes_received(long bytes_read)
-{
-	_total_payload_received += bytes_read;
-}
 
 std::string &Client::get_request_data() { return _request_buffer; }
 
@@ -29,8 +25,6 @@ void Client::append_total_bytes_sent(long bytes_sent) { _total_payload_sent += b
 
 void Client::reset_total_bytes_sent() { _total_payload_sent = 0; }
 
-void Client::reset_total_bytes_received() { _total_payload_received = 0; }
-
 void Client::reset_request_data()
 {
 	_request_buffer.clear();
@@ -39,7 +33,6 @@ void Client::reset_response_data()
 {
 	_response_buffer.clear();
 }
-
 
 std::string &Client::get_request_body() { return _request_body; }
 
@@ -56,3 +49,7 @@ Response &Client::get_response() { return _response; }
 int Client::get_status() { return _status; }
 
 void Client::set_status(int status) { _status = status; }
+
+void Client::set_server_block(ConfServer &config) { _config = config; }
+
+ConfServer &Client::get_server_block() { return _config; }

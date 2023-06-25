@@ -63,7 +63,7 @@ void Response::autoIndex()
 				body.append("<a href=\"" + tmp + "/\">" + tmp + "/</a><br>");
 			else
 				body.append("<a href=\"" + tmp + "\">" + tmp + "</a><br>");
-				
+
 		}
 		body.append("</pre><hr></body></html>");
 		closedir(dir);
@@ -181,6 +181,7 @@ void Response::readFileByPath(std::string filePath)
 
 void Response::processing()
 {
+	std::cout << "processing" << std::endl;
 	if (_client->get_status() == NOT_STARTED)
 	{
 		if (!checkRequestIsFormed())

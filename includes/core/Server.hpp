@@ -8,7 +8,7 @@
 #include <string>
 #include <unistd.h>
 #include <fcntl.h>
-#include  <utility>
+#include <utility>
 #include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -22,6 +22,9 @@
 #include <vector>
 #include "Client.hpp"
 #include "utils.hpp"
+
+#include "../config/Config.hpp"
+#include "../config/ConfServer.hpp"
 
 #define QUEUE_LIMIT 1000
 #define REQUEST_END "\r\n\r\n"
@@ -59,24 +62,26 @@ struct Server
 	void handle_incoming_request(long client_socket);
 	void handle_outgoing_response(long client_socket);
 	void feed_request(std::string request, long client_socket); // feed request to the Request class
-	void build_response(Request &request, long client_socket); // generate a response
-	// void send_response(long client_socket);
+	void build_response(Request &request, long client_socket);	// generate a response
+	void send_response(long client_socket);
 	std::string get_http_method(std::string &request);
 	bool is_request_completed(std::string &request, long client_socket);
 	void close_all_sockets();
-	Client* create_client();
+	Client *create_client();
 	void drop_client(long client_id);
 	bool is_connection_close(std::string &request);
 	void throw_error(std::string error_message);
 
 	// getters and setters
-	Client* get_client(long client_id);
-
+	Client *get_client(long client_id);
+	void match_client_request_to_server_block(long client_socket);
 
 	std::vector<long> &get_server_sockets();
+
 private:
+	Config _config;
+	std::vector<ConfServer> _server_blocks;
 	long _server_count;
-	std::string _config_file;
 	std::vector<std::string> _hosts;
 	std::vector<int> _ports;
 	Clients _clients;
@@ -87,7 +92,7 @@ private:
 	// std::string _server_name;
 	fd_set _socket_pool;
 	fd_set _write_set_pool;
-	fd_set _read_set;  // sets of file descriptors to monitor for read
+	fd_set _read_set; // sets of file descriptors to monitor for read
 	fd_set _write_set;
 	struct sockaddr_in _server_addr, _client_addr;
 
