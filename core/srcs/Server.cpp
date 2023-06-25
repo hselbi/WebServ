@@ -1,6 +1,6 @@
 #include "../../includes/core/Server.hpp"
 
-Server::Server() : _biggest_socket(0), _server_count(1), _config_file(DEFAULT_CONFIG_FILE) {}
+Server::Server() : _biggest_socket(0), _server_count(1) {}
 
 Server::~Server()
 {
@@ -9,17 +9,8 @@ Server::~Server()
 
 void Server::load_config_file(char *config_file)
 {
-	if (config_file)
-		_config_file = config_file;
+	_server_blocks = _config.parser(config_file);
 
-	// _config.parsing_config_file(get_config_file()); // throw execption on error
-
-	// set_server_count(_config.get_server_count()); // !! set server count
-	// set_host(_config.get_host()); // !! set host and port for each server
-	// set_port(_config.get_port());
-	// set_error_page(_config.get_error_page()); // !! set error page for each server
-	// set_cgi_extension(_config.get_cgi_extension()); // !! set cgi extension for each server
-	// set_cgi_path(_config.get_cgi_path()); // !! set cgi path for each server
 }
 
 void Server::cleanup_by_closing_all_sockets()
@@ -101,18 +92,8 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 	get_client(client_socket)->get_response().processing();
 }
 
-// void Server::send_response(long client_socket)
-// {
-// }
-
-void Server::handle_outgoing_response(long client_socket) // ! send response to client
+void Server::send_response(long client_socket)
 {
-	// std::cout << "\33[32m";
-	// 	std::cout << "------> before RESPONSE : <------\n";
-	// 	std::cout << get_client(client_socket)->get_response_data() << "\n";
-
-	/* 	// compare the return value from send() with the number of bytes that we tried to send. If the number of bytes actually sent is less than requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data. */
-	// std::cout << "sending response\n";
 	long bytes_sent;
 	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), 0)) == -1)
 	{
@@ -128,21 +109,31 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 	}
 	else if (bytes_sent < get_client(client_socket)->get_response_data().length()) // if send returns less than the number of bytes requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data.
 	{
-		// std::cout << "bytes sent : " << bytes_sent << "\n";
-		// std::cout << "response not completed  : " << get_client(client_socket)->get_response_data() << "\n";
-
 		get_client(client_socket)->get_response_data().erase(0, bytes_sent);
 	}
-	else
+}
+void Server::handle_outgoing_response(long client_socket) // ! send response to client
+{
+	std::cout << get_client(client_socket)->get_response_data().length() << "\n";
+
+	build_response(get_client(client_socket)->get_request(), client_socket);
+	std::cout << get_client(client_socket)->get_response_data().length() << "\n";
+
+	// exit(0);
+
+	send_response(client_socket);
+
+	std::cout << "\33[32m";
+	std::cout << "------> RESPONSE : <------\n";
+	// std::cout << "bytes sent : " << bytes_sent << "\n";
+	// std::cout << "response : "
+	// 		  << "\n";
+	// std::cout << get_client(client_socket)->get_response_data() << "\n";
+
+	// std::cout << get_client(client_socket)->get_response_data().length() << "\n";
+
+	if (get_client(client_socket)->get_status() == DONE)
 	{
-		// std::cout << "\33[32m";
-		// std::cout << "------> RESPONSE : <------\n";
-
-		// std::cout << "bytes sent : " << bytes_sent << "\n";
-		// std::cout << "completed response : " << get_client(client_socket)->get_response_data() << "\n";
-		// std::cout << get_client(client_socket)->get_response_data() << "\n";
-
-		// handle case where Connection header is set to close or keep-alive
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
 		{
 			std::cout << "Connection header is set to close\n";
@@ -155,15 +146,14 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 			FD_CLR(client_socket, &_write_set_pool);
 			// FD_SET(client_socket, &_socket_pool);
 			get_client(client_socket)->reset_request_data();
-			get_client(client_socket)->reset_total_bytes_received();
+			// get_client(client_socket)->reset_total_bytes_received();
 			get_client(client_socket)->reset_response_data(); // clear the request buffer for  next request
-
+			get_client(client_socket)->set_status(NOT_STARTED);
 		}
 	}
 }
-// ! http request line example:
-// !! GET /index.html HTTP/1.1
-// !! POST /form HTTP/1.1
+
+// !! GET /index.html HTTP/1.1 | POST /form HTTP/1.1
 std::string Server::get_http_method(std::string &request)
 {
 	std::string http_method;
@@ -228,6 +218,19 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 	return false;
 }
 
+void Server::match_client_request_to_server_block(long client_socket)
+{
+	for (std::vector<ConfServer>::iterator server_block = _server_blocks.begin(); server_block != _server_blocks.end(); ++server_block)
+	{
+		// // !! getHost still not implemented
+		// if (server_block->getHost() == get_client(client_socket)->get_request().getHeaders()["Host"] && server_block->getPort() == get_client(client_socket)->get_request().getPort())
+		// {
+		// 	get_client(client_socket)->set_server_block(*server_block);
+		// 	return;
+		// }
+	}
+}
+
 void Server::handle_incoming_request(long client_socket) // ready to read socket descriptor
 {
 	char received_data[BUFFER_SIZE];
@@ -245,37 +248,20 @@ void Server::handle_incoming_request(long client_socket) // ready to read socket
 	}
 	else
 	{
-		get_client(client_socket)->append_total_bytes_received(bytes_read);
+		// get_client(client_socket)->append_total_bytes_received(bytes_read);
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
 
 		// std::cout << "\033[0;35m ------> REQUEST : <------\n";
-		// std::cout << " bytes read : " << bytes_read << "\n";
-		// std::cout << strlen(received_data) << "\n";
 		// std::cout << received_data << "\n";
-
-		// std::string http_method = get_http_method(get_client(client_socket)->get_request_data());
-
-		// if ((bytes_read < BUFFER_SIZE) && http_method != "POST")
-		// if (std::string(received_data).length())
 
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
 		{
-			// std::cout << "Request completed\n";
-			// ! parsing done? build response, move fd from read_set to write_set
-			// LOG_INFO("parsing done for socket", client_socket);
 			feed_request(get_client(client_socket)->get_request_data(), client_socket); // feed request to the Request class
-			build_response(get_client(client_socket)->get_request(), client_socket);
-
+			match_client_request_to_server_block(client_socket);
+			// !!! dont forget to remove the client socket from the read_set
+			FD_SET(client_socket, &_write_set);
 			FD_SET(client_socket, &_write_set_pool);
-
-			// get_client(client_socket)->reset_total_bytes_received();
-			// get_client(client_socket)->reset_request_data();
 		}
-
-		// else
-		// {
-
-		// }
 	}
 }
 
@@ -414,9 +400,10 @@ void Server::setup_server()
 	// _ports.push_back(5002);
 	zero_socket_pool();
 	long server_socket;
-	for (long i = 0; i < SERVER_BLOCK_COUNT; i++)
+	// for (long i = 0; i < SERVER_BLOCK_COUNT; i++)
+	for (long i = 0; i < _server_blocks.size(); i++)
 	{
-		// std::cout << "server " << i <<  std::endl;
+		std::cout << "server " << i <<  std::endl;
 		create_server_socket();
 		bind_socket(i, "127.0.0.1", _ports[i]);
 		listen_on_socket(i);
