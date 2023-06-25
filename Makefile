@@ -13,14 +13,7 @@ SRCS			= ./main.cpp \
 					$(addprefix $(SRC_CORE)/, Client.cpp  Server.cpp  utils.cpp ) \
 					$(addprefix $(SRC_RESPONSE)/, Response.cpp ResponseError.cpp Utils.cpp)
 
-<<<<<<< HEAD
-OBJS = $(SRCS:%.c=%.o)
-
-# objs/%.o : %.c
-# 	$(CC) -o $@ $(CXXFLAGS) $<
-=======
 OBJS			= $(SRCS:.cpp=.o)
->>>>>>> 5737b44cd71e3eadbcbd2daecc1f261e0dc618cd
 
 CXX				= clang++
 CWWFLAGS		= -Wall -Werror -Wextra -std=c++98
