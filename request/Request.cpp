@@ -17,7 +17,24 @@ std::vector<std::string>		Request::initMethods()
 std::vector<std::string>	Request::methods = Request::initMethods();
 
 
+Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
+{
+	std::cout << "Request Constructor" << std::endl;
+}
 
+void Request::resetReq(){
+	m_method = "";
+	m_body = "";
+	m_code_ret = 200;
+	m_version = "";
+	m_path = "";
+	m_port = 80;
+	m_raw = "";
+	m_query = "";
+	m_headers.clear();
+	m_env_cgi.clear();
+	m_language.clear();
+}
 
 Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {

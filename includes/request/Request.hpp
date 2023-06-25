@@ -52,6 +52,9 @@ public:
 
 
     /* member functions */
+
+    void resetReq();
+
     void defaultReq();
 
     int parseReq(const std::string &str);
@@ -69,7 +72,7 @@ public:
 
     std::string myGetLine(std::string line, size_t &i);
 
-    void getRequest(const std::string &str);
+    void getRequest(const std::string &str) const ;
 
     void check_headers(std::string key, std::string value);
 };
