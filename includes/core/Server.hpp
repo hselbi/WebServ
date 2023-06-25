@@ -44,7 +44,7 @@ struct Server
 	Server();
 	~Server();
 
-	void load_config_file(char *config_file);
+	void load_config_file(const char *config_file);
 	void start(); // configure server and setup the sockets for each server block // Starts all servers in the cluster.
 	void stop();
 	void setup_server();

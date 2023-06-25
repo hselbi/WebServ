@@ -11,11 +11,12 @@ int main(int ac, char *av[])
 {
 	signal(SIGPIPE, SIG_IGN);
 	Server server;
+	std::string config = (ac == 1) ? "./config/conf/test.config" : av[1];
 	try
 	{
 		if (ac  <= 2)
 		{
-			server.load_config_file(av[1]);
+			server.load_config_file(config.c_str());
 			server.start(); // configuring and setuping the server socket, ...etc
 		}
 		else

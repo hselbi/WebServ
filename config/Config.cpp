@@ -10,12 +10,17 @@ int Config::openfile(const char* filename)
 	std::ifstream fs;
 
 	content.clear();
+	std::cout << filename <<std::endl;
 	fs.open(filename);
 	if (fs.is_open())
 	{
 		while (!fs.eof())
 		{
 			getline(fs, read);
+			// {
+			// 	std::cout << "\e[0;31m[ERROR] file open failed.\n\e[0m";
+			// 	return 1;
+			// }
 			content.append(read + '\n');
 			
 		}
