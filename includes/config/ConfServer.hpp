@@ -39,7 +39,7 @@ class ConfServer
         int getServerId();
         std::string getServerName();
         std::string getHost();
-        std::string getPort();
+        int getPort();
         std::string getRoot();
         std::vector<std::string> getIndex();
         std::vector<MethodType> getAllowMethods();
