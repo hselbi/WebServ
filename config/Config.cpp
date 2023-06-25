@@ -22,7 +22,7 @@ int Config::openfile(const char* filename)
 			// 	return 1;
 			// }
 			content.append(read + '\n');
-			
+
 		}
 		fs.close();
 	}
@@ -45,7 +45,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		return std::vector<ConfServer>();
     std::vector<ConfServer> result;
 
-    std::cout << "> config file parsing start\n";
+    // std::cout << "> config file parsing start\n";
 	size_t pre = 0;
 	size_t cur = content.find_first_not_of(" \t\n", pre);
 	if (cur == std::string::npos)
@@ -70,7 +70,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		result.push_back(server);
 	}
 
-	std::cout << "> config file parsing finish\n";
+	// std::cout << "> config file parsing finish\n";
 	return result;
 }
 
@@ -147,7 +147,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 }
 
 int Config::setServValue(ConfServer *serv, const std::string key, const std::string value, size_t id)
-{	
+{
 
 	serv->server_id = id;
 
@@ -245,7 +245,7 @@ ConfLoca Config::parse_location(size_t *i)
         std::cout << "[ERROR] config parsing failed." << std::endl;
         exit(1);
     }
-		
+
 	pre++;
 	cur = content.find_first_not_of(" \t\n", pre);
 	while (cur != std::string::npos)

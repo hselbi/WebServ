@@ -404,7 +404,7 @@ void Server::setup_server()
 	// for (long i = 0; i < SERVER_BLOCK_COUNT; i++)
 	for (long i = 0; i < _server_blocks.size(); i++)
 	{
-		std::cout << "server " << i <<  std::endl;
+		// std::cout << "server " << i <<  std::endl;
 		create_server_socket();
 		bind_socket(i, "127.0.0.1", _ports[i]);
 		listen_on_socket(i);
