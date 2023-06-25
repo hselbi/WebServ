@@ -33,9 +33,9 @@ std::string ConfServer::getHost()
 	return host;
 }
 
-std::string ConfServer::getPort()
+int ConfServer::getPort()
 {
-	return port;
+	return (atoi( port.c_str() ));
 }
 
 std::string ConfServer::getRoot()
