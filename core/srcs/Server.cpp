@@ -80,7 +80,7 @@ void Server::drop_client(long client_socket)
 
 void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
 {
-	get_client(client_socket)->get_request().getRequest(request);
+	get_client(client_socket)->get_request().parseReq(request);
 }
 
 std::string generate_response()
