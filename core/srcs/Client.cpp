@@ -1,16 +1,12 @@
 #include "../../includes/core/Client.hpp"
+#include "../../includes/request/Request.hpp"
 
-Client::Client() : _total_payload_received(0), _request_body_size(0), _status(0) {}
+Client::Client() : _request_body_size(0), _status(0) {}
 
 // Client::Client(long client_socket) { }
 Client::~Client() {}
 
-long &Client::get_total_bytes_received() { return _total_payload_received; }
 
-void Client::append_total_bytes_received(long bytes_read)
-{
-	_total_payload_received += bytes_read;
-}
 
 std::string &Client::get_request_data() { return _request_buffer; }
 
@@ -28,8 +24,6 @@ long &Client::get_total_bytes_sent() { return _total_payload_sent; }
 void Client::append_total_bytes_sent(long bytes_sent) { _total_payload_sent += bytes_sent; }
 
 void Client::reset_total_bytes_sent() { _total_payload_sent = 0; }
-
-void Client::reset_total_bytes_received() { _total_payload_received = 0; }
 
 void Client::reset_request_data()
 {

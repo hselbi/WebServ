@@ -80,7 +80,7 @@ struct Server
 
 private:
 	Config _config;
-	std::vector<ConfServer> *_server_blocks;
+	std::vector<ConfServer> _server_blocks;
 	long _server_count;
 	std::vector<std::string> _hosts;
 	std::vector<int> _ports;
