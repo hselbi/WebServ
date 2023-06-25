@@ -7,8 +7,9 @@ Server::~Server()
 	cleanup_by_closing_all_sockets();
 }
 
-void Server::load_config_file(char *config_file)
+void Server::load_config_file(const char *config_file)
 {
+	// std::cout << "===>" << config_file << std::endl;
 	_server_blocks = _config.parser(config_file);
 
 }
