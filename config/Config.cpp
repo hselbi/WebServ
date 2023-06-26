@@ -79,7 +79,7 @@ int Config::check_server_syntax(std::vector<ConfServer>& servers) {
         for (; itn != servers.end(); ++itn) {
 			// std::cout << YELLOW << (*it).getServerId() << " <----> " <<  (*itn).getServerId() << RESET << std::endl;
             if ((*itn).getPort() == (*it).getPort()) {
-                std::cout << "[ERROR] Config parsing failed. Port is not unique." << std::endl;
+                std::cout << RED << "[ERROR] Config parsing failed. Port is not unique." << RESET << std::endl;
                 exit(1);
             }
         }
