@@ -31,8 +31,6 @@ void Server::cleanup_by_closing_all_sockets()
 
 std::vector<long> &Server::get_server_sockets() { return _server_sockets; }
 
-// long Server::get_server_socket() { return _server_socket; }
-
 void Server::throw_error(std::string error_message)
 {
 	// throw std::runtime_error(error_message + " in server : " + std::to_string(get_server_id()) + ", on port : " + get_port() + ", on host : " + get_host() + "\n");
@@ -56,7 +54,7 @@ Client *Server::get_client(long client_socket)
 	return _clients[client_socket];
 }
 
-Client *Server::	create_client()
+Client *Server::create_client()
 {
 	Client *client = new Client();
 	client->get_response().setClient(*client);
@@ -123,12 +121,8 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 
 	std::cout << "\33[32m";
 	std::cout << "------> RESPONSE : <------\n";
-	// std::cout << "bytes sent : " << bytes_sent << "\n";
-	// std::cout << "response : "
-	// 		  << "\n";
+	// std::cout << "response : " << "\n";
 	// std::cout << get_client(client_socket)->get_response_data() << "\n";
-
-	// std::cout << get_client(client_socket)->get_response_data().length() << "\n";
 
 	if (get_client(client_socket)->get_status() == DONE)
 	{
@@ -144,7 +138,6 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 			FD_CLR(client_socket, &_write_set_pool);
 			// FD_SET(client_socket, &_socket_pool);
 			get_client(client_socket)->reset_request_data();
-			// get_client(client_socket)->reset_total_bytes_received();
 			get_client(client_socket)->reset_response_data(); // clear the request buffer for  next request
 			get_client(client_socket)->set_status(NOT_STARTED);
 		}
@@ -220,7 +213,6 @@ void Server::match_client_request_to_server_block(long client_socket)
 {
 	for (std::vector<ConfServer>::iterator server_block = _server_blocks.begin(); server_block != _server_blocks.end(); ++server_block)
 	{
-		// // !! getHost still not implemented
 		if (server_block->getHost() == get_client(client_socket)->get_request().getHost() && server_block->getPort() == get_client(client_socket)->get_request().getPort())
 		{
 			get_client(client_socket)->set_server_block(*server_block);
@@ -235,18 +227,17 @@ void Server::handle_incoming_request(long client_socket)
 	long bytes_read;
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
 	{
-		std::cerr << "Error: recv() failed on client socket " << client_socket << "\n";
+		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
 		drop_client(client_socket);
 		return;
 	}
 	else if (bytes_read == 0)
 	{
-		// std::cout << "Connection closed by the client on socket " << client_socket << ", on server " << get_server_id() << ", port " << get_port() << ", host " + get_host() << "\n";
+		std::cout << "Connection closed by the client on socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
 		drop_client(client_socket);
 	}
 	else
 	{
-		// get_client(client_socket)->append_total_bytes_received(bytes_read);
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
 
 		// std::cout << "\033[0;35m ------> REQUEST : <------\n";
@@ -269,12 +260,9 @@ void Server::accept_new_connection(long server_socket)
 	long client_socket;
 	if ((client_socket = accept(server_socket, (struct sockaddr *)&_client_addr, &client_len)) == -1)
 		throw std::runtime_error("accept failed");
-
-	// std::cout << "server " << get_server_id() << " accepted new connection on port " << get_port() << ", host " + get_host() << "\n";
-	// std::cout << "accepted new connection " << client_socket  <<  "\n";
-
+	std::cout << "accepted new client " << client_socket  <<  " on server port " << _server_port[server_socket] << "\n";
 	_clients.insert(std::make_pair(client_socket, create_client()));
-
+	get_client(client_socket)->set_server_socket(server_socket);
 	FD_SET(client_socket, &_socket_pool);
 	if (client_socket > _biggest_socket) // keep tracking of max socket descriptor
 		_biggest_socket = client_socket;
@@ -298,10 +286,10 @@ void Server::bind_socket(long server_socket_id, std::string host, int port)
 {
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
-	_server_addr.sin_port = htons(port); // _server_addr.sin_addr.s_addr = INADDR_ANY;
+	_server_addr.sin_port = htons(port);
+	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0) // !! host.c_str() should be valid ip address,
+		throw_error("inet_aton failed, invalid ip address format in server block host");
 
-	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0)
-		std::cout << "inet_aton failed\n";
 	// _server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1)
 		throw_error("server socket binding failed");
@@ -340,8 +328,6 @@ void Server::create_server_socket()
 	FD_SET(server_socket, &_socket_pool);
 	// FD_SET(server_socket, &_write_set_pool);
 	_biggest_socket = server_socket;
-
-	// return server_socket;
 }
 
 long Server::monitor_clients()
@@ -354,19 +340,15 @@ long Server::monitor_clients()
 	_read_set = _socket_pool;
 	_write_set = _write_set_pool;
 	if ((ready_count = select(_biggest_socket + 1, &_read_set, &_write_set, 0, &timeout)) == -1)
-	{
 		restart_server("select failed");
-	}
 	return ready_count;
 }
 
 void Server::start_server()
 {
-	std::cout << "listening ...\n";
 	for (;;)
 	{
 		long ready_count = monitor_clients(); // monitor socket descriptors for activity
-		// for (Clients::iterator client = _clients.begin(); client != _clients.end(); ++client)
 		for (long socket = 0; (socket <= _biggest_socket) && ready_count > 0; ++socket)
 		{
 			if (FD_ISSET(socket, &_read_set)) // ready to read
@@ -394,19 +376,19 @@ void Server::start_server()
 void Server::setup_server()
 {
 	zero_socket_pool();
-	long server_socket;
 	for (long i = 0; i < _server_blocks.size(); i++)
 	{
 		create_server_socket();
 		bind_socket(i, _server_blocks[i].getHost(), _server_blocks[i].getPort());
 		listen_on_socket(i);
-		std::cout << "Server " << i << " created, Host: " << _server_blocks[i].getHost() << ", listening on Port: " << _server_blocks[i].getPort() << std::endl;
+		_server_port.insert(std::make_pair(_server_sockets[i], _server_blocks[i].getPort()));
+		std::cout << "Server " << (i + 1) << " created, Host: " << _server_blocks[i].getHost() << ", listening on Port: " << _server_blocks[i].getPort() << std::endl;
 	}
 }
 
 void Server::start()
 {
-	setup_server(); // !! add host and port, _config.get_host(index), _config.get_port(index)
+	setup_server();
 	start_server();
 }
 
