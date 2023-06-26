@@ -10,6 +10,28 @@ bool isWhitespace(const std::string& str) {
 }
 
 
+void    Request::check_headers(std::string key, std::string value)
+{
+
+    if (key == "Host")
+    {
+        size_t i;
+
+        i = value.find_first_of(':');
+        if (i == std::string::npos)
+        {
+            m_host = value;
+            m_port = 80;
+        }
+        else
+        {
+            std::string tmp(value, i + 1);
+            m_host = value.substr(0, i);
+            m_port = atoi(tmp.c_str());
+        }
+    }
+}
+
 int Request::parseReq(const std::string &str)
 {
     std::string key;
@@ -32,12 +54,11 @@ int Request::parseReq(const std::string &str)
     // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret != 400)
     while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret != 400)
 	{
-        std::cout << "###########" << std::endl;
 		key = keyReader(line);
 		value = valueReader(line);
         if (m_headers.count(key))
             m_headers[key] = value;
-        // check_headers(key, value);
+        check_headers(key, value);
 		// if (key.find("Secret") != std::string::npos)
 		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
 	}
