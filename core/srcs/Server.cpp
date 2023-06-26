@@ -210,7 +210,7 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 			return false; // not completed request
 		}
 	}
-	else //((http_method == "GET" || http_method == "DELETE")) // !! usualy http get request is not more than 1k bytes long -  headers + body
+	else 
 	{
 		if ((request.find(REQUEST_END) != std::string::npos))
 			return true;
@@ -224,15 +224,15 @@ void Server::match_client_request_to_server_block(long client_socket)
 	for (std::vector<ConfServer>::iterator server_block = _server_blocks.begin(); server_block != _server_blocks.end(); ++server_block)
 	{
 		// // !! getHost still not implemented
-		// if (server_block->getHost() == get_client(client_socket)->get_request().getHeaders()["Host"] && server_block->getPort() == get_client(client_socket)->get_request().getPort())
-		// {
-		// 	get_client(client_socket)->set_server_block(*server_block);
-		// 	return;
-		// }
+		if (server_block->getHost() == get_client(client_socket)->get_request().getHost() && server_block->getPort() == get_client(client_socket)->get_request().getPort())
+		{
+			get_client(client_socket)->set_server_block(*server_block);
+			return;
+		}
 	}
 }
 
-void Server::handle_incoming_request(long client_socket) // ready to read socket descriptor
+void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
@@ -404,7 +404,7 @@ void Server::setup_server()
 	// for (long i = 0; i < SERVER_BLOCK_COUNT; i++)
 	for (long i = 0; i < _server_blocks.size(); i++)
 	{
-		std::cout << "server " << i <<  std::endl;
+		// std::cout << "server " << i <<  std::endl;
 		create_server_socket();
 		bind_socket(i, "127.0.0.1", _ports[i]);
 		listen_on_socket(i);
