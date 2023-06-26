@@ -40,6 +40,7 @@ struct Client;
 struct Server
 {
 	typedef std::map<long, Client *> Clients;
+	// typedef std::map<long, int> _server_port;
 
 	Server();
 	~Server();
@@ -78,8 +79,13 @@ struct Server
 
 	std::vector<long> &get_server_sockets();
 
+
+
+
+
 private:
 	Config _config;
+	std::map<long, int> _server_port;
 	std::vector<ConfServer> _server_blocks;
 	long _server_count;
 	Clients _clients;

@@ -53,3 +53,7 @@ void Client::set_status(int status) { _status = status; }
 void Client::set_server_block(ConfServer &config) { _config = config; }
 
 ConfServer &Client::get_server_block() { return _config; }
+
+long Client::get_server_socket() { return _server_socket; }
+
+void Client::set_server_socket(long server_socket) { _server_socket = server_socket; }
