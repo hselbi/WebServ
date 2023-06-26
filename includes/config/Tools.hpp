@@ -6,6 +6,7 @@
 int		replace(std::string &original, std::string word1, std::string word2);
 std::vector<std::string> split(std::string input, char delimiter);
 size_t	StringToHexNumber(std::string input);
+bool isAllDigits(const std::string& str);
 
 template<typename T>
 std::ostream &operator<<(std::ostream &out, const std::vector<T> &op)

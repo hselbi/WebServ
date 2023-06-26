@@ -17,10 +17,6 @@ int Config::openfile(const char* filename)
 		while (!fs.eof())
 		{
 			getline(fs, read);
-			// {
-			// 	std::cout << "\e[0;31m[ERROR] file open failed.\n\e[0m";
-			// 	return 1;
-			// }
 			content.append(read + '\n');
 			
 		}
@@ -45,12 +41,12 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		return std::vector<ConfServer>();
     std::vector<ConfServer> result;
 
-    std::cout << "> config file parsing start\n";
+    std::cout << YELLOW << "> config file parsing start\n" << RESET;
 	size_t pre = 0;
 	size_t cur = content.find_first_not_of(" \t\n", pre);
 	if (cur == std::string::npos)
     {
-        std::cout << "[ERROR] config parsing failed." << std::endl;
+        std::cout << RED <<"[ERROR] config parsing failed." << RESET << std::endl;
 		exit(1);
     }
 	size_t id = 0;
@@ -60,19 +56,37 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		pre = content.find_first_not_of(" \t\n", cur);;
 		cur = content.find_first_of(" \t\n", pre);
 		std::string key = content.substr(pre, cur - pre);
-		// std::cout << "@@@@@@ ==> " << key << std::endl;
 		if (key != "server")
         {
-            std::cout << "[ERROR] config parsing failed." << std::endl;
+            std::cout << RED << "[ERROR] config parsing failed." << RESET << std::endl;
 			exit(1);
         }
 		ConfServer server = parse_server(&cur, id);
 		result.push_back(server);
 	}
 
-	std::cout << "> config file parsing finish\n";
+	std::cout << YELLOW << "> config file parsing finish\n" << RESET;
+	check_server_syntax(result);
 	return result;
 }
+
+int Config::check_server_syntax(std::vector<ConfServer>& servers) {
+    std::vector<ConfServer>::iterator it = servers.begin();
+    std::vector<ConfServer>::iterator itn;
+    for (; it != servers.end(); ++it) {
+        itn = it;
+        ++itn;
+        for (; itn != servers.end(); ++itn) {
+			// std::cout << YELLOW << (*it).getServerId() << " <----> " <<  (*itn).getServerId() << RESET << std::endl;
+            if ((*itn).getPort() == (*it).getPort()) {
+                std::cout << "[ERROR] Config parsing failed. Port is not unique." << std::endl;
+                exit(1);
+            }
+        }
+    }
+    return 1;
+}
+
 
 ConfServer Config::parse_server(size_t *t, size_t id)
 {
@@ -105,6 +119,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
             exit(1);
         }
 		std::string key = content.substr(pre, cur - pre);
+		// std::cout << GREEN << key << RESET << std::endl;
 		if (key == "}")
 		{
 			// std::cout << RED << "==> " << cur << RESET << std::endl;
@@ -143,7 +158,34 @@ ConfServer Config::parse_server(size_t *t, size_t id)
             }
 		}
 	}
+
 	return result;
+}
+
+int	checkHost(std::string host)
+{
+	std::vector<std::string> tmp = split(host, '.');
+	if (tmp.size() != 4  && tmp.size() != 1)
+		return -1;
+	if (tmp.size() == 4)
+	{
+		for (unsigned long i = 0; i != tmp.size(); i++)
+		{
+			if (tmp[i].length() > 3)
+				return -1;
+			for (unsigned long j = 0; j != tmp[i].length(); j++)
+			{
+				if (tmp[i][j] < '0' || tmp[i][j] > '9')
+					return -1;
+			}
+		}
+	}
+	else
+	{
+		if (tmp[0] != "localhost")
+			return -1;
+	}
+	return 1;
 }
 
 int Config::setServValue(ConfServer *serv, const std::string key, const std::string value, size_t id)
@@ -159,16 +201,38 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 	{
 		if (value.find_first_of(':') == std::string::npos)
 		{
-			serv->host = "0.0.0.0";
-			serv->port = value;
+			if (checkHost(value) == -1)
+			{
+				std::cout << RED << "FAILED CONFIG: host(solo)" << RESET << std::endl;
+				return -1;
+			}
+			serv->host = value;
+			serv->port = "80";
+			// std::cout << " <----> " << value << std::endl;
 		}
 		else
 		{
+			// std::cout << value << " <----> " << std::endl;
 			std::vector<std::string> tmp = split(value, ':');
 			if (serv->host != "" && serv->host != tmp[0])
 				return -1;
+			
 			serv->host = tmp[0];
-			serv->port = tmp[1];
+			if (checkHost(serv->host) == -1)
+			{
+				std::cout << RED << "FAILED CONFIG: Host(1st)" << RESET << std::endl;
+				return -1;
+			}
+			//  port : 0 to 65535
+			if (isAllDigits(tmp[1]) || tmp[1] == "0")
+				serv->port = tmp[1];
+			else
+			{
+				std::cout << RED << "FAILED CONFIG: port(2nd)" << RESET << std::endl;
+				return -1;
+			}
+
+			// std::cout << tmp[0] << " <----> " << tmp[1] << std::endl;
 		}
 	}
 	else if (key == "root")
@@ -193,7 +257,13 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 	}
 	else if (key == "client_body_limit")
 	{
-		serv->client_body_limit = atoi(value.c_str());
+		if (isAllDigits(value))
+			serv->client_body_limit = atoi(value.c_str());
+		else
+		{
+			std::cout << RED << "FAILED CONFIG: client_body_limit" << RESET << std::endl;
+			return -1;
+		}
 	}
 	else if (key == "recv_timeout")
 	{

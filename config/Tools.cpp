@@ -33,3 +33,12 @@ size_t StringToHexNumber(std::string input)
 	convert >> ret;
 	return ret;
 }
+
+bool isAllDigits(const std::string& str) {
+    for (int i = 0; i < str.length(); i++) {
+        if (!std::isdigit(str[i])) {
+            return false;
+        }
+    }
+    return true;
+}
