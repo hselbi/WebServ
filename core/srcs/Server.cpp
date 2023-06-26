@@ -56,7 +56,7 @@ Client *Server::get_client(long client_socket)
 	return _clients[client_socket];
 }
 
-Client *Server::create_client()
+Client *Server::	create_client()
 {
 	Client *client = new Client();
 	client->get_response().setClient(*client);
@@ -103,8 +103,6 @@ void Server::send_response(long client_socket)
 	}
 	else if (bytes_sent == 0)
 	{
-		std::cout << "Client socket " << client_socket << " closed the connection\n";
-		drop_client(client_socket);
 		return;
 	}
 	else if (bytes_sent < get_client(client_socket)->get_response_data().length()) // if send returns less than the number of bytes requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data.
