@@ -82,24 +82,14 @@ private:
 	Config _config;
 	std::vector<ConfServer> _server_blocks;
 	long _server_count;
-	std::vector<std::string> _hosts;
-	std::vector<int> _ports;
 	Clients _clients;
 	std::vector<long> _server_sockets;
 	long _biggest_socket;
-	// std::string _host;
-	// std::string _port;
-	// std::string _server_name;
 	fd_set _socket_pool;
 	fd_set _write_set_pool;
 	fd_set _read_set; // sets of file descriptors to monitor for read
 	fd_set _write_set;
 	struct sockaddr_in _server_addr, _client_addr;
-
-	std::ofstream _outputFile;
-
-	// Request request;
-	// Response response;
 };
 
 //  http header = method + path + version + headers + body

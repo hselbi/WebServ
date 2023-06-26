@@ -11,7 +11,6 @@ void Server::load_config_file(const char *config_file)
 {
 	// std::cout << "===>" << config_file << std::endl;
 	_server_blocks = _config.parser(config_file);
-
 }
 
 void Server::cleanup_by_closing_all_sockets()
@@ -210,7 +209,7 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 			return false; // not completed request
 		}
 	}
-	else 
+	else
 	{
 		if ((request.find(REQUEST_END) != std::string::npos))
 			return true;
@@ -295,8 +294,6 @@ void Server::listen_on_socket(long server_socket)
 {
 	if (listen(_server_sockets[server_socket], QUEUE_LIMIT) == -1) // SOMAXCONN // 1000 - queue limit for incoming connections before the OS starts rejecting and refusing connections
 		throw_error("server socket listening failed");
-
-	// std::cout << "server " << get_server_id() << " listening on port " << get_port() << " on host " + get_host() << "\n";
 }
 
 void Server::bind_socket(long server_socket_id, std::string host, int port)
@@ -304,9 +301,10 @@ void Server::bind_socket(long server_socket_id, std::string host, int port)
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
 	_server_addr.sin_port = htons(port); // _server_addr.sin_addr.s_addr = INADDR_ANY;
-	// _server_addr.sin_addr.s_addr = inet_addr(host);
-	_server_addr.sin_addr.s_addr = INADDR_ANY;
 
+	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0)
+		std::cout << "inet_aton failed\n";
+	// _server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1)
 		throw_error("server socket binding failed");
 }
@@ -397,17 +395,14 @@ void Server::start_server()
 
 void Server::setup_server()
 {
-	_ports.push_back(5001);
-	// _ports.push_back(5002);
 	zero_socket_pool();
 	long server_socket;
-	// for (long i = 0; i < SERVER_BLOCK_COUNT; i++)
 	for (long i = 0; i < _server_blocks.size(); i++)
 	{
-		// std::cout << "server " << i <<  std::endl;
 		create_server_socket();
-		bind_socket(i, "127.0.0.1", _ports[i]);
+		bind_socket(i, _server_blocks[i].getHost(), _server_blocks[i].getPort());
 		listen_on_socket(i);
+		std::cout << "Server " << i << " created, Host: " << _server_blocks[i].getHost() << ", listening on Port: " << _server_blocks[i].getPort() << std::endl;
 	}
 }
 
