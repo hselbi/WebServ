@@ -192,7 +192,7 @@ void	Request::setBody(const std::string& str)
 void Request::setQuery()
 {
 	size_t i;
-
+	// std::cout << RED << "==> " << m_path << " <==" << std::endl;
 	i = m_path.find_first_of('?');
 	if (i != std::string::npos)
 	{
