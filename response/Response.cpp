@@ -39,7 +39,7 @@ void Response::autoIndex()
 	struct dirent *ent;
 	std::string strHeader;
 	t_responseHeader responseHeader;
-	std::string path = "./www" + _client->get_request().getPath();
+	std::string path = _client->get_server_block().getRoot() + _client->get_request().getPath();
 	std::string body = "<html><head><title>Index of " + _client->get_request().getPath() + "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
 	std::string tmp;
 
@@ -56,12 +56,15 @@ void Response::autoIndex()
 	}
 	if ((dir = opendir(path.c_str())) != NULL)
 	{
+		body.append("<a href=\"./\">./</a><br>");
+		body.append("<a href=\"../\">../</a><br>");
+
 		while ((ent = readdir(dir)) != NULL)
 		{
 			tmp = ent->d_name;
-			if (Utils::isDirectory(path + "/" + tmp))
+			if (Utils::isDirectory(path + "/" + tmp) && tmp != "." && tmp != "..")
 				body.append("<a href=\"" + tmp + "/\">" + tmp + "/</a><br>");
-			else
+			else if (tmp != "." && tmp != "..")
 				body.append("<a href=\"" + tmp + "\">" + tmp + "</a><br>");
 
 		}
@@ -89,6 +92,7 @@ void Response::autoIndex()
 bool Response::checkRequestIsFormed()
 {
 	std::map<std::string, std::string> req = _client->get_request().getHeaders();
+
 	if (!req["Transfer-Encoding"].empty() && req["Transfer-Encoding"] != "chunked")
 	{
 		errorPages(501);
@@ -115,8 +119,7 @@ bool Response::checkRequestIsFormed()
 void Response::readFile()
 {
 	t_responseHeader responseHeader;
-	std::string strHeader;
-	std::string filePath = "./www" + _client->get_request().getPath();
+	std::string filePath = _client->get_server_block().getRoot()  + _client->get_request().getPath();
 	std::streampos fileSize;
 
 	if (Utils::isDirectory(filePath))
@@ -140,16 +143,14 @@ void Response::readFile()
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	responseHeader.headers["Server"] = "WebServ";
-
-	strHeader = Utils::ResponseHeaderToString(responseHeader);
-	_client->append_response_data(strHeader);
+	_header_buffer = "";
+	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->set_status(ON_PROCESS);
 }
 
 void Response::readFileByPath(std::string filePath)
 {
 	t_responseHeader responseHeader;
-	std::string strHeader;
 	std::streampos fileSize;
 
 	if (Utils::isDirectory(filePath))
@@ -174,36 +175,48 @@ void Response::readFileByPath(std::string filePath)
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	responseHeader.headers["Server"] = "WebServ";
 
-	strHeader = Utils::ResponseHeaderToString(responseHeader);
-	_client->append_response_data(strHeader);
+	_header_buffer = "";
+	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->set_status(ON_PROCESS);
 }
 
 void Response::processing()
 {
-	std::cout << "processing" << std::endl;
+	int buffer_size = RES_BUFFER_SIZE;
+	isLocationHaveRedirection();
 	if (_client->get_status() == NOT_STARTED)
 	{
-		if (!checkRequestIsFormed())
-			return;
-		readFile();
-
-		// return ; // just for now
+		if (checkRequestIsFormed() && getMatchedLocation())
+			readFile();
 	}
 	if (_client->get_status() == ON_PROCESS) // change if to else if
-	{
+	{	
+		if (_header_buffer.length() > 0)
+		{
+			if (_header_buffer.length() >= buffer_size)
+			{	std::string str(_header_buffer, buffer_size);
+				_header_buffer = _header_buffer.substr(buffer_size);
+				_client->append_response_data(str);
+				return;
+			}
+			else
+				buffer_size -= _header_buffer.length();
+		}
 		if (!_file.eof())
 		{
-			_file.read(_buffer, RES_BUFFER_SIZE);
+			_file.read(_buffer, buffer_size);
 			std::string str(_buffer, _file.gcount());
+			str = (_header_buffer.length() > 0) ? _header_buffer + str : str;
 			_client->append_response_data(str);
-			processing(); // just for now
+			_header_buffer = "";
+			processing(); // TODO: Remove recursion after work chunked response
 		}
 		else
 		{
 			_file.close();
 			_buffer[0] = '\0';
 			_client->set_status(DONE);
+			std::cout << YELLOW << "DONE" << RESET << std::endl;
 		}
 	}
 }
@@ -212,3 +225,4 @@ void Response::setClient(Client &client)
 {
 	this->_client = &client;
 }
+
