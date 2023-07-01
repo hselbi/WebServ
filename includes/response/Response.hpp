@@ -18,15 +18,18 @@ class Response {
 
 	private:
 		Client 								*_client;
-		char	 							_buffer[RES_BUFFER_SIZE];
 		std::ifstream						_file;
-		void								readFile();
-		void								readFileByPath(std::string filePath);
-		bool								checkRequestIsFormed();
-		void								autoIndex();
-		std::string							getContentType(const std::string& filePath);
-		void								errorPages(int statusCode);
-		
+		std::string							_header_buffer;
+		char	 							_buffer[RES_BUFFER_SIZE];
+
+		void					readFile();
+		void					readFileByPath(std::string filePath);
+		bool					checkRequestIsFormed();
+		void					autoIndex();
+		std::string				getContentType(const std::string& filePath);
+		void					errorPages(int statusCode);
+		bool					getMatchedLocation();
+		bool					isLocationHaveRedirection();
 
 		// Response error handlers
 		
