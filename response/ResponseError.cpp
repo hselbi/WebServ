@@ -43,13 +43,16 @@ bool	Response::getMatchedLocation()
 
 bool Response::isLocationHaveRedirection()
 {
-
 	ConfServer server = _client->get_server_block();
 	std::vector<ConfLoca> locations = server.getLocations();
-
+	std::string path = _client->get_request().getPath();
+		
 	for (int i = 0; i < locations.size(); i++)
 	{
-		std::cout << "server.getLocations()[i].getLocaPath(): " << locations[i].path << std::endl;
+		if (path == locations[i].path)
+		{
+			std::cout << "location: " << locations[i].path << std::endl;
+		}
 		
 	}
 	return true;
