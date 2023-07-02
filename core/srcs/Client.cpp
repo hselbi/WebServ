@@ -17,7 +17,9 @@ void Client::append_request_data(char *request_buffer, long read_bytes)
 
 std::string &Client::get_response_data() { return _response_buffer; }
 
-void Client::append_response_data(std::string &response_buffer) { _response_buffer.append(response_buffer); }
+void Client::append_response_data(std::string &response_buffer) {
+		_response_buffer.append(response_buffer); 
+	}
 
 long &Client::get_total_bytes_sent() { return _total_payload_sent; }
 
