@@ -112,17 +112,17 @@ void Server::send_response(long client_socket)
 }
 void Server::handle_outgoing_response(long client_socket) // ! send response to client
 {
-	std::cout << get_client(client_socket)->get_response_data().length() << "\n";
+	// std::cout << get_client(client_socket)->get_response_data().length() << "\n";
 
 	build_response(get_client(client_socket)->get_request(), client_socket);
-	std::cout << get_client(client_socket)->get_response_data().length() << "\n";
+	// std::cout << get_client(client_socket)->get_response_data().length() << "\n";
 
 	// exit(0);
 
 	send_response(client_socket);
 
-	std::cout << "\33[32m";
-	std::cout << "------> RESPONSE : <------\n";
+	// std::cout << "\33[32m";
+	// std::cout << "------> RESPONSE : <------\n";
 	// std::cout << "bytes sent : " << bytes_sent << "\n";
 	// std::cout << "response : "
 	// 		  << "\n";
@@ -134,12 +134,12 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 	{
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
 		{
-			std::cout << "Connection header is set to close\n";
+			// std::cout << "Connection header is set to close\n";
 			drop_client(client_socket);
 		}
 		else
 		{
-			std::cout << "Connection did not closed, header is set to keep-alive\n";
+			// std::cout << "Connection did not closed, header is set to keep-alive\n";
 			FD_CLR(client_socket, &_write_set);
 			FD_CLR(client_socket, &_write_set_pool);
 			// FD_SET(client_socket, &_socket_pool);
@@ -221,7 +221,8 @@ void Server::match_client_request_to_server_block(long client_socket)
 	for (std::vector<ConfServer>::iterator server_block = _server_blocks.begin(); server_block != _server_blocks.end(); ++server_block)
 	{
 		// // !! getHost still not implemented
-		if (server_block->getHost() == get_client(client_socket)->get_request().getHost() && server_block->getPort() == get_client(client_socket)->get_request().getPort())
+		// print condition if 
+		if (server_block->getPort() == get_client(client_socket)->get_request().getPort())
 		{
 			get_client(client_socket)->set_server_block(*server_block);
 			return;
@@ -400,7 +401,8 @@ void Server::setup_server()
 		create_server_socket();
 		bind_socket(i, _server_blocks[i].getHost(), _server_blocks[i].getPort());
 		listen_on_socket(i);
-		std::cout << "Server " << i << " created, Host: " << _server_blocks[i].getHost() << ", listening on Port: " << _server_blocks[i].getPort() << std::endl;
+		std::cout << "Server " << i << " created, Host: " << _server_blocks[i].getHost() << ", listening on Port: " << _server_blocks[i].getPort();
+		std::cout << " | http://" << _server_blocks[i].getHost() << ":" << _server_blocks[i].getPort() << std::endl;
 	}
 }
 

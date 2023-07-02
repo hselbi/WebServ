@@ -81,7 +81,7 @@ void Response::autoIndex()
 	responseHeader.statusMessage = "OK";
 	responseHeader.headers["Content-Type"] = "text/html";
 	responseHeader.headers["Content-Length"] = Utils::toString(body.length());
-	responseHeader.headers["Server"] = "WebServ";
+	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
 	_client->append_response_data(strHeader);
@@ -142,7 +142,7 @@ void Response::readFile()
 	responseHeader.statusMessage = Utils::getStatusMessage(200);
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-	responseHeader.headers["Server"] = "WebServ";
+	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 	_header_buffer = "";
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->set_status(ON_PROCESS);
@@ -173,7 +173,7 @@ void Response::readFileByPath(std::string filePath)
 	responseHeader.statusMessage = Utils::getStatusMessage(200);
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-	responseHeader.headers["Server"] = "WebServ";
+	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
 	_header_buffer = "";
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
@@ -183,7 +183,7 @@ void Response::readFileByPath(std::string filePath)
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	isLocationHaveRedirection();
+	
 	if (_client->get_status() == NOT_STARTED)
 	{
 		if (checkRequestIsFormed() && getMatchedLocation())

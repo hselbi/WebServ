@@ -26,19 +26,20 @@ void	Response::errorPages(int statusCode)
 
 bool	Response::getMatchedLocation()
 {
+	// TODO: Verify this function (!! High Priority)
 	std::string filePath = _client->get_server_block().getRoot()  + _client->get_request().getPath();
-	std::cout << "filePath: " << filePath << std::endl;
 
 	if (Utils::isDirectory(filePath) || Utils::fileExists(filePath))
 	{
-		
-		return true;
+		if (isLocationHaveRedirection())
+			return false;
 	}
 	else
 	{
 		errorPages(404);
 		return false;
 	}
+	return true;
 }
 
 bool Response::isLocationHaveRedirection()
@@ -46,14 +47,27 @@ bool Response::isLocationHaveRedirection()
 	ConfServer server = _client->get_server_block();
 	std::vector<ConfLoca> locations = server.getLocations();
 	std::string path = _client->get_request().getPath();
+	t_responseHeader responseHeader;
+
 		
 	for (int i = 0; i < locations.size(); i++)
 	{
 		if (path == locations[i].path)
 		{
-			std::cout << "location: " << locations[i].path << std::endl;
+			responseHeader.statusCode = 301;
+			responseHeader.statusMessage = Utils::getStatusMessage(301);
+			responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+			responseHeader.headers["Content-Type"] = "text/html";
+			responseHeader.headers["Content-Length"] = "0";
+			// TODO: Verify this path
+			responseHeader.headers["Location"] = "/hello.html";
+			_header_buffer = Utils::ResponseHeaderToString(responseHeader);
+			_client->append_response_data(_header_buffer);
+			_header_buffer = "";
+			std::cout << "Location: " << locations[i].path << std::endl;
+			_client->set_status(DONE);
+			return true;
 		}
-		
 	}
-	return true;
+	return false;
 }
