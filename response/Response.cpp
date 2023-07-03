@@ -183,14 +183,14 @@ void Response::readFileByPath(std::string filePath)
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	std::cout << "Path : " << _client->get_request().getPath() << std::endl;
+	
 	if (_client->get_status() == NOT_STARTED)
 	{
-		if (checkRequestIsFormed() && getMatchedLocation())
+		// if (checkRequestIsFormed() && getMatchedLocation())
 			readFile();
 	}
 	if (_client->get_status() == ON_PROCESS) // change if to else if
-	{	
+	{
 		if (_header_buffer.length() > 0)
 		{
 			if (_header_buffer.length() >= buffer_size)
@@ -210,7 +210,7 @@ void Response::processing()
 			_client->append_response_data(str);
 			_header_buffer = "";
 			// std::cout << RED << "ON_PROCESS" << RESET << std::endl;
-			processing(); // TODO: Remove recursion after work chunked response
+			// processing(); // TODO: Remove recursion after work chunked response
 		}
 		else
 		{
