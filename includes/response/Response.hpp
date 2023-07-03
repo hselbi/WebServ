@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "Utils.hpp"
+#include "../config/ConfLoca.hpp"
 
 # define RES_BUFFER_SIZE 64000
 
@@ -21,6 +22,7 @@ class Response {
 		std::ifstream						_file;
 		std::string							_header_buffer;
 		char	 							_buffer[RES_BUFFER_SIZE];
+		ConfLoca 							*_location;	
 
 		void					readFile();
 		void					readFileByPath(std::string filePath);

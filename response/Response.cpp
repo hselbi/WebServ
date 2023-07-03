@@ -1,7 +1,9 @@
 #include "../includes/response/Response.hpp"
 #include "../includes/core/Client.hpp"
 
-Response::Response() {}
+Response::Response() {
+	_location = NULL;
+}
 Response::~Response() {}
 
 std::string Response::getContentType(const std::string &filePath)
@@ -181,10 +183,10 @@ void Response::readFileByPath(std::string filePath)
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	
+	std::cout << "Path : " << _client->get_request().getPath() << std::endl;
 	if (_client->get_status() == NOT_STARTED)
 	{
-		// if (checkRequestIsFormed() && getMatchedLocation())
+		if (checkRequestIsFormed() && getMatchedLocation())
 			readFile();
 	}
 	if (_client->get_status() == ON_PROCESS) // change if to else if
@@ -207,8 +209,8 @@ void Response::processing()
 			str = (_header_buffer.length() > 0) ? _header_buffer + str : str;
 			_client->append_response_data(str);
 			_header_buffer = "";
-			std::cout << RED << "ON_PROCESS" << RESET << std::endl;
-			// processing(); // TODO: Remove recursion after work chunked response
+			// std::cout << RED << "ON_PROCESS" << RESET << std::endl;
+			processing(); // TODO: Remove recursion after work chunked response
 		}
 		else
 		{

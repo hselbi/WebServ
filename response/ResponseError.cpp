@@ -29,15 +29,19 @@ bool	Response::getMatchedLocation()
 	// TODO: Verify this function (!! High Priority)
 	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
 	std::string requestPath = _client->get_request().getPath();
-
+	std::cout << "requestPath: " << requestPath << std::endl;
 	for (int i = 0; i < locations.size(); i++)
 	{
+		std::cout << "locations[i].path: " << locations[i].path << std::endl;
 		if (requestPath.rfind(locations[i].path, 0) == 0)
 		{
-			std::cout << "Matched location: " << locations[i].path << std::endl;
+			_location = &locations[i];
+
+			_location->print_loca_info();
 			return true;
 		}
 	}
+	std::cout << "No matched location" << std::endl;
 	errorPages(404);
 	return false;
 }
