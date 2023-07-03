@@ -19,7 +19,7 @@ std::vector<std::string>	Request::methods = Request::initMethods();
 
 Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
-	std::cout << "Request Constructor" << std::endl;
+	// std::cout << "Request Constructor" << std::endl;
 }
 
 void Request::resetReq(){
@@ -38,7 +38,7 @@ void Request::resetReq(){
 
 Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
-	std::cout << "Request constructor" << std::endl;
+	// std::cout << "Request constructor" << std::endl;
 	defaultReq();
 	m_env_cgi.clear();
 
@@ -110,7 +110,7 @@ void Request::defaultReq()
 	m_headers["Content-Length"] = "";
 	m_headers["Authorization"] = "";
 	m_headers["Transfer-Encoding"] = "";
-	
+
 }
 
 
@@ -228,8 +228,8 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 	os << YELLOW << ">Port : " << GREEN << re.getPort() << '\n' << RESET;
 	os << YELLOW << ">Path : " << GREEN << re.getPath() << '\n' << RESET;
 	os << YELLOW << ">Query : " << GREEN << re.getQuery() << '\n' << RESET;
-	
-	
+
+
 	std::map<std::string, std::string> tmp = re.getHeaders();
 	for (it = tmp.begin(); it != tmp.end(); it++)
 	{
