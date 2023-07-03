@@ -110,19 +110,8 @@ void Server::send_response(long client_socket)
 }
 void Server::handle_outgoing_response(long client_socket) // ! send response to client
 {
-	// std::cout << get_client(client_socket)->get_response_data().length() << "\n";
-
 	build_response(get_client(client_socket)->get_request(), client_socket);
-	// std::cout << get_client(client_socket)->get_response_data().length() << "\n";
-
-	// exit(0);
-
 	send_response(client_socket);
-
-	std::cout << "\33[32m";
-	std::cout << "------> RESPONSE : <------\n";
-	// std::cout << "response : " << "\n";
-	// std::cout << get_client(client_socket)->get_response_data() << "\n";
 
 	if (get_client(client_socket)->get_status() == DONE)
 	{
@@ -220,12 +209,19 @@ void Server::match_client_request_to_server_block(long client_socket)
 		}
 	}
 }
-
+int i = 0;
 void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
-	std::cout << client_socket << " here \n";
+
+	std::cout << YELLOW << "inside recv" << RESET << "\n";
+	if (i == 1)
+	{
+		std::cout << GREEN << "inside iiiiiiiii " << RESET << "\n";
+		return;
+	}
+	++i;
 
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
 	{
@@ -240,13 +236,7 @@ void Server::handle_incoming_request(long client_socket)
 	}
 	else
 	{
-	std::cout << client_socket << " here 222 \n";
-
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
-
-		// std::cout << "\033[0;35m ------> REQUEST : <------\n";
-		// std::cout << received_data << "\n";
-
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
 		{
 			feed_request(get_client(client_socket)->get_request_data(), client_socket); // feed request to the Request class
@@ -264,7 +254,7 @@ void Server::accept_new_connection(long server_socket)
 	long client_socket;
 	if ((client_socket = accept(server_socket, (struct sockaddr *)&_client_addr, &client_len)) == -1)
 		throw std::runtime_error("accept failed");
-	std::cout << "accepted new client " << client_socket  <<  " on server port " << _server_port[server_socket] << "\n";
+	std::cout << PURPLE << "accepted new client " << client_socket << " on server port " << _server_port[server_socket] << RESET << "\n";
 	_clients.insert(std::make_pair(client_socket, create_client()));
 	get_client(client_socket)->set_server_socket(server_socket);
 	FD_SET(client_socket, &_socket_pool);
