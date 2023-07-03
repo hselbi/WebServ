@@ -225,6 +225,8 @@ void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
+	std::cout << client_socket << " here \n";
+
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
@@ -238,6 +240,8 @@ void Server::handle_incoming_request(long client_socket)
 	}
 	else
 	{
+	std::cout << client_socket << " here 222 \n";
+
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
 
 		// std::cout << "\033[0;35m ------> REQUEST : <------\n";
