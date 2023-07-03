@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 #include "Utils.hpp"
 
-# define RES_BUFFER_SIZE 1024
+# define RES_BUFFER_SIZE 64000
 
 struct Client;
 
