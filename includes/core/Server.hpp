@@ -79,10 +79,6 @@ struct Server
 
 	std::vector<long> &get_server_sockets();
 
-
-
-
-
 private:
 	Config _config;
 	std::map<long, int> _server_port;
@@ -91,7 +87,8 @@ private:
 	Clients _clients;
 	std::vector<long> _server_sockets;
 	long _biggest_socket;
-	fd_set _socket_pool;
+	fd_set _server_socket_pool;
+	fd_set _read_set_pool; // sets of file descriptors to monitor for read
 	fd_set _write_set_pool;
 	fd_set _read_set; // sets of file descriptors to monitor for read
 	fd_set _write_set;
