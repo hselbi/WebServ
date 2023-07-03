@@ -48,7 +48,11 @@ struct Client
 	void set_server_block(ConfServer &config);
 	ConfServer &get_server_block();
 
+	long get_server_socket();
+	void set_server_socket(long server_socket);
+
 private:
+	long _server_socket;
 	int _status;
 	ConfServer _config;
 	Request _request;
