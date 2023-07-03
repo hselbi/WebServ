@@ -38,6 +38,7 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
+    defaultReq();
     // std::ifstream file;
     // file.open(str, std::ios::in);
     
