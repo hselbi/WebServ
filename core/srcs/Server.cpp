@@ -110,10 +110,10 @@ void Server::send_response(long client_socket)
 }
 void Server::handle_outgoing_response(long client_socket) // ! send response to client
 {
-	std::cout << get_client(client_socket)->get_response_data().length() << "\n";
+	// std::cout << get_client(client_socket)->get_response_data().length() << "\n";
 
 	build_response(get_client(client_socket)->get_request(), client_socket);
-	std::cout << get_client(client_socket)->get_response_data().length() << "\n";
+	// std::cout << get_client(client_socket)->get_response_data().length() << "\n";
 
 	// exit(0);
 
@@ -128,12 +128,12 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 	{
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
 		{
-			std::cout << "Connection header is set to close\n";
+			// std::cout << "Connection header is set to close\n";
 			drop_client(client_socket);
 		}
 		else
 		{
-			std::cout << "Connection did not closed, header is set to keep-alive\n";
+			// std::cout << "Connection did not closed, header is set to keep-alive\n";
 			FD_CLR(client_socket, &_write_set);
 			FD_CLR(client_socket, &_write_set_pool);
 			// FD_SET(client_socket, &_socket_pool);
