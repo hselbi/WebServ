@@ -27,25 +27,24 @@ void	Response::errorPages(int statusCode)
 bool	Response::getMatchedLocation()
 {
 	// TODO: Verify this function (!! High Priority)
-	std::string filePath = _client->get_server_block().getRoot()  + _client->get_request().getPath();
+	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
+	std::string requestPath = _client->get_request().getPath();
 
-	if (Utils::isDirectory(filePath) || Utils::fileExists(filePath))
+	for (int i = 0; i < locations.size(); i++)
 	{
-		if (isLocationHaveRedirection())
-			return false;
+		if (requestPath.rfind(locations[i].path, 0) == 0)
+		{
+			std::cout << "Matched location: " << locations[i].path << std::endl;
+			return true;
+		}
 	}
-	else
-	{
-		errorPages(404);
-		return false;
-	}
-	return true;
+	errorPages(404);
+	return false;
 }
 
 bool Response::isLocationHaveRedirection()
 {
-	ConfServer server = _client->get_server_block();
-	std::vector<ConfLoca> locations = server.getLocations();
+	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
 	std::string path = _client->get_request().getPath();
 	t_responseHeader responseHeader;
 

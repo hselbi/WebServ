@@ -1,8 +1,6 @@
 #include "../includes/response/Response.hpp"
 #include "../includes/core/Client.hpp"
 
-#define RES_COLOR "\036[36m"
-
 Response::Response() {}
 Response::~Response() {}
 
@@ -186,7 +184,7 @@ void Response::processing()
 	
 	if (_client->get_status() == NOT_STARTED)
 	{
-		if (checkRequestIsFormed() && getMatchedLocation())
+		// if (checkRequestIsFormed() && getMatchedLocation())
 			readFile();
 	}
 	if (_client->get_status() == ON_PROCESS) // change if to else if
@@ -209,7 +207,8 @@ void Response::processing()
 			str = (_header_buffer.length() > 0) ? _header_buffer + str : str;
 			_client->append_response_data(str);
 			_header_buffer = "";
-			processing(); // TODO: Remove recursion after work chunked response
+			std::cout << RED << "ON_PROCESS" << RESET << std::endl;
+			// processing(); // TODO: Remove recursion after work chunked response
 		}
 		else
 		{
