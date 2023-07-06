@@ -8,19 +8,21 @@
 
 class ConfLoca
 {
-public:
+    public:
 
-    int client_body_limit;
-	std::string path;
-	std::string root;
-	std::vector<std::string> index;
-	std::vector<MethodType> allow_methods;
-    std::map<std::string, std::string> cgi_infos;
+        int client_body_limit;
+        std::string path;
+        std::string root;
+        std::vector<std::string> index;
+        std::vector<MethodType> allow_methods;
+        std::map<std::string, std::string> cgi_infos;
 
-    ConfLoca();
-    ~ConfLoca();
-    static MethodType strtoMethod(std::string str);
-    void print_loca_info();
+        ConfLoca();
+        ~ConfLoca();
+        ConfLoca(const ConfLoca &copy);
+        ConfLoca &operator=(const ConfLoca &copy);
+        static MethodType strtoMethod(std::string str);
+        void print_loca_info();
 
 };
 

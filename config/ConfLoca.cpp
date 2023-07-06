@@ -7,9 +7,26 @@ ConfLoca::ConfLoca()
 }
 
 ConfLoca::~ConfLoca()
+{}
+
+ConfLoca::ConfLoca(const ConfLoca &copy)
 {
+    *this = copy;
 }
 
+ConfLoca &ConfLoca::operator=(const ConfLoca &copy)
+{
+    if (this != &copy)
+    {
+        this->path = copy.path;
+        this->root = copy.root;
+        this->index = copy.index;
+        this->allow_methods = copy.allow_methods;
+        this->client_body_limit = copy.client_body_limit;
+        this->cgi_infos = copy.cgi_infos;
+    }
+    return *this;
+}
 
 MethodType ConfLoca::strtoMethod(std::string str)
 {

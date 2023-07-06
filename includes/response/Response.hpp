@@ -14,24 +14,34 @@ class Response {
 	public:
 		Response();
 		~Response();
-		void 								processing();
-		void 								setClient(Client &client);	
+		Response(const Response &copy);
 
+		
+		void				processing();
+		void				setClient(Client &client);	
 	private:
-		Client 								*_client;
-		std::ifstream						_file;
-		std::string							_header_buffer;
-		char	 							_buffer[RES_BUFFER_SIZE];
-		ConfLoca 							*_location;	
+		Client				*_client;
+		ConfLoca 			*_location;	
+		std::ifstream		_file;
+		std::string			_header_buffer;
+		char	 			_buffer[RES_BUFFER_SIZE];
 
 		void					readFile();
 		void					readFileByPath(std::string filePath);
-		bool					checkRequestIsFormed();
 		void					autoIndex();
-		std::string				getContentType(const std::string& filePath);
 		void					errorPages(int statusCode);
-		bool					getMatchedLocation();
+		std::string				getContentType(const std::string& filePath);
+		std::string				getRoot();
+		std::string				getErrorPagePath(int statusCode);
+		std::string				isDirHasIndexFiles();
+		void 					checkWhichRequestedMethod();
+		void					Method_GET();
+		void					setRediration(std::string location);
+		bool					checkRequestIsFormed();
 		bool					isLocationHaveRedirection();
+		bool					getMatchedLocation();
+		bool					isMethodAllowedInLocation();
+		bool 					getAutoIndex();	
 
 		// Response error handlers
 		
