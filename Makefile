@@ -11,7 +11,7 @@ SRCS			= ./main.cpp \
 					$(addprefix $(SRCS_REQ)/, Request.cpp MemRequest.cpp) \
 					$(addprefix $(SRCS_CONF)/, ConfLoca.cpp ConfServer.cpp Config.cpp Tools.cpp) \
 					$(addprefix $(SRC_CORE)/, Client.cpp  Server.cpp  utils.cpp ) \
-					$(addprefix $(SRC_RESPONSE)/, Response.cpp ResponseError.cpp Utils.cpp)
+					$(addprefix $(SRC_RESPONSE)/, Response.cpp ResponseError.cpp ResponseGetters.cpp Utils.cpp ResponseMethods.cpp)
 
 OBJS			= $(SRCS:.cpp=.o)
 
