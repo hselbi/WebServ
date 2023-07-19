@@ -4,6 +4,8 @@ ConfLoca::ConfLoca()
 {
     path = "";
 	root = "";
+    autoindex = DEFAULT;
+    
 }
 
 ConfLoca::~ConfLoca()
@@ -11,7 +13,16 @@ ConfLoca::~ConfLoca()
 
 ConfLoca::ConfLoca(const ConfLoca &copy)
 {
-    *this = copy;
+    this->path = copy.path;
+    this->root = copy.root;
+    this->index = copy.index;
+    this->allow_methods = copy.allow_methods;
+    this->client_body_limit = copy.client_body_limit;
+    this->cgi_infos = copy.cgi_infos;
+    this->autoindex = copy.autoindex;
+    this->error_pages = copy.error_pages;
+    this->binary = copy.binary;
+
 }
 
 ConfLoca &ConfLoca::operator=(const ConfLoca &copy)
@@ -24,6 +35,10 @@ ConfLoca &ConfLoca::operator=(const ConfLoca &copy)
         this->allow_methods = copy.allow_methods;
         this->client_body_limit = copy.client_body_limit;
         this->cgi_infos = copy.cgi_infos;
+        this->autoindex = copy.autoindex;
+        this->error_pages = copy.error_pages;
+        this->binary = copy.binary;
+        
     }
     return *this;
 }
