@@ -19,7 +19,12 @@ void    Response::Method_GET()
             {
                 if ((index = isDirHasIndexFiles()) != "")
                 {
-                    readFileByPath(index);
+                    if (_location && _location->cgi_infos.size() > 0)
+                    {
+                        // TODO: CGI
+                    }
+                    else 
+                        readFileByPath(index);
                     return;
                 }
                 else

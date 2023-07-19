@@ -11,6 +11,12 @@ void Server::load_config_file(const char *config_file)
 {
 	// std::cout << "===>" << config_file << std::endl;
 	_server_blocks = _config.parser(config_file);
+	// std::cout << "server blocks size: " << _server_blocks.size() << std::endl;
+	// if (_server_blocks.size() == 1)
+    // {
+    //     std::cout << RED <<"[ERROR] config parsing failed." << RESET << std::endl;
+	// 	exit(1);
+    // }
 }
 
 void Server::cleanup_by_closing_all_sockets()
@@ -299,6 +305,11 @@ void Server::listen_on_socket(long server_socket)
 
 void Server::bind_socket(long server_socket_id, std::string host, int port)
 {
+	std::vector<ConfServer>::iterator server_block = _server_blocks.begin(); 
+	std::cout << "server_block->getHost(): " << server_block->getHost() << std::endl;
+	std::cout << "server_block->getPort(): " << server_block->getPort() << std::endl;
+	std::cout << "host: " << host << std::endl;
+	std::cout << "port: " << port << std::endl;
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
 	_server_addr.sin_port = htons(port);

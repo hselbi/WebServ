@@ -12,8 +12,8 @@ ConfServer::ConfServer()
 	if (send_timeout.tv_sec != 0) send_timeout = tv;
 	
 	autoindex = false;
-	host = "";
-	port = "";
+	host = "127.0.0.1";
+	port = "80";
 	redirect_status = -1;
 	server_id = 0;
 }
