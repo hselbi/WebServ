@@ -374,6 +374,10 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
     {
         loca->root = value;
     }
+	else if (key == "autoindex")
+	{
+		loca->autoindex = value == "on" ? true : false;
+	}
     else if (key == "index")
     {
 
@@ -395,6 +399,16 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
         tmp = value.substr(pre, cur - pre);
         loca->index.push_back(tmp);
     }
+	else if (key == "error_page"){
+		std::vector<std::string> tmp = split(value, ' ');
+		std::string path = tmp[tmp.size() - 1];
+		for (unsigned long i = 0; i != tmp.size() -1; i++){
+			int status_code = atoi(tmp[i].c_str());
+			if (loca->error_pages.find(status_code) != loca->error_pages.end())
+				continue;
+			loca->error_pages[status_code] = path;
+		}
+	}
     else if (key == "allow_methods")
     {
         std::vector<std::string> tmp = split(value, ' ');
