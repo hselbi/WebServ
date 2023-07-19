@@ -16,9 +16,9 @@ class Response {
 		~Response();
 		Response(const Response &copy);
 
-		
 		void				processing();
-		void				setClient(Client &client);	
+		void				setClient(Client &client);
+		
 	private:
 		Client				*_client;
 		ConfLoca 			*_location;	
@@ -26,14 +26,14 @@ class Response {
 		std::string			_header_buffer;
 		char	 			_buffer[RES_BUFFER_SIZE];
 
-		void					readFile();
-		void					readFileByPath(std::string filePath);
-		void					autoIndex();
-		void					errorPages(int statusCode);
 		std::string				getContentType(const std::string& filePath);
 		std::string				getRoot();
 		std::string				getErrorPagePath(int statusCode);
 		std::string				isDirHasIndexFiles();
+		void					readFile();
+		void					readFileByPath(std::string filePath);
+		void					autoIndex();
+		void					errorPages(int statusCode);
 		void 					checkWhichRequestedMethod();
 		void					Method_GET();
 		void					setRediration(std::string location);
@@ -43,7 +43,5 @@ class Response {
 		bool					isMethodAllowedInLocation();
 		bool 					getAutoIndex();	
 
-		// Response error handlers
 		
-
 };

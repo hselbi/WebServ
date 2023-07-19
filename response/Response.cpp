@@ -4,12 +4,17 @@
 Response::Response() {
 	_location = NULL;
 }
+ 
 Response::~Response() {
 	if (_location)
 		delete _location;
 	_file.close();
 }
 
+void Response::setClient(Client &client)
+{
+	this->_client = &client;
+}
 
 void Response::autoIndex()
 {
@@ -19,14 +24,12 @@ void Response::autoIndex()
 	t_responseHeader	responseHeader;
 	
 	path = getRoot() + _client->get_request().getPath();
-	
-	body = "<html><head><title>Index of " + _client->get_request().getPath() + "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
-
+	body = "<html><head><title>Index of " + _client->get_request().getPath() 
+		+ "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
 	if ((dir = opendir(path.c_str())) != NULL)
 	{
 		body.append("<a href=\"./\">./</a><br>");
 		body.append("<a href=\"../\">../</a><br>");
-
 		while ((ent = readdir(dir)) != NULL)
 		{
 			tmp = ent->d_name;
@@ -40,7 +43,7 @@ void Response::autoIndex()
 		closedir(dir);
 	}
 	responseHeader.statusCode = 200;
-	responseHeader.statusMessage = "OK";
+	responseHeader.statusMessage = Utils::getStatusMessage(200);
 	responseHeader.headers["Content-Type"] = "text/html";
 	responseHeader.headers["Content-Length"] = Utils::toString(body.length());
 	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
@@ -60,7 +63,8 @@ bool Response::checkRequestIsFormed()
 		errorPages(501);
 		return false;
 	}
-	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty() && _client->get_request().getMethod() == "POST")
+	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty()
+		&& _client->get_request().getMethod() == "POST")
 	{
 		errorPages(400);
 		return false;
@@ -84,18 +88,7 @@ void Response::readFile()
 	std::string filePath = getRoot()  + _client->get_request().getPath();
 	std::streampos fileSize;
 
-	if (Utils::isDirectory(filePath))
-	{
-		autoIndex();
-		return;
-	}
 	_file.open(filePath.c_str(), std::ios::binary);
-	if (!_file.is_open())
-	{
-		errorPages(404);
-		return;
-	}
-
 	_file.seekg(0, std::ios::end);
 	fileSize = _file.tellg();
 	_file.seekg(0, std::ios::beg);
@@ -105,7 +98,7 @@ void Response::readFile()
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
-	_header_buffer = "";
+
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->set_status(ON_PROCESS);
 }
@@ -134,16 +127,13 @@ void Response::readFileByPath(std::string filePath)
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	
-
 
 	if (_client->get_status() == NOT_STARTED)
 	{
 		if (checkRequestIsFormed() && getMatchedLocation())
-		{
 			checkWhichRequestedMethod();
-		}
 	}
+
 	if (_client->get_status() == ON_PROCESS) // change if to else if
 	{
 		if (_header_buffer.length() > 0)
@@ -164,8 +154,6 @@ void Response::processing()
 			str = (_header_buffer.length() > 0) ? _header_buffer + str : str;
 			_client->append_response_data(str);
 			_header_buffer = "";
-			// std::cout << RED << "ON_PROCESS" << RESET << std::endl;
-			// processing(); // TODO: Remove recursion after work chunked response
 		}
 		else
 		{
@@ -175,11 +163,6 @@ void Response::processing()
 			std::cout << YELLOW << "DONE" << RESET << std::endl;
 		}
 	}
-}
-
-void Response::setClient(Client &client)
-{
-	this->_client = &client;
 }
 
 void Response::checkWhichRequestedMethod()
