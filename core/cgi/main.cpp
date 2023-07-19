@@ -3,14 +3,17 @@
 int main(int ac, char const *av[])
 {
 	Cgi cgi;
+	ConfServer configServer;
+	ConfLoca configLocation;
+	Request request;
 
-
-	cgi.start_cgi();
+	cgi.start_cgi(configServer, configLocation, request);
 
     return 0;
 }
 
 /*
-	cgi.set_cgi_bin("/usr/bin/php-cgi");
-	cgi.set_cgi_script("/home/user/42/webserv/www/index.php");
+	is_req_complet
+	cgi bin and script
+	throw_error
 */
