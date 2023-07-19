@@ -1,7 +1,7 @@
 #include "../includes/request/Request.hpp"
 #include "../includes/includes.hpp"
 
-
+// done some if request its already is done 
 
 std::vector<std::string>		Request::initMethods()
 {
