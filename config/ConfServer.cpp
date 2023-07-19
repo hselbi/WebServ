@@ -3,17 +3,19 @@
 
 ConfServer::ConfServer()
 {
-    client_body_limit = 1024;
+	client_body_limit = 1024;
 
 	struct timeval tv;
 	tv.tv_sec = 60;
 	tv.tv_usec = 0;
-	if (recv_timeout.tv_sec != 0) recv_timeout = tv;
-	if (send_timeout.tv_sec != 0) send_timeout = tv;
-	
+	if (recv_timeout.tv_sec != 0)
+		recv_timeout = tv;
+	if (send_timeout.tv_sec != 0)
+		send_timeout = tv;
+
 	autoindex = false;
-	host = "";
-	port = "";
+	host = "127.0.0.1";
+	port = "8080";
 	redirect_status = -1;
 	server_id = 0;
 }
@@ -24,7 +26,7 @@ int ConfServer::getServerId()
 }
 
 std::string ConfServer::getServerName()
-{
+{ 
 	return server_name;
 }
 
@@ -35,7 +37,7 @@ std::string ConfServer::getHost()
 
 int ConfServer::getPort()
 {
-	return (atoi( port.c_str() ));
+	return (atoi(port.c_str()));
 }
 
 std::string ConfServer::getRoot()
@@ -94,14 +96,14 @@ ConfServer::~ConfServer()
 
 MethodType ConfServer::strtoMethod(std::string str)
 {
-    if (str == "GET")
-        return GET;
-    else if (str == "POST")
-        return POST;
-    else if (str == "DELETE")
-        return DELETE;
-    else
-        return INVALID;
+	if (str == "GET")
+		return GET;
+	else if (str == "POST")
+		return POST;
+	else if (str == "DELETE")
+		return DELETE;
+	else
+		return INVALID;
 }
 
 void ConfServer::print_server_info()
@@ -120,7 +122,8 @@ void ConfServer::print_server_info()
 		std::cout << YELLOW << "> allow_methods: " << GREEN << allow_methods << "\n";
 		std::cout << YELLOW << "> error pages: ";
 		if (error_pages.size() > 0)
-			std::cout << GREEN << "\n" << error_pages;
+			std::cout << GREEN << "\n"
+					  << error_pages;
 		else
 			std::cout << GREEN << "(empty)\n";
 		for (unsigned long i = 0; i < locations.size(); i++)
@@ -131,5 +134,6 @@ void ConfServer::print_server_info()
 		std::cout << YELLOW << "> redirect_status: " << GREEN << redirect_status << "\n";
 		std::cout << YELLOW << "> redirect_url: " << GREEN << redirect_url << "\n";
 	}
-	std::cout << "-------------------------------------------------\n" << RESET;
+	std::cout << "-------------------------------------------------\n"
+			  << RESET;
 }
