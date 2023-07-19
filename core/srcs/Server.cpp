@@ -249,9 +249,9 @@ void Server::handle_incoming_request(long client_socket)
 	else
 	{
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
+			feed_request(get_client(client_socket)->get_request_data(), client_socket); // feed request to the Request class
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
 		{
-			feed_request(get_client(client_socket)->get_request_data(), client_socket); // feed request to the Request class
 			match_client_request_to_server_block(client_socket);
 
 			FD_CLR(client_socket, &_read_set_pool);
