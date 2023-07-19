@@ -16,6 +16,9 @@ class ConfLoca
         std::vector<std::string> index;
         std::vector<MethodType> allow_methods;
         std::map<std::string, std::string> cgi_infos;
+        bool autoindex;
+        // error_pages;
+        
 
         ConfLoca();
         ~ConfLoca();
