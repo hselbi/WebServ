@@ -207,7 +207,7 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 				return -1;
 			}
 			serv->host = value;
-			serv->port = "80";
+			serv->port = "8080";
 			// std::cout << " <----> " << value << std::endl;
 		}
 		else
@@ -216,7 +216,7 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 			std::vector<std::string> tmp = split(value, ':');
 			if (serv->host != "" && serv->host != tmp[0])
 				return -1;
-			
+
 			serv->host = tmp[0];
 			if (checkHost(serv->host) == -1)
 			{

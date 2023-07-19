@@ -296,16 +296,18 @@ void Server::listen_on_socket(long server_socket)
 
 void Server::bind_socket(long server_socket_id, std::string host, int port)
 {
+	std::cout << "host: " << host << std::endl;
+	std::cout << "port: " << port << std::endl;
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
-	_server_addr.sin_port = htons(port);
+	_server_addr.sin_port = htons(8080);
 	if (host == "localhost")
 		host = "127.0.0.1";
 	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0) // !! host.c_str() should be valid ip address,
 		throw_error("inet_aton failed, invalid ip address format");
 
 	// _server_addr.sin_addr.s_addr = INADDR_ANY;
-	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1)
+	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1) // cannot bind port 80
 		throw_error("server socket binding failed");
 }
 
