@@ -1,6 +1,6 @@
 #include "../../includes/core/Cgi.hpp"
 
-Cgi::Cgi()
+Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _output(""), _cgi_output_file(NULL), _envp(NULL), _argv(NULL), _extension("")
 {
 }
 
@@ -10,13 +10,20 @@ Cgi::~Cgi()
 
 void Cgi::start_cgi(ConfServer &configServer, ConfLoca configLocation, Request &request)
 {
+	set_cgi_bin("/usr/bin/php");
+	set_cgi_script("index.php");
 	init_env_vars(configServer, configLocation, request);
-	// init_env_vars();
 	exec_cgi();
 }
 
 void Cgi::init_env_vars(ConfServer &configServer, ConfLoca configLocation, Request &request)
 {
+	std::string root;
+	if (configLocation.getRoot() != "")
+		root = configLocation.getRoot();
+	else
+		root = configServer.getRoot();
+
 	_env_vars["SERVER_SOFTWARE"] = "MortalKOMBAT/1.0";
 	_env_vars["SERVER_NAME"] = configServer.getServerName();
 	_env_vars["GATEWAY_INTERFACE"] = "CGI/1.1";
@@ -24,14 +31,10 @@ void Cgi::init_env_vars(ConfServer &configServer, ConfLoca configLocation, Reque
 	_env_vars["SERVER_PORT"] = configServer.getPort();
 	_env_vars["REQUEST_METHOD"] = request.getMethod();
 	_env_vars["REQUEST_URI"] = request.getPath();
-	if (configLocation.getRoot() != "")
-		_env_vars["DOCUMENT_ROOT"] = configLocation.getRoot();
-	else
-		_env_vars["DOCUMENT_ROOT"] = configServer.getRoot();
-
-	_env_vars["SCRIPT_NAME"] = "index.php"; // !! configLocation.getScriptName();
+	_env_vars["DOCUMENT_ROOT"] = root;
+	_env_vars["SCRIPT_NAME"] = get_cgi_script_name(request.getPath());
 	_env_vars["SCRIPT_FILENAME"] = _env_vars["DOCUMENT_ROOT"] + "/" + _env_vars["SCRIPT_NAME"];
-	_env_vars["QUERY_STRING"] = get_query_string(request.getPath());
+	_env_vars["QUERY_STRING"] = request.getQuery();
 	_env_vars["PATH_INFO"] = get_path_info(request.getPath());
 
 	_envp = new char *[_env_vars.size() + 1];
@@ -45,9 +48,9 @@ void Cgi::init_env_vars(ConfServer &configServer, ConfLoca configLocation, Reque
 	_envp[i] = NULL;
 
 	_argv = new char *[3];
-	_argv[0] = new char[_env_vars["CGI_PATH"].length() + 1];
+	_argv[0] = new char[_cgi_bin.length() + 1];
 	_argv[1] = new char[_env_vars["SCRIPT_NAME"].length() + 1];
-	strcpy(_argv[0], _env_vars["CGI_PATH"].c_str());
+	strcpy(_argv[0], _cgi_bin.c_str());
 	strcpy(_argv[1], _env_vars["SCRIPT_NAME"].c_str());
 	_argv[2] = NULL;
 }
@@ -117,7 +120,7 @@ void Cgi::exec_cgi() // !! upload handiinng
 
 		close(write_to_cgi[0]);
 
-		if (execve("/usr/bin/php", _argv, _envp) == -1)
+		if (execve(_cgi_bin.c_str(), _argv, _envp) == -1)
 		{
 			std::cerr << "execve failed" << std::endl;
 			exit(1);
@@ -146,4 +149,24 @@ void Cgi::exec_cgi() // !! upload handiinng
 void Cgi::set_body(std::string payload)
 {
 	_body = payload;
+}
+
+void Cgi::set_cgi_bin(std::string cgi_bin)
+{
+	_cgi_bin = cgi_bin;
+}
+
+void Cgi::set_cgi_script(std::string cgi_script)
+{
+	_cgi_script = cgi_script;
+}
+
+// /board/time/index.php, find last occurence of / and get what is after it
+std::string Cgi::get_cgi_script_name(std::string path)
+{
+	std::string script_name;
+	size_t pos = path.find_last_of('/');
+	if (pos != std::string::npos)
+		script_name = path.substr(pos + 1);
+	return script_name;
 }

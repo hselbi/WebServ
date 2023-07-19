@@ -30,7 +30,10 @@ struct Cgi
 	void set_body(std::string payload);
 	std::string get_path_info(std::string url);
 
-	void set_cgi_bin(
+	void set_cgi_bin(std::string cgi_bin);
+	void set_cgi_script(std::string cgi_script);
+
+	std::string get_cgi_script_name(std::string path);
 
 private:
 	env_vars_t _env_vars;
