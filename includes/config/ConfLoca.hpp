@@ -17,6 +17,7 @@ class ConfLoca
         std::vector<MethodType> allow_methods;
         std::map<std::string, std::string> cgi_infos;
         bool autoindex;
+        std::string binary;
         std::map<int, std::string> error_pages;
         // need to be done ...
         // error_pages;
