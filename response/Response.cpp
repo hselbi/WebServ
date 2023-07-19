@@ -133,8 +133,7 @@ void Response::processing()
 		if (checkRequestIsFormed() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
-
-	if (_client->get_status() == ON_PROCESS) // change if to else if
+	else if (_client->get_status() == ON_PROCESS) // change if to else if
 	{
 		if (_header_buffer.length() > 0)
 		{
@@ -160,7 +159,6 @@ void Response::processing()
 			_file.close();
 			_buffer[0] = '\0';
 			_client->set_status(DONE);
-			std::cout << YELLOW << "DONE" << RESET << std::endl;
 		}
 	}
 }
@@ -184,7 +182,6 @@ void Response::setRediration(std::string location)
 
 	_header_buffer = "";
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	std::cout << RED << "setRediration" << RESET << std::endl;
 
 	_client->set_status(ON_PROCESS);
 }

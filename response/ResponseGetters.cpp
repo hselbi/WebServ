@@ -3,7 +3,6 @@
 
 std::string Response::getRoot()
 {
-
     if (_location && _location->root != "")
         return _location->root;
     return _client->get_server_block().getRoot() != "" ? _client->get_server_block().getRoot() : "./www/html";
@@ -11,10 +10,13 @@ std::string Response::getRoot()
 
 bool Response::getAutoIndex()
 {
-    // TODO: check if can location have also autoindex
-
-    // if (_location && _location->root != "")
-    //     return _location->root;
+    //TODO: check if can location have also autoindex
+    if (_location && _location->autoindex != DEFAULT)
+    {
+        std::cout << "AUTOINDEX: " << _location->autoindex << std::endl;
+        return (_location->autoindex == ON) ? true : false;
+    }
+    
     return _client->get_server_block().getAutoindex();
 }
 
@@ -40,13 +42,8 @@ std::string Response::isDirHasIndexFiles()
             return dirPath + indexFiles[i];
     }
 
-    // TODO: Add index.php after fix php-cgi
-	std::string defaultPages[] = {"index.html", "index.htm"};
-    for (size_t i = 0; i < 2; i++)
-    {
-        if (Utils::fileExists(dirPath + defaultPages[i]))
-            return dirPath + defaultPages[i];
-    }
+    if (Utils::fileExists(dirPath + "index.html"))
+        return dirPath + "index.html";
 
     return "";
 }
@@ -68,7 +65,18 @@ std::string Response::getContentType(const std::string &filePath)
 	contentTypes[".mp4"] = "video/mp4";
     contentTypes[".css"] = "text/css";
     contentTypes[".js"] = "application/javascript";
-    contentTypes[".php"] = "text/html";
+    contentTypes[".ttf"] = "font/ttf";
+    contentTypes[".svg"] = "image/svg+xml";
+    contentTypes[".ico"] = "image/x-icon";
+    contentTypes[".txt"] = "text/plain";
+    contentTypes[".zip"] = "application/zip";
+    contentTypes[".gz"] = "application/gzip";
+    contentTypes[".tar"] = "application/x-tar";
+    contentTypes[".xml"] = "application/xml";
+    contentTypes[".json"] = "application/json";
+    contentTypes[".mp3"] = "audio/mpeg";
+    contentTypes[".wav"] = "audio/wav";
+    contentTypes[".avi"] = "video/x-msvideo";
 
 
 	dotPos = filePath.rfind('.');
@@ -79,5 +87,5 @@ std::string Response::getContentType(const std::string &filePath)
 	if (it != contentTypes.end())
 		return it->second;
 
-	return "text/plain";
+	return "application/octet-stream";
 }
