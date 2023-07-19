@@ -423,9 +423,15 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 	}
 	else if (key == "cgi_info")
 	{
+		int i;
+		int pos = 0;
 		std::vector<std::string> tmp = split(value, ' ');
 		if (tmp.size() != 2)
 			return -1;
+		if ((tmp[1].find(tmp[0], pos)) == std::string::npos)
+			return -1; 
+
+		
 		loca->cgi_infos[tmp[0]] = tmp[1];
 	}
 	else
