@@ -19,6 +19,8 @@ public:
 
     ConfLoca();
     ~ConfLoca();
+	std::string getRoot();
+	std::string getPath();
     static MethodType strtoMethod(std::string str);
     void print_loca_info();
 
