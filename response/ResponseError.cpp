@@ -38,21 +38,22 @@ bool	Response::getMatchedLocation()
 	{	
 		if (requestPath.rfind(locations[i].path, 0) == 0)
 		{
-			_location = new ConfLoca(locations[i]);
-			if (isLocationHaveRedirection())
-				return true;
-			else
-			{
-				if (isMethodAllowedInLocation())
-				{
-					std::cout << "Allowed method in location" << std::endl;
-					return true;
-				}
-				else
-					return false;
-			}	
+			// _location = new ConfLoca(locations[i]);
+			// std::cout <<  "*** autoindex: " << _location->autoindex << std::endl;
+			// if (isLocationHaveRedirection())
+			// 	return true;
+			// else
+			// {
+			// 	if (isMethodAllowedInLocation())
+			// 	{
+			// 		std::cout << "Allowed method in location" << std::endl;
+			// 		return true;
+			// 	}
+			// 	else
+			// 		return false;
+			// }	
 			
-			return true;
+			return false;
 		}
 	}
 	std::cout << "No matched location" << std::endl;

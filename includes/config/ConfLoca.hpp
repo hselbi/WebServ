@@ -7,9 +7,9 @@
 
 enum e_autoindex
 {
-    OFF,
+    DEFAULT,
     ON,
-    DEFAULT
+    OFF
 };
 
 class ConfLoca
@@ -24,7 +24,7 @@ class ConfLoca
         std::map<std::string, std::string> cgi_infos;
         std::string binary;
         
-        int autoindex;
+        e_autoindex autoindex;
         
         std::map<int, std::string> error_pages;
         // need to be done ...
