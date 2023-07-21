@@ -11,6 +11,12 @@ void Server::load_config_file(const char *config_file)
 {
 	// std::cout << "===>" << config_file << std::endl;
 	_server_blocks = _config.parser(config_file);
+	// std::cout << "server blocks size: " << _server_blocks.size() << std::endl;
+	// if (_server_blocks.size() == 1)
+    // {
+    //     std::cout << RED <<"[ERROR] config parsing failed." << RESET << std::endl;
+	// 	exit(1);
+    // }
 }
 
 void Server::cleanup_by_closing_all_sockets()
@@ -34,7 +40,8 @@ std::vector<long> &Server::get_server_sockets() { return _server_sockets; }
 void Server::throw_error(std::string error_message)
 {
 	// throw std::runtime_error(error_message + " in server : " + std::to_string(get_server_id()) + ", on port : " + get_port() + ", on host : " + get_host() + "\n");
-	throw std::runtime_error(error_message + " in server : " + "\n");
+	// throw std::runtime_error(error_message + " in server : " + "\n");
+	throw std::runtime_error(error_message + "\n");
 }
 
 bool Server::is_connection_close(std::string &request)
@@ -104,7 +111,8 @@ void Server::send_response(long client_socket)
 	// }
 	else if (bytes_sent < get_client(client_socket)->get_response_data().length()) // if send returns less than the number of bytes requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data.
 	{
-		std::cout << "send bytes send < response length " <<  "\n";
+		std::cout << "send bytes send < response length "
+				  << "\n";
 		get_client(client_socket)->get_response_data().erase(0, bytes_sent);
 	}
 	else
@@ -123,8 +131,8 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 }
 
 void Server::handle_outgoing_response(long client_socket) // ! send response to client
-{	
-	
+{
+
 	build_response(get_client(client_socket)->get_request(), client_socket);
 	send_response(client_socket);
 	if (get_client(client_socket) == NULL)
@@ -253,11 +261,10 @@ void Server::handle_incoming_request(long client_socket)
 	else
 	{
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
+		feed_request(std::string(received_data), client_socket);
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
 		{
-			feed_request(get_client(client_socket)->get_request_data(), client_socket); // feed request to the Request class
 			match_client_request_to_server_block(client_socket);
-
 			FD_CLR(client_socket, &_read_set_pool);
 			FD_SET(client_socket, &_write_set_pool);
 		}
@@ -299,14 +306,18 @@ void Server::listen_on_socket(long server_socket)
 
 void Server::bind_socket(long server_socket_id, std::string host, int port)
 {
+	std::cout << "host: " << host << std::endl;
+	std::cout << "port: " << port << std::endl;
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
-	_server_addr.sin_port = htons(port);
+	_server_addr.sin_port = htons(8080);
+	if (host == "localhost")
+		host = "127.0.0.1";
 	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0) // !! host.c_str() should be valid ip address,
-		throw_error("inet_aton failed, invalid ip address format in server block host");
+		throw_error("inet_aton failed, invalid ip address format");
 
 	// _server_addr.sin_addr.s_addr = INADDR_ANY;
-	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1)
+	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1) // cannot bind port 80
 		throw_error("server socket binding failed");
 }
 
