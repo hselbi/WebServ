@@ -5,11 +5,16 @@
 void	Response::errorPages(int statusCode)
 {
 	t_responseHeader	responseHeader;
-	std::string			filePath = "./defaultPages/" + Utils::toString(statusCode) + ".html";
-
+	std::string			filePath = getErrorPagePath(statusCode);
+	
+	open_file:
 	_file.open(filePath.c_str(), std::ios::binary);
 	if (!_file.is_open())
+	{
 		std::cout << RED <<  "Failed to open file: " << filePath << RESET << std::endl;
+		_client->set_status(DONE);
+		return;
+	}
 
 	_file.seekg(0, std::ios::end);
 	std::streampos fileSize = _file.tellg();
@@ -29,43 +34,68 @@ bool	Response::getMatchedLocation()
 	// TODO: Verify this function (!! High Priority)
 	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
 	std::string requestPath = _client->get_request().getPath();
-
 	for (int i = 0; i < locations.size(); i++)
-	{
+	{	
 		if (requestPath.rfind(locations[i].path, 0) == 0)
 		{
-			std::cout << "Matched location: " << locations[i].path << std::endl;
+			_location = new ConfLoca(locations[i]);
+			if (isLocationHaveRedirection())
+				return true;
+			else
+			{
+				if (isMethodAllowedInLocation())
+				{
+					std::cout << "Allowed method in location" << std::endl;
+					return true;
+				}
+				else
+					return false;
+			}	
+			
 			return true;
 		}
 	}
+	std::cout << "No matched location" << std::endl;
 	errorPages(404);
 	return false;
 }
 
 bool Response::isLocationHaveRedirection()
 {
-	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
-	std::string path = _client->get_request().getPath();
 	t_responseHeader responseHeader;
 
 		
-	for (int i = 0; i < locations.size(); i++)
+	// TODO: check if redirection is working
+
+	// if (_location->redirection != "")
+	// {
+	// 	responseHeader.statusCode = 301;
+	// 	responseHeader.statusMessage = Utils::getStatusMessage(301);
+	// 	responseHeader.headers["Location"] = _location->redirection;
+	// 	_header_buffer = "";
+	// 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
+	// 	_client->set_status(DONE);
+	// 	return true;
+	// }
+		
+	return false;
+}
+
+
+bool Response::isMethodAllowedInLocation()
+{
+	std::vector<MethodType> allow_methods;
+
+	if (_location)
 	{
-		if (path == locations[i].path)
-		{
-			responseHeader.statusCode = 301;
-			responseHeader.statusMessage = Utils::getStatusMessage(301);
-			responseHeader.headers["Server"] = _client->get_server_block().getServerName();
-			responseHeader.headers["Content-Type"] = "text/html";
-			responseHeader.headers["Content-Length"] = "0";
-			// TODO: Verify this path
-			responseHeader.headers["Location"] = "/hello.html";
-			_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-			_client->append_response_data(_header_buffer);
-			_header_buffer = "";
-			std::cout << "Location: " << locations[i].path << std::endl;
-			_client->set_status(DONE);
+		allow_methods = _location->allow_methods;
+		if (std::find(allow_methods.begin(), allow_methods.end(), _location->strtoMethod(_client->get_request().getMethod())) != allow_methods.end())
 			return true;
+		else
+		{
+			std::cout << "Method not allowed in location" << std::endl;
+			errorPages(405);
+			return false;
 		}
 	}
 	return false;

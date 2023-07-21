@@ -44,7 +44,7 @@ private:
 	std::string _output;
 	std::string _cgi_bin;
 	std::string _cgi_script;
-	FILE *_cgi_output_file;
+	// FILE *_cgi_output_file;
 };
 
 /*
