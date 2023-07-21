@@ -1,6 +1,9 @@
 #include "../../includes/core/Cgi.hpp"
 
-Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _output(""), _cgi_output_file(NULL), _envp(NULL), _argv(NULL), _extension("")
+// Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _output(""), _cgi_output_file(NULL), _envp(NULL), _argv(NULL), _extension("")
+// {
+// }
+Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _output(""), _envp(NULL), _argv(NULL), _extension("")
 {
 }
 
@@ -50,8 +53,9 @@ void Cgi::init_env_vars(ConfServer &configServer, ConfLoca configLocation, Reque
 	_argv = new char *[3];
 	_argv[0] = new char[_cgi_bin.length() + 1];
 	_argv[1] = new char[_env_vars["SCRIPT_NAME"].length() + 1];
+	// strcpy(_argv[0], _cgi_bin.c_str());
 	strcpy(_argv[0], _cgi_bin.c_str());
-	strcpy(_argv[1], _env_vars["SCRIPT_NAME"].c_str());
+	strcpy(_argv[1], "index.php");
 	_argv[2] = NULL;
 }
 
@@ -93,7 +97,7 @@ void Cgi::exec_cgi() // !! upload handiinng
 	pid_t pid;
 	int write_to_cgi[2];
 
-	_cgi_output_file = tmpfile();
+	FILE * _cgi_output_file = tmpfile();
 	if (!_cgi_output_file)
 	{
 		std::cerr << "tmpfile failed" << std::endl;
@@ -115,12 +119,13 @@ void Cgi::exec_cgi() // !! upload handiinng
 	{
 		close(write_to_cgi[1]);
 
-		dup2(write_to_cgi[0], STDIN_FILENO); // read from pipe
-		dup2(fileno(_cgi_output_file), STDOUT_FILENO);
+		dup2(write_to_cgi[0], 0); // read from pipe
+		dup2(fileno(_cgi_output_file), 1);
 
 		close(write_to_cgi[0]);
 
-		if (execve(_cgi_bin.c_str(), _argv, _envp) == -1)
+		char *newargv[] = {(char*)"/usr/bin/php", (char*)"index.php", NULL};
+		if (execve("/usr/bin/php", newargv, 0) == -1)
 		{
 			std::cerr << "execve failed" << std::endl;
 			exit(1);
@@ -130,19 +135,14 @@ void Cgi::exec_cgi() // !! upload handiinng
 	{
 		close(write_to_cgi[0]);
 		close(write_to_cgi[1]);
-
 		// DONT WAIT FOR CHILD PROCESS TO FINISH
-		waitpid(pid, NULL, WNOHANG); //
-
-		lseek(_cgi_output_file->_fileno, 0, SEEK_SET);
-
+		waitpid(pid, NULL, 0); //
+		lseek(fileno(_cgi_output_file), 0, SEEK_SET);
 		char buf[4024];
-		read(fileno(_cgi_output_file), buf, 100);
-
 		printf("data from CGI: \n ------------------ \n");
-		printf("%s\n", buf);
-
-		close(_cgi_output_file->_fileno);
+		read(fileno(_cgi_output_file), buf, 100);
+		std::cout << buf << std::endl;
+		close(fileno(_cgi_output_file));
 	}
 }
 

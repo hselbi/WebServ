@@ -11,6 +11,12 @@ void Server::load_config_file(const char *config_file)
 {
 	// std::cout << "===>" << config_file << std::endl;
 	_server_blocks = _config.parser(config_file);
+	// std::cout << "server blocks size: " << _server_blocks.size() << std::endl;
+	// if (_server_blocks.size() == 1)
+    // {
+    //     std::cout << RED <<"[ERROR] config parsing failed." << RESET << std::endl;
+	// 	exit(1);
+    // }
 }
 
 void Server::cleanup_by_closing_all_sockets()
@@ -52,6 +58,8 @@ bool Server::is_connection_close(std::string &request)
 
 Client *Server::get_client(long client_socket)
 {
+	if (_clients.find(client_socket) == _clients.end())
+		return NULL;
 	return _clients[client_socket];
 }
 
@@ -124,9 +132,11 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 
 void Server::handle_outgoing_response(long client_socket) // ! send response to client
 {
+
 	build_response(get_client(client_socket)->get_request(), client_socket);
 	send_response(client_socket);
-
+	if (get_client(client_socket) == NULL)
+		return;
 	if (get_client(client_socket)->get_status() == DONE)
 	{
 		if (is_connection_close(get_client(client_socket)->get_request_data()))

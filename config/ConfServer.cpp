@@ -26,7 +26,7 @@ int ConfServer::getServerId()
 }
 
 std::string ConfServer::getServerName()
-{ 
+{
 	return server_name;
 }
 

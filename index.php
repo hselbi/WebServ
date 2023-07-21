@@ -1,6 +1,8 @@
 <?php
 	// phpinfo();
 	echo "Hello World\n";
+	echo "Hello World\n";
+	echo "Hello World\n";
 
 	// if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 	// 	// HTTP method is GET
