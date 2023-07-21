@@ -418,13 +418,9 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 	}
     else if (key == "allow_methods")
     {
-		printf("hellow");
         std::vector<std::string> tmp = split(value, ' ');
         for (unsigned long i = 0; i < tmp.size(); i++)
-        {
             loca->allow_methods.push_back(ConfLoca::strtoMethod(tmp[i]));
-        }
-		// printf("bye");
     }
     else if (key == "client_body_limit")
 	{
