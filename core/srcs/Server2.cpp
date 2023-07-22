@@ -359,17 +359,21 @@ void Server::start_server()
 	for (;;)
 	{
 		long ready_count = monitor_clients(); // monitor socket descriptors for activity
+		// std::cout << "ready_count: " << ready_count << std::endl;
 		for (long socket = 0; (socket <= _biggest_socket) && ready_count > 0; ++socket)
 		{
 			if (FD_ISSET(socket, &_read_set))
 			{
 				if (FD_ISSET(socket, &_server_socket_pool)) // ready to read
+				// if (socket == _server_sockets[0])
 				{
+					// std::cout << "server socket: " << socket << std::endl;
 					// ! new connection
 					accept_new_connection(socket);
 				}
 				else
 				{
+					// std::cout << "CLIENT socket: " << socket << std::endl;
 					// ! incoming request
 					handle_incoming_request(socket);
 				}
@@ -409,4 +413,9 @@ void Server::restart_server(std::string message)
 	cleanup_by_closing_all_sockets();
 	setup_server();
 	start_server();
+}
+
+std::string generate_request(const std::string &host, const std::string &path)
+{
+	return std::string("GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
 }
