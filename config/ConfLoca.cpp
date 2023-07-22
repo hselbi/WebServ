@@ -13,15 +13,20 @@ ConfLoca::~ConfLoca()
 
 ConfLoca::ConfLoca(const ConfLoca &copy)
 {
-    this->path = copy.path;
-    this->root = copy.root;
-    this->index = copy.index;
-    this->allow_methods = copy.allow_methods;
-    this->client_body_limit = copy.client_body_limit;
-    this->cgi_infos = copy.cgi_infos;
-    this->autoindex = copy.autoindex;
-    this->error_pages = copy.error_pages;
-    this->binary = copy.binary;
+    if (this != &copy)
+    {
+        this->path = copy.path;
+        this->root = copy.root;
+        this->index = copy.index;
+        this->allow_methods = copy.allow_methods;
+        this->client_body_limit = copy.client_body_limit;
+        this->cgi_infos = copy.cgi_infos;
+        this->autoindex = copy.autoindex;
+        std::cout << "@@@@@autoindex: " << (autoindex ? "on\n" : "off\n");
+        this->error_pages = copy.error_pages;
+        this->binary = copy.binary;
+        
+    }
 
 }
 
@@ -36,6 +41,7 @@ ConfLoca &ConfLoca::operator=(const ConfLoca &copy)
         this->client_body_limit = copy.client_body_limit;
         this->cgi_infos = copy.cgi_infos;
         this->autoindex = copy.autoindex;
+        std::cout << "autoindex: " << (autoindex ? "on\n" : "off\n");
         this->error_pages = copy.error_pages;
         this->binary = copy.binary;
         
@@ -61,7 +67,9 @@ void ConfLoca::print_loca_info()
 	std::cout << "\t\t> path: " << path << "\n";
 	std::cout << "\t\t> root: " << root << "\n";
 	std::cout << "\t\t> index: " << index << "\n";
+    std::cout << "\t\t> autoindex: " << (autoindex ? "on\n" : "off\n");
 	std::cout << "\t\t> allow_methods: " << allow_methods << std::endl;
     std::cout << "\t\t> client_body_limit: " << client_body_limit << std::endl;
+
     std::cout << "\t\t> cgi_infos: " << cgi_infos <<std::endl;
 }
