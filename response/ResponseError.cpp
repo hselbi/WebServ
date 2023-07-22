@@ -38,8 +38,8 @@ bool	Response::getMatchedLocation()
 	{	
 		if (requestPath.rfind(locations[i].path, 0) == 0)
 		{
-			// _location = new ConfLoca(locations[i]);
-			// std::cout <<  "*** autoindex: " << _location->autoindex << std::endl;
+			_location = new ConfLoca(locations[i]);
+			std::cout <<  "*** autoindex: " << _location->autoindex << std::endl;
 			// if (isLocationHaveRedirection())
 			// 	return true;
 			// else
