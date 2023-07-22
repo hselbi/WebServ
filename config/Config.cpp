@@ -129,7 +129,9 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 
 		if (key == "location")
 		{
+			// std::cout << "==> " << cur << std::endl;
 			result.locations.push_back(parse_location(&cur));
+			std::cout << "============><=========" << std::endl;
 		}
 		else
 		{
@@ -318,8 +320,10 @@ ConfLoca Config::parse_location(size_t *i)
 
 	pre++;
 	cur = content.find_first_not_of(" \t\n", pre);
+	// std::cout << "============> " << content <<" <=========" << std::endl;
 	while (cur != std::string::npos)
 	{
+		std::cout << "==> " << cur << std::endl;
 
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
@@ -333,6 +337,7 @@ ConfLoca Config::parse_location(size_t *i)
             exit(1);
         }
 		std::string key = content.substr(pre, cur - pre);
+		std::cout << GREEN << key << RESET << std::endl;
 		if (key == "}")
 		{
 			*i = cur;
