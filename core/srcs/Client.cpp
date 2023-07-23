@@ -48,6 +48,8 @@ Request &Client::get_request() { return _request; }
 
 Response &Client::get_response() { return _response; }
 
+Cgi &Client::get_cgi() { return _cgi; }
+
 int Client::get_status() { return _status; }
 
 void Client::set_status(int status) { _status = status; }

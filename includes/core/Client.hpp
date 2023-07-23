@@ -4,6 +4,7 @@
 #include <vector>
 #include "../request/Request.hpp"
 #include "../response/Response.hpp"
+#include "../core/Cgi.hpp"
 #include "../config/ConfServer.hpp"
 
 enum E_RESPONSE_STATUS
@@ -15,6 +16,7 @@ enum E_RESPONSE_STATUS
 
 class Request;
 class Response;
+class Cgi;
 
 struct Client
 {
@@ -43,6 +45,8 @@ struct Client
 
 	Request &get_request();
 	Response &get_response();
+	Cgi &get_cgi();
+
 	int get_status();
 	void set_status(int status);
 	void set_server_block(ConfServer &config);
@@ -57,6 +61,7 @@ private:
 	ConfServer _config;
 	Request _request;
 	Response _response;
+	Cgi _cgi;
 	std::string _response_buffer;
 	long _client_socket;		 // client socket
 	std::string _request_buffer; // clear the request buffer for the next request

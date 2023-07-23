@@ -1,9 +1,7 @@
 #include "../../includes/core/Cgi.hpp"
+#include "../../includes/core/Client.hpp"
 
-// Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _output(""), _cgi_output_file(NULL), _envp(NULL), _argv(NULL), _extension("")
-// {
-// }
-Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _output(""), _envp(NULL), _argv(NULL), _extension("")
+Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _output(""), _cgi_output_file(NULL), _envp(NULL), _argv(NULL), _extension("")
 {
 }
 
@@ -11,34 +9,35 @@ Cgi::~Cgi()
 {
 }
 
-void Cgi::start_cgi(ConfServer &configServer, ConfLoca configLocation, Request &request)
+void Cgi::setClient(Client &client)
+{
+	this->_client = &client;
+}
+
+void Cgi::start_cgi()
 {
 	set_cgi_bin("/usr/bin/php");
 	set_cgi_script("index.php");
-	init_env_vars(configServer, configLocation, request);
+	init_env_vars();
 	exec_cgi();
 }
 
-void Cgi::init_env_vars(ConfServer &configServer, ConfLoca configLocation, Request &request)
+void Cgi::init_env_vars()
 {
-	std::string root;
-	if (configLocation.getRoot() != "")
-		root = configLocation.getRoot();
-	else
-		root = configServer.getRoot();
+	std::string root = _client->get_response().getRoot();
 
 	_env_vars["SERVER_SOFTWARE"] = "MortalKOMBAT/1.0";
-	_env_vars["SERVER_NAME"] = configServer.getServerName();
+	_env_vars["SERVER_NAME"] = _client->get_server_block().getServerName();
 	_env_vars["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env_vars["SERVER_PROTOCOL"] = "HTTP/1.1";
-	_env_vars["SERVER_PORT"] = configServer.getPort();
-	_env_vars["REQUEST_METHOD"] = request.getMethod();
-	_env_vars["REQUEST_URI"] = request.getPath();
+	_env_vars["SERVER_PORT"] = _client->get_server_block().getPort();
+	_env_vars["REQUEST_METHOD"] = _client->get_request().getMethod();
+	_env_vars["REQUEST_URI"] = _client->get_request().getPath();
 	_env_vars["DOCUMENT_ROOT"] = root;
-	_env_vars["SCRIPT_NAME"] = get_cgi_script_name(request.getPath());
+	_env_vars["SCRIPT_NAME"] = get_cgi_script_name(_client->get_request().getPath());
 	_env_vars["SCRIPT_FILENAME"] = _env_vars["DOCUMENT_ROOT"] + "/" + _env_vars["SCRIPT_NAME"];
-	_env_vars["QUERY_STRING"] = request.getQuery();
-	_env_vars["PATH_INFO"] = get_path_info(request.getPath());
+	_env_vars["QUERY_STRING"] = _client->get_request().getQuery();
+	_env_vars["PATH_INFO"] = get_path_info(_client->get_request().getPath());
 
 	_envp = new char *[_env_vars.size() + 1];
 	int i = 0;
@@ -97,7 +96,7 @@ void Cgi::exec_cgi() // !! upload handiinng
 	pid_t pid;
 	int write_to_cgi[2];
 
-	FILE * _cgi_output_file = tmpfile();
+	_cgi_output_file = tmpfile();
 	if (!_cgi_output_file)
 	{
 		std::cerr << "tmpfile failed" << std::endl;

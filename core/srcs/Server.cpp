@@ -67,6 +67,7 @@ Client *Server::create_client()
 {
 	Client *client = new Client();
 	client->get_response().setClient(*client);
+	client->get_cgi().setClient(*client);
 	return (client);
 }
 
@@ -246,7 +247,7 @@ void Server::handle_incoming_request(long client_socket)
 	// 	exit(0);
 	// }
 	// ++i;
-
+	
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
