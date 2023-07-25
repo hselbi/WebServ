@@ -3,23 +3,23 @@ NAME = webserv
 SRCS_REQ		= ./request
 SRCS_CONF		= ./config
 SRCS_POST		= ./postMethod
-SRC_CGI			= ./core/cgi
-SRC_CORE		= ./core/srcs
 SRC_RESPONSE	= ./response
+SRC_CGI	= ./cgi
+SRC_CORE	= ./core/srcs
 
 
 SRCS			= ./main.cpp \
 					$(addprefix $(SRCS_REQ)/, Request.cpp MemRequest.cpp) \
 					$(addprefix $(SRCS_CONF)/, ConfLoca.cpp ConfServer.cpp Config.cpp Tools.cpp) \
 					$(addprefix $(SRC_CORE)/, Client.cpp  Server.cpp  utils.cpp ) \
-					$(addprefix $(SRC_CGI)/, Cgi.cpp) \
-					$(addprefix $(SRC_RESPONSE)/, Response.cpp ResponseError.cpp ResponseGetters.cpp Utils.cpp ResponseMethods.cpp)
+					$(addprefix $(SRC_RESPONSE)/, Response.cpp ResponseError.cpp Utils.cpp)
+					$(addprefix $(SRC_CGI)/, Response.cpp ResponseError.cpp Utils.cpp)
 
 OBJS			= $(SRCS:.cpp=.o)
 
 CXX				= clang++
 CWWFLAGS		= -Wall -Werror -Wextra -std=c++98
-CFAFLAGS		= -std=c++98 -g -fsanitize=address
+CFAFLAGS		= -std=c++98 -g3 -fsanitize=address
 
 all:			$(NAME)
 
