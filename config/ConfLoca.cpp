@@ -2,10 +2,10 @@
 
 ConfLoca::ConfLoca()
 {
-    path = "";
+	path = "";
 	root = "";
     autoindex = DEFAULT;
-    
+
 }
 
 ConfLoca::~ConfLoca()
@@ -44,21 +44,21 @@ ConfLoca &ConfLoca::operator=(const ConfLoca &copy)
         std::cout << "autoindex: " << (autoindex ? "on\n" : "off\n");
         this->error_pages = copy.error_pages;
         this->binary = copy.binary;
-        
+
     }
     return *this;
 }
 
 MethodType ConfLoca::strtoMethod(std::string str)
 {
-    if (str == "GET")
-        return GET;
-    else if (str == "POST")
-        return POST;
-    else if (str == "DELETE")
-        return DELETE;
-    else
-        return INVALID;
+	if (str == "GET")
+		return GET;
+	else if (str == "POST")
+		return POST;
+	else if (str == "DELETE")
+		return DELETE;
+	else
+		return INVALID;
 }
 
 void ConfLoca::print_loca_info()
@@ -69,7 +69,16 @@ void ConfLoca::print_loca_info()
 	std::cout << "\t\t> index: " << index << "\n";
     std::cout << "\t\t> autoindex: " << (autoindex ? "on\n" : "off\n");
 	std::cout << "\t\t> allow_methods: " << allow_methods << std::endl;
-    std::cout << "\t\t> client_body_limit: " << client_body_limit << std::endl;
+	std::cout << "\t\t> client_body_limit: " << client_body_limit << std::endl;
+	std::cout << "\t\t> cgi_infos: " << cgi_infos << std::endl;
+}
 
-    std::cout << "\t\t> cgi_infos: " << cgi_infos <<std::endl;
+std::string ConfLoca::getRoot()
+{
+	return root;
+}
+
+std::string ConfLoca::getPath()
+{
+	return path;
 }
