@@ -13,6 +13,7 @@ ConfLoca::~ConfLoca()
 
 ConfLoca::ConfLoca(const ConfLoca &copy)
 {
+    std::cout << "ConfLoca copy constructor called\n";
     if (this != &copy)
     {
         this->path = copy.path;
@@ -69,6 +70,15 @@ void ConfLoca::print_loca_info()
 	std::cout << "\t\t> index: " << index << "\n";
     std::cout << "\t\t> autoindex: " << (autoindex ? "on\n" : "off\n");
 	std::cout << "\t\t> allow_methods: " << allow_methods << std::endl;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    std::cout << "\t\t> client_body_limit: " << client_body_limit << std::endl;
+
+    std::cout << "\t\t> cgi_infos: " << cgi_infos <<std::endl;
+}
+=======
+>>>>>>> zakaria
 	std::cout << "\t\t> client_body_limit: " << client_body_limit << std::endl;
 	std::cout << "\t\t> cgi_infos: " << cgi_infos << std::endl;
 }
@@ -82,3 +92,7 @@ std::string ConfLoca::getPath()
 {
 	return path;
 }
+<<<<<<< HEAD
+=======
+>>>>>>> 2f7e2652cfdbf0f394e22c85abe4dcf151d8b61b
+>>>>>>> zakaria
