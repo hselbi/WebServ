@@ -64,6 +64,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
         }
 		ConfServer server = parse_server(&cur, id);
 		result.push_back(server);
+		std::cout << "============> <=========" << std::endl;
 	}
 
 	std::cout << YELLOW << "> config file parsing finish\n" << RESET;
@@ -170,6 +171,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 
 int	checkHost(std::string host)
 {
+	// std::cout << "host: " << host << std::endl;
 	std::vector<std::string> tmp = split(host, '.');
 	if (tmp.size() != 4  && tmp.size() != 1)
 		return -1;
@@ -179,6 +181,7 @@ int	checkHost(std::string host)
 		{
 			if (tmp[i].length() > 3)
 				return -1;
+			
 			for (unsigned long j = 0; j != tmp[i].length(); j++)
 			{
 				if (tmp[i][j] < '0' || tmp[i][j] > '9')
@@ -218,17 +221,22 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 		}
 		else
 		{
-			// std::cout << value << " <----> " << std::endl;
+			// std::cout << serv->host << std::endl;
 			std::vector<std::string> tmp = split(value, ':');
-			if (serv->host != "" && serv->host != tmp[0])
-				return -1;
 
+			if (tmp[0] == "")
+			{
+				std::cout << RED << "FAILED CONFIG: Host required" << RESET << std::endl;
+				return -1;
+			}
 			serv->host = tmp[0];
+			std::cout << " <----> " << serv->host << std::endl;
 			if (checkHost(serv->host) == -1)
 			{
 				std::cout << RED << "FAILED CONFIG: Host(1st)" << RESET << std::endl;
 				return -1;
 			}
+			// std::cout << " <----> " << tmp[0] << std::endl;
 			//  port : 0 to 65535
 			if (isAllDigits(tmp[1]) || tmp[1] == "0")
 				serv->port = tmp[1];
@@ -327,7 +335,7 @@ ConfLoca Config::parse_location(size_t *i)
 	// std::cout << "============> " << content <<" <=========" << std::endl;
 	while (cur != std::string::npos)
 	{
-		std::cout << "==> " << cur << std::endl;
+		// std::cout << "==> " << cur << std::endl;
 
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
