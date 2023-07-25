@@ -23,16 +23,18 @@ class ConfLoca
         std::vector<MethodType> allow_methods;
         std::map<std::string, std::string> cgi_infos;
         std::string binary;
-        
-        e_autoindex autoindex;
-        
+
+        int autoindex;
+
         std::map<int, std::string> error_pages;
         // need to be done ...
         // error_pages;
-        
+
 
         ConfLoca();
         ~ConfLoca();
+		std::string getRoot();
+		std::string getPath();
         ConfLoca(const ConfLoca &copy);
         ConfLoca &operator=(const ConfLoca &copy);
         static MethodType strtoMethod(std::string str);

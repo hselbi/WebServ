@@ -213,8 +213,8 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 				return -1;
 			}
 			serv->host = value;
-			serv->port = "80";
-			std::cout << " <----> " << value << std::endl;
+			serv->port = "8080";
+			// std::cout << " <----> " << value << std::endl;
 		}
 		else
 		{
@@ -222,7 +222,7 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 			std::vector<std::string> tmp = split(value, ':');
 			if (serv->host != "" && serv->host != tmp[0])
 				return -1;
-			
+
 			serv->host = tmp[0];
 			if (checkHost(serv->host) == -1)
 			{
@@ -390,7 +390,7 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 	}
     else if (key == "index")
     {
-		
+
 
 
         /*
@@ -423,6 +423,7 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 	}
     else if (key == "allow_methods")
     {
+		// printf("hellow");
         std::vector<std::string> tmp = split(value, ' ');
         for (unsigned long i = 0; i < tmp.size(); i++)
             loca->allow_methods.push_back(ConfLoca::strtoMethod(tmp[i]));
@@ -438,7 +439,7 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 		std::vector<std::string> tmp = split(value, ' ');
 		if (tmp.size() != 2)
 			return -1;
-		
+
 		loca->cgi_infos[tmp[0]] = tmp[1];
 	}
 	else
