@@ -13,6 +13,7 @@ ConfLoca::~ConfLoca()
 
 ConfLoca::ConfLoca(const ConfLoca &copy)
 {
+    std::cout << "ConfLoca copy constructor called\n";
     if (this != &copy)
     {
         this->path = copy.path;
@@ -22,7 +23,7 @@ ConfLoca::ConfLoca(const ConfLoca &copy)
         this->client_body_limit = copy.client_body_limit;
         this->cgi_infos = copy.cgi_infos;
         this->autoindex = copy.autoindex;
-        std::cout << "@@@@@autoindex: " << (autoindex ? "on\n" : "off\n");
+        // std::cout << "@@@@@autoindex: " << (autoindex ? "on\n" : "off\n");
         this->error_pages = copy.error_pages;
         this->binary = copy.binary;
         
@@ -41,7 +42,7 @@ ConfLoca &ConfLoca::operator=(const ConfLoca &copy)
         this->client_body_limit = copy.client_body_limit;
         this->cgi_infos = copy.cgi_infos;
         this->autoindex = copy.autoindex;
-        std::cout << "autoindex: " << (autoindex ? "on\n" : "off\n");
+        // std::cout << "autoindex: " << (autoindex ? "on\n" : "off\n");
         this->error_pages = copy.error_pages;
         this->binary = copy.binary;
         
