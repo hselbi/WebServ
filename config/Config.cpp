@@ -63,6 +63,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
         }
 		ConfServer server = parse_server(&cur, id);
 		result.push_back(server);
+		std::cout << "============> <=========" << std::endl;
 	}
 
 	std::cout << YELLOW << "> config file parsing finish\n" << RESET;
@@ -323,7 +324,7 @@ ConfLoca Config::parse_location(size_t *i)
 	// std::cout << "============> " << content <<" <=========" << std::endl;
 	while (cur != std::string::npos)
 	{
-		std::cout << "==> " << cur << std::endl;
+		// std::cout << "==> " << cur << std::endl;
 
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
