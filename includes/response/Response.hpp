@@ -18,6 +18,7 @@ class Response {
 
 		void				processing();
 		void				setClient(Client &client);
+		std::string				getRoot();
 		
 	private:
 		Client				*_client;
@@ -27,7 +28,6 @@ class Response {
 		char	 			_buffer[RES_BUFFER_SIZE];
 
 		std::string				getContentType(const std::string& filePath);
-		std::string				getRoot();
 		std::string				getErrorPagePath(int statusCode);
 		std::string				isDirHasIndexFiles();
 		void					readFile();

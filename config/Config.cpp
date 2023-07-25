@@ -50,6 +50,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		exit(1);
     }
 	size_t id = 0;
+	// printf("%d", cur);
 	while (cur != std::string::npos)
 	{
 		id += 1;
@@ -94,6 +95,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
     ConfServer result;
 	size_t key_start;
 	size_t value_end;
+	size_t index = 0;
 
 	size_t pre = content.find_first_not_of(" \t\n", *t);
 	if (pre == std::string::npos || content[pre] != '{')
@@ -102,9 +104,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
         std::cout << "[ERROR] config parsing failed." << std::endl;
 		exit(1);
     }
-	// std::cout << "==> **" << pre << std::endl;
 	pre++;
-	// std::cout << "==> " << pre << std::endl;
 	size_t cur = content.find_first_not_of(" \t\n", pre);
 	while (cur != std::string::npos)
 	{
@@ -120,10 +120,12 @@ ConfServer Config::parse_server(size_t *t, size_t id)
             exit(1);
         }
 		std::string key = content.substr(pre, cur - pre);
-		// std::cout << GREEN << key << RESET << std::endl;
 		if (key == "}")
 		{
-			// std::cout << RED << "==> " << cur << RESET << std::endl;
+			if (!index) {
+				std::cout << RED << "[ERROR] config parsing failed."<< RESET << std::endl;
+				exit(1);
+			}
 			*t = content.find_first_not_of(" \n\t", cur + 1);
 			break;
 		}
@@ -136,6 +138,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 		}
 		else
 		{
+			// std::cout << "hafid ==> " << std::endl;
 			if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
 			{
                 std::cout << "[ERROR] config parsing failed." << std::endl;
@@ -160,6 +163,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 				exit(1);
             }
 		}
+		index++;
 	}
 
 	return result;
@@ -167,6 +171,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 
 int	checkHost(std::string host)
 {
+	// std::cout << "host: " << host << std::endl;
 	std::vector<std::string> tmp = split(host, '.');
 	if (tmp.size() != 4  && tmp.size() != 1)
 		return -1;
@@ -176,6 +181,7 @@ int	checkHost(std::string host)
 		{
 			if (tmp[i].length() > 3)
 				return -1;
+			
 			for (unsigned long j = 0; j != tmp[i].length(); j++)
 			{
 				if (tmp[i][j] < '0' || tmp[i][j] > '9')
@@ -210,22 +216,27 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 				return -1;
 			}
 			serv->host = value;
-			serv->port = "80";
+			serv->port = "8080";
 			// std::cout << " <----> " << value << std::endl;
 		}
 		else
 		{
-			// std::cout << value << " <----> " << std::endl;
+			// std::cout << serv->host << std::endl;
 			std::vector<std::string> tmp = split(value, ':');
-			if (serv->host != "" && serv->host != tmp[0])
+
+			if (tmp[0] == "")
+			{
+				std::cout << RED << "FAILED CONFIG: Host required" << RESET << std::endl;
 				return -1;
-			
+			}
 			serv->host = tmp[0];
+			std::cout << " <----> " << serv->host << std::endl;
 			if (checkHost(serv->host) == -1)
 			{
 				std::cout << RED << "FAILED CONFIG: Host(1st)" << RESET << std::endl;
 				return -1;
 			}
+			// std::cout << " <----> " << tmp[0] << std::endl;
 			//  port : 0 to 65535
 			if (isAllDigits(tmp[1]) || tmp[1] == "0")
 				serv->port = tmp[1];
@@ -388,6 +399,8 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
     else if (key == "index")
     {
 
+
+
         /*
             std::vector<std::string> tmp = split(value, ' ');
 		    for (unsigned long i = 0; i != tmp.size(); i++)
@@ -418,11 +431,13 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 	}
     else if (key == "allow_methods")
     {
+		// printf("hellow");
         std::vector<std::string> tmp = split(value, ' ');
         for (unsigned long i = 0; i < tmp.size(); i++)
         {
             loca->allow_methods.push_back(ConfLoca::strtoMethod(tmp[i]));
         }
+		// printf("bye");
     }
     else if (key == "client_body_limit")
 	{
@@ -435,7 +450,7 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 		std::vector<std::string> tmp = split(value, ' ');
 		if (tmp.size() != 2)
 			return -1;
-		
+
 		loca->cgi_infos[tmp[0]] = tmp[1];
 	}
 	else
