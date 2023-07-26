@@ -74,7 +74,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
 int Config::check_server_syntax(std::vector<ConfServer>& servers) {
     std::vector<ConfServer>::iterator it = servers.begin();
     std::vector<ConfServer>::iterator itn;
-    for (; it != servers.end(); ++it) {ƒ
+    for (; it != servers.end(); ++it) {
         itn = it;
         ++itn;
         for (; itn != servers.end(); ++itn) {
