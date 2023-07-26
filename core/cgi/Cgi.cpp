@@ -14,12 +14,12 @@ void Cgi::setClient(Client &client)
 	this->_client = &client;
 }
 
-void Cgi::start_cgi()
+int Cgi::start_cgi()
 {
-	set_cgi_bin("/usr/bin/php");
+	set_cgi_bin("/Users/zmahmoud/Desktop/php-cgi");
 	set_cgi_script("index.php");
 	init_env_vars();
-	exec_cgi();
+	return exec_cgi();
 }
 
 void Cgi::init_env_vars()
@@ -91,7 +91,7 @@ std::string Cgi::get_path_info(std::string url)
 	return path_info;
 }
 
-void Cgi::exec_cgi() // !! upload handiinng
+int Cgi::exec_cgi() // !! upload handiinng
 {
 	pid_t pid;
 	int write_to_cgi[2];
@@ -123,8 +123,8 @@ void Cgi::exec_cgi() // !! upload handiinng
 
 		close(write_to_cgi[0]);
 
-		char *newargv[] = {(char*)"/usr/bin/php", (char*)"index.php", NULL};
-		if (execve("/usr/bin/php", newargv, 0) == -1)
+		char *newargv[] = {(char*)"/Users/zmahmoud/Desktop/php-cgi", (char*)"index.php", NULL};
+		if (execve("/Users/zmahmoud/Desktop/php-cgi", newargv, 0) == -1)
 		{
 			std::cerr << "execve failed" << std::endl;
 			exit(1);
@@ -137,12 +137,13 @@ void Cgi::exec_cgi() // !! upload handiinng
 		// DONT WAIT FOR CHILD PROCESS TO FINISH
 		waitpid(pid, NULL, 0); //
 		lseek(fileno(_cgi_output_file), 0, SEEK_SET);
-		char buf[4024];
-		printf("data from CGI: \n ------------------ \n");
-		read(fileno(_cgi_output_file), buf, 100);
-		std::cout << buf << std::endl;
-		close(fileno(_cgi_output_file));
+		// char buf[4024];
+		// printf("data from CGI: \n ------------------ \n");
+		// read(fileno(_cgi_output_file), buf, 100);
+		// std::cout << buf << std::endl;
+		// close(fileno(_cgi_output_file));
 	}
+	return fileno(_cgi_output_file);
 }
 
 void Cgi::set_body(std::string payload)
