@@ -33,27 +33,26 @@ bool	Response::getMatchedLocation()
 {
 	// TODO: Verify this function (!! High Priority)
 	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
+	_client->get_server_block().print_server_info();
 	std::string requestPath = _client->get_request().getPath();
 	for (int i = 0; i < locations.size(); i++)
 	{	
 		if (requestPath.rfind(locations[i].path, 0) == 0)
 		{
 			_location = new ConfLoca(locations[i]);
-			// std::cout <<  "*** autoindex: " << _location->autoindex << std::endl;
-			// if (isLocationHaveRedirection())
-			// 	return true;
-			// else
-			// {
-			// 	if (isMethodAllowedInLocation())
-			// 	{
-			// 		std::cout << "Allowed method in location" << std::endl;
-			// 		return true;
-			// 	}
-			// 	else
-			// 		return false;
-			// }	
 			
-			return false;
+			if (isLocationHaveRedirection())
+				return true;
+			else
+			{
+				if (isMethodAllowedInLocation())
+				{
+					std::cout << "Allowed method in location" << std::endl;
+					return true;
+				}
+				else
+					return false;
+			}	
 		}
 	}
 	std::cout << "No matched location" << std::endl;
@@ -86,6 +85,7 @@ bool Response::isLocationHaveRedirection()
 bool Response::isMethodAllowedInLocation()
 {
 	std::vector<MethodType> allow_methods;
+	std::cout << _location << std::endl;
 
 	if (_location)
 	{

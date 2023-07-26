@@ -227,8 +227,6 @@ void Server::handle_incoming_request(long client_socket)
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
 
-<<<<<<< HEAD
-=======
 	// std::cout << YELLOW << "inside recv" << RESET << "\n";
 	// if (i == 1)
 	// {
@@ -237,7 +235,6 @@ void Server::handle_incoming_request(long client_socket)
 	// }
 	// ++i;
 	
->>>>>>> zakaria
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
@@ -405,6 +402,11 @@ void Server::setup_server()
 		listen_on_socket(i);
 		_server_port.insert(std::make_pair(_server_sockets[i], _server_blocks[i].getPort()));
 		std::cout << "Server " << (i + 1) << " created, Host: " << _server_blocks[i].getHost() << ", listening on Port: " << _server_blocks[i].getPort() << std::endl;
+		
+		// hafid added this 3 line
+		std::cout << "=============><==============" << std::endl;
+		_server_blocks[i].print_server_info();
+		std::cout << "=============><==============" << std::endl;
 	}
 }
 

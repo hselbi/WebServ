@@ -10,7 +10,7 @@ int Config::openfile(const char* filename)
 	std::ifstream fs;
 
 	content.clear();
-	std::cout << filename <<std::endl;
+	// std::cout << filename <<std::endl;
 	fs.open(filename);
 	if (fs.is_open())
 	{
@@ -64,7 +64,6 @@ std::vector<ConfServer> Config::parser(const char* filename)
         }
 		ConfServer server = parse_server(&cur, id);
 		result.push_back(server);
-		std::cout << "============> <=========" << std::endl;
 	}
 
 	std::cout << YELLOW << "> config file parsing finish\n" << RESET;
@@ -134,7 +133,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 		{
 			// std::cout << "==> " << cur << std::endl;
 			result.locations.push_back(parse_location(&cur));
-			std::cout << "============><=========" << std::endl;
+			// std::cout << "============><=========" << std::endl;
 		}
 		else
 		{
@@ -230,7 +229,7 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 				return -1;
 			}
 			serv->host = tmp[0];
-			std::cout << " <----> " << serv->host << std::endl;
+			// std::cout << " <----> " << serv->host << std::endl;
 			if (checkHost(serv->host) == -1)
 			{
 				std::cout << RED << "FAILED CONFIG: Host(1st)" << RESET << std::endl;
@@ -322,6 +321,7 @@ ConfLoca Config::parse_location(size_t *i)
 	size_t pre = content.find_first_not_of(" \t\n", *i);
 	size_t cur = content.find_first_of(" \t\n", pre);
 	result.path = content.substr(pre, cur - pre);
+	// std::cout << "============> " << result.path <<" <=========" << std::endl;
 
 	pre = content.find_first_not_of(" \t\n", cur);
 	if (pre == std::string::npos || content[pre] != '{')
@@ -332,7 +332,6 @@ ConfLoca Config::parse_location(size_t *i)
 
 	pre++;
 	cur = content.find_first_not_of(" \t\n", pre);
-	// std::cout << "============> " << content <<" <=========" << std::endl;
 	while (cur != std::string::npos)
 	{
 		// std::cout << "==> " << cur << std::endl;
@@ -349,7 +348,9 @@ ConfLoca Config::parse_location(size_t *i)
             exit(1);
         }
 		std::string key = content.substr(pre, cur - pre);
-		std::cout << GREEN << key << RESET << std::endl;
+		// std::cout << GREEN << key << RESET << std::endl;
+		// std::cout << GREEN << content.substr(pre, cur - pre) << RESET << std::endl;
+		// std::cout << "=====><============" << std::endl;
 		if (key == "}")
 		{
 			*i = cur;
@@ -357,6 +358,7 @@ ConfLoca Config::parse_location(size_t *i)
 		}
 		else
 		{
+
 			if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
             {
                 std::cout << "[ERROR] config parsing failed. 3" << std::endl;
@@ -393,7 +395,7 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
     }
 	else if (key == "autoindex")
 	{
-		std::cout << "autoindex: " << value << std::endl;
+		// std::cout << "autoindex: " << value << std::endl;
 		loca->autoindex = (value == "on" ? ON : OFF);
 	}
     else if (key == "index")
@@ -459,6 +461,7 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 
 int Config::check_line_syntax(std::string line)
 {
+	// std::cout << "line: " << line << std::endl;
     // remove the comments
     size_t sharp;
 	sharp = line.find_first_of("#");
@@ -468,6 +471,7 @@ int Config::check_line_syntax(std::string line)
 		if (line.find_first_not_of(" \t\n") != std::string::npos)
 			return -2;
 	}
+	
 
     // line must be end with semicolon
 	size_t semicol;
