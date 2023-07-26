@@ -398,6 +398,7 @@ void Server::setup_server()
 		_server_port.insert(std::make_pair(_server_sockets[i], _server_blocks[i].getPort()));
 		std::cout << "Server " << (i + 1) << " created, Host: " << _server_blocks[i].getHost() << ", listening on Port: " << _server_blocks[i].getPort() << std::endl;
 	}
+
 }
 
 void Server::start()
