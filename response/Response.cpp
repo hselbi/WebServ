@@ -126,7 +126,6 @@ void Response::readFileByPath(std::string filePath)
 
 void Response::processing()
 {
-	std::cout << "Response::processing()" << std::endl;
 	int buffer_size = RES_BUFFER_SIZE;
 	// _client->get_cgi().start_cgi();
 	if (_client->get_status() == NOT_STARTED)

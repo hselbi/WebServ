@@ -24,12 +24,7 @@ class ConfLoca
         std::map<std::string, std::string> cgi_infos;
         std::string binary;
 
-<<<<<<< HEAD
-        int autoindex;
-
-=======
         e_autoindex autoindex;
->>>>>>> zakaria
         std::map<int, std::string> error_pages;
         // need to be done ...
         // error_pages;
