@@ -33,6 +33,7 @@ void    Response::Method_GET()
         }
         else
         {
+            _location->print_loca_info();
             std::cout << "Size : " << _location->cgi_infos.size() << std::endl;
             
             if (_location && _location->cgi_infos.size() > 0)
