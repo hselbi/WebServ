@@ -74,7 +74,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
 int Config::check_server_syntax(std::vector<ConfServer>& servers) {
     std::vector<ConfServer>::iterator it = servers.begin();
     std::vector<ConfServer>::iterator itn;
-    for (; it != servers.end(); ++it) {
+    for (; it != servers.end(); ++it) {ƒ
         itn = it;
         ++itn;
         for (; itn != servers.end(); ++itn) {
@@ -331,6 +331,8 @@ ConfLoca Config::parse_location(size_t *i)
 	cur = content.find_first_not_of(" \t\n", pre);
 	while (cur != std::string::npos)
 	{
+
+		// here is the problem 
 
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
