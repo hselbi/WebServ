@@ -162,7 +162,7 @@ void Response::processing()
 			_client->set_status(DONE);
 		}
 	}
-	else if (_have_cgi && _client->get_status() == ON_PROCESS) // change if to else if
+	else if (_have_cgi && _client->get_status() == ON_PROCESS) 
 	{
 		ssize_t bytesRead;
 		if (_header_buffer.length() > 0)

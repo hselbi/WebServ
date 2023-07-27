@@ -3,7 +3,6 @@
 
 void    Response::Method_GET()
 {
-    std::cout << "GET GET" << std::endl;
 	std::string filePath = getRoot()  + _client->get_request().getPath();
     std::string index = "";
     if (Utils::fileExists(filePath))
@@ -29,13 +28,9 @@ void    Response::Method_GET()
                     return;
                 }
             }
-            
         }
         else
         {
-            _location->print_loca_info();
-            std::cout << "Size : " << _location->cgi_infos.size() << std::endl;
-            
             if (_location && _location->cgi_infos.size() > 0)
             {
                 std::cout << "Have CGI" << std::endl;
@@ -59,7 +54,9 @@ void Response::readCgiFile()
 {
 	t_responseHeader responseHeader;
 	off_t fileSize;
-
+    ssize_t bytesRead;
+    int endHeaderPos = 0;
+    char buffer[10000];
 	
 	fileSize = lseek(_cgi_file, 0, SEEK_END);
     
@@ -76,12 +73,21 @@ void Response::readCgiFile()
         _client->set_status(DONE);
     }
 
-	responseHeader.statusCode = 200;
-	responseHeader.statusMessage = Utils::getStatusMessage(200);
-	responseHeader.headers["Content-Type"] = "text/php";
-	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+    while ((bytesRead = read(_cgi_file, buffer, sizeof(buffer) - 1)) > 0) {
+        buffer[bytesRead] = '\0';
+        char *found = strstr(buffer, "\r\n\r\n");
+        if (found) {
+            endHeaderPos = found - buffer;
+            break;
+        }
+    }
 
+    lseek(_cgi_file, endHeaderPos, SEEK_SET);
+    responseHeader.statusCode = 200;
+	responseHeader.statusMessage = Utils::getStatusMessage(200);
+	responseHeader.headers["Content-Type"] = "text/html";
+	responseHeader.headers["Content-Length"] = Utils::toString(fileSize - endHeaderPos);
+	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->set_status(ON_PROCESS);
 }
