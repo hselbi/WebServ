@@ -126,8 +126,7 @@ void ConfServer::print_server_info()
 					  << error_pages;
 		else
 			std::cout << GREEN << "(empty)\n";
-		for (unsigned long i = 0; i < locations.size(); i++)
-			locations[i].print_loca_info();
+
 	}
 	else
 	{
