@@ -24,7 +24,7 @@ struct Cgi
 	Cgi();
 	~Cgi();
 
-	int start_cgi();
+	int start_cgi(std::string script_path);
 	int exec_cgi();
 
 	void init_env_vars();
