@@ -11,11 +11,8 @@ std::string Response::getRoot()
 bool Response::getAutoIndex()
 {
     //TODO: check if can location have also autoindex
-    std::cout << "--> " << _location->autoindex << std::endl;
     if (_location && _location->autoindex != DEFAULT)
-    {
         return (_location->autoindex == ON) ? true : false;
-    }
     
     return _client->get_server_block().getAutoindex();
 }

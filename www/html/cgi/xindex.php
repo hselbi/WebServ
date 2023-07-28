@@ -18,9 +18,9 @@
 <body>
 	
 <?php
-	phpinfo();
-	// echo "Hello World\n";
-	// echo "Hello World\n";
+	// phpinfo();
+	echo "Hello World\n"
+	echo "Hello World\n";
 	// echo "Hello World\n";
 
 	// if ($_SERVER['REQUEST_METHOD'] === 'GET') {

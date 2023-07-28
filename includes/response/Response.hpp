@@ -39,12 +39,14 @@ class Response {
 		void					errorPages(int statusCode);
 		void 					checkWhichRequestedMethod();
 		void					Method_GET();
+		void					Method_DELETE();
 		void					setRediration(std::string location);
 		bool					checkRequestIsFormed();
 		bool					isLocationHaveRedirection();
 		bool					getMatchedLocation();
 		bool					isMethodAllowedInLocation();
-		bool 					getAutoIndex();	
-
+		bool 					getAutoIndex();
+		void					deleteFile();
+		void 					deleteAllFolderFiles();
 		
 };
