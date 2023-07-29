@@ -75,7 +75,7 @@ bool Response::isServerHaveRedirection()
 
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 		_client->append_response_data(_header_buffer);
-		_client->set_status(DONE);
+		_client->set_res_status(DONE);
 		return true;
 	}
 	else if (redirectStatus != -1)
@@ -86,24 +86,11 @@ bool Response::isServerHaveRedirection()
 		responseHeader.headers["Content-Length"] = "0";
 		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
-<<<<<<< HEAD
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 		_client->append_response_data(_header_buffer);
-		_client->set_status(DONE);
+		_client->set_res_status(DONE);
 		return true;
 	}
-=======
-	// if (_location->redirection != "")
-	// {
-	// 	responseHeader.statusCode = 301;
-	// 	responseHeader.statusMessage = Utils::getStatusMessage(301);
-	// 	responseHeader.headers["Location"] = _location->redirection;
-	// 	_header_buffer = "";
-	// 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	// 	_client->set_res_status(DONE);
-	// 	return true;
-	// }
->>>>>>> origin/hafid
 		
 	return false;
 }

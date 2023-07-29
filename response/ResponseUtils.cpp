@@ -48,7 +48,7 @@ void Response::setRediration(std::string location)
 
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->append_response_data(_header_buffer);
-	_client->set_status(DONE);
+	_client->set_res_status(DONE);
 }
 
 void	Response::deleteAllFolderFiles()
@@ -88,6 +88,6 @@ void	Response::deleteFile()
 		responseHeader.headers["Content-Length"] = "0";
 		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-		_client->set_status(ON_PROCESS);
+		_client->set_res_status(ON_PROCESS);
 	}
 }

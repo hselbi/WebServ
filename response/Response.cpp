@@ -1,12 +1,14 @@
 #include "../includes/response/Response.hpp"
 #include "../includes/core/Client.hpp"
 
-Response::Response() {
+Response::Response()
+{
 	_location = NULL;
 	_have_cgi = false;
 }
- 
-Response::~Response() {
+
+Response::~Response()
+{
 	std::cout << "Response destructor called" << std::endl;
 	if (_location)
 		delete _location;
@@ -31,7 +33,8 @@ void Response::processing()
 		if (_header_buffer.length() > 0)
 		{
 			if (_header_buffer.length() >= buffer_size)
-			{	std::string str(_header_buffer, buffer_size);
+			{
+				std::string str(_header_buffer, buffer_size);
 				_header_buffer = _header_buffer.substr(buffer_size);
 				_client->append_response_data(str);
 				return;
@@ -54,9 +57,9 @@ void Response::processing()
 			_client->set_res_status(DONE);
 		}
 	}
-	else if (_have_cgi && _client->get_status() == ON_PROCESS) 
+	else if (_have_cgi && _client->get_res_status() == ON_PROCESS)
 		processingCgi();
-	else if (_client->get_status() == DONE)
+	else if (_client->get_res_status() == DONE)
 	{
 		_have_cgi = false;
 		delete _location;
@@ -66,13 +69,14 @@ void Response::processing()
 
 void Response::processingCgi()
 {
-	ssize_t			bytesRead;
-	int				buffer_size = RES_BUFFER_SIZE;
+	ssize_t bytesRead;
+	int buffer_size = RES_BUFFER_SIZE;
 
 	if (_header_buffer.length() > 0)
 	{
 		if (_header_buffer.length() >= buffer_size)
-		{	std::string str(_header_buffer, buffer_size);
+		{
+			std::string str(_header_buffer, buffer_size);
 			_header_buffer = _header_buffer.substr(buffer_size);
 			_client->append_response_data(str);
 			return;
@@ -87,25 +91,24 @@ void Response::processingCgi()
 		_client->append_response_data(str);
 		_header_buffer = "";
 	}
-	else 
+	else
 	{
 		close(_cgi_file);
 		_have_cgi = false;
 		_buffer[0] = '\0';
-		_client->set_status(DONE);
+		_client->set_res_status(DONE);
 	}
 }
 
 void Response::autoIndex()
 {
-	DIR					*dir;
-	struct dirent		*ent;
-	std::string			strHeader, path, body, tmp;
-	t_responseHeader	responseHeader;
-	
+	DIR *dir;
+	struct dirent *ent;
+	std::string strHeader, path, body, tmp;
+	t_responseHeader responseHeader;
+
 	path = getRoot() + _client->get_request().getPath();
-	body = "<html><head><title>Index of " + _client->get_request().getPath() 
-		+ "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
+	body = "<html><head><title>Index of " + _client->get_request().getPath() + "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
 	if ((dir = opendir(path.c_str())) != NULL)
 	{
 		body.append("<a href=\"./\">./</a><br>");
@@ -117,7 +120,6 @@ void Response::autoIndex()
 				body.append("<a href=\"" + tmp + "/\">" + tmp + "/</a><br>");
 			else if (tmp != "." && tmp != "..")
 				body.append("<a href=\"" + tmp + "\">" + tmp + "</a><br>");
-
 		}
 		body.append("</pre><hr></body></html>");
 		closedir(dir);
@@ -131,5 +133,5 @@ void Response::autoIndex()
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
 	_client->append_response_data(strHeader);
 	_client->append_response_data(body);
-	_client->set_status(DONE);
+	_client->set_res_status(DONE);
 }
