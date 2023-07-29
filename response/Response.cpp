@@ -133,7 +133,7 @@ void Response::processing()
 		if (checkRequestIsFormed() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
-	else if (!_have_cgi && _client->get_status() == ON_PROCESS) // change if to else if
+	else if (!_have_cgi && _client->get_status() == ON_PROCESS)
 	{
 		if (_header_buffer.length() > 0)
 		{
@@ -190,6 +190,12 @@ void Response::processing()
 			_buffer[0] = '\0';
 			_client->set_status(DONE);
 		}
+	}
+	else if (_client->get_status() == DONE)
+	{
+		_have_cgi = false;
+		delete _location;
+		_location = NULL;
 	}
 }
 
