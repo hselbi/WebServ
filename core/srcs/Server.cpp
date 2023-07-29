@@ -79,7 +79,41 @@ void Server::drop_client(long client_socket)
 
 void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
 {
+
 	get_client(client_socket)->get_request().parseReq(request);
+
+
+}
+
+
+bool Server::isReqFinished()
+{
+	// !  check methods that dont have body 
+	// !  check if the request is "Transfer-Encoding: chunked", and other stuff
+	
+    if (get_client(client_socket)->get_request().getCodeRet() == 400)
+		return true;
+    if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
+    {
+        if (get_client(client_socket)->get_request().getHeaders()["Content-Length"] == "0")
+		{
+			// 204 (No Content) or 304 (Not Modified)
+            return true;
+		}
+        if (std::stoi(get_client(client_socket)->get_request().getHeaders()["Content-Length"]) == get_client(client_socket)->get_request().getBody().size())
+            return true;
+    }
+    if (!get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"].empty())
+    {
+        if (get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"] == "chunked")
+        {
+            if (get_client(client_socket)->get_request().getBody().size() == 0)
+                return false;
+            if (get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 1] == '\n' && get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 2] == '\r')
+                return true;
+        }
+    }
+    return false;
 }
 
 std::string generate_response()
@@ -125,7 +159,7 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 	send_response(client_socket);
 	if (get_client(client_socket) == NULL)
 		return;
-	if (get_client(client_socket)->get_status() == DONE)
+	if (get_client(client_socket)->get_res_status() == DONE)
 	{
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
 		{
@@ -140,7 +174,10 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 
 			get_client(client_socket)->reset_request_data();
 			get_client(client_socket)->reset_response_data();
-			get_client(client_socket)->set_status(NOT_STARTED);
+			get_client(client_socket)->set_res_status(NOT_STARTED);
+
+			get_client(client_socket)->get_request().resetReq();
+			// TODO: reset response
 		}
 	}
 }
