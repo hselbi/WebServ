@@ -39,6 +39,7 @@ class Response {
 		void					errorPages(int statusCode);
 		void 					checkWhichRequestedMethod();
 		void					Method_GET();
+		void					Method_POST();
 		void					Method_DELETE();
 		void					setRediration(std::string location);
 		bool					checkRequestIsFormed();
