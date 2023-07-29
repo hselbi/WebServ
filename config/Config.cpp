@@ -336,6 +336,8 @@ ConfLoca Config::parse_location(size_t *i)
 	{
 		// std::cout << "==> " << cur << std::endl;
 
+		// here is the problem 
+
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
             std::cout << "[ERROR] config parsing failed. 1" << std::endl;

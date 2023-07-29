@@ -3,6 +3,7 @@
 
 Response::Response() {
 	_location = NULL;
+	_have_cgi = false;
 }
  
 Response::~Response() {
@@ -127,13 +128,12 @@ void Response::readFileByPath(std::string filePath)
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	// _client->get_cgi().start_cgi();
 	if (_client->get_status() == NOT_STARTED)
 	{
 		if (checkRequestIsFormed() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
-	else if (_client->get_status() == ON_PROCESS) // change if to else if
+	else if (!_have_cgi && _client->get_status() == ON_PROCESS)
 	{
 		if (_header_buffer.length() > 0)
 		{
@@ -161,6 +161,42 @@ void Response::processing()
 			_client->set_status(DONE);
 		}
 	}
+	else if (_have_cgi && _client->get_status() == ON_PROCESS) 
+	{
+		ssize_t bytesRead;
+		if (_header_buffer.length() > 0)
+		{
+			if (_header_buffer.length() >= buffer_size)
+			{	std::string str(_header_buffer, buffer_size);
+				_header_buffer = _header_buffer.substr(buffer_size);
+				_client->append_response_data(str);
+				return;
+			}
+			else
+				buffer_size -= _header_buffer.length();
+		}
+		if ((bytesRead = read(_cgi_file, _buffer, buffer_size)) > 0)
+		{
+			// TODO: check if read = -1 
+			std::string str(_buffer, bytesRead);
+			str = (_header_buffer.length() > 0) ? _header_buffer + str : str;
+			_client->append_response_data(str);
+			_header_buffer = "";
+		}
+		else 
+		{
+			close(_cgi_file);
+			_have_cgi = false;
+			_buffer[0] = '\0';
+			_client->set_status(DONE);
+		}
+	}
+	else if (_client->get_status() == DONE)
+	{
+		_have_cgi = false;
+		delete _location;
+		_location = NULL;
+	}
 }
 
 void Response::checkWhichRequestedMethod()
@@ -168,6 +204,8 @@ void Response::checkWhichRequestedMethod()
 	std::string method = _client->get_request().getMethod();
 	if (method == "GET")
 		Method_GET();
+	else if (method == "DELETE")
+		Method_DELETE();
 }
 
 void Response::setRediration(std::string location)
@@ -180,8 +218,49 @@ void Response::setRediration(std::string location)
 	responseHeader.headers["Location"] = location;
 	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
-	_header_buffer = "";
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 
 	_client->set_status(ON_PROCESS);
+}
+
+
+void	Response::deleteFile()
+{
+	std::string filePath = getRoot() + _client->get_request().getPath();
+
+	if (remove(filePath.c_str()) != 0)
+		errorPages(500);
+	else
+	{
+		t_responseHeader responseHeader;
+		responseHeader.statusCode = 204;
+		responseHeader.statusMessage = Utils::getStatusMessage(204);
+		responseHeader.headers["Content-Length"] = "0";
+		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
+		_client->set_status(ON_PROCESS);
+	}
+}
+
+void	Response::deleteAllFolderFiles()
+{
+	std::string path = getRoot() + _client->get_request().getPath();
+	DIR *dir;
+	struct dirent *ent;
+	std::string filePath;
+
+	if ((dir = opendir(path.c_str())) != NULL)
+	{
+		while ((ent = readdir(dir)) != NULL)
+		{
+			filePath = path + ent->d_name;
+			std::cout << "filePath: " << filePath << std::endl;
+			if (remove(filePath.c_str()) != 0)
+				errorPages(500);
+		}
+		closedir(dir);
+	}
+	else
+		errorPages(403);
+	deleteFile();
 }
