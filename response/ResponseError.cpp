@@ -7,7 +7,7 @@ void	Response::errorPages(int statusCode)
 	t_responseHeader	responseHeader;
 	std::string			filePath = getErrorPagePath(statusCode);
 	
-	open_file:
+
 	_file.open(filePath.c_str(), std::ios::binary);
 	if (!_file.is_open())
 	{
@@ -24,7 +24,6 @@ void	Response::errorPages(int statusCode)
 	responseHeader.statusMessage = Utils::getStatusMessage(statusCode);
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-	_header_buffer = "";
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->set_status(ON_PROCESS);
 }

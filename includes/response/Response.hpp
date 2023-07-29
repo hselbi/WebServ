@@ -48,5 +48,6 @@ class Response {
 		bool 					getAutoIndex();
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
+		void					processingCgi();
 		
 };
