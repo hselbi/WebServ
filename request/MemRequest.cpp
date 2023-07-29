@@ -148,10 +148,6 @@ int Request::parseReq(const std::string &str)
     setQuery();
     // file.close();
 
-    if (isFinished())
-        m_req_status = REQUEST_COMPLETED;
-    else
-        m_req_status = REQUEST_NOT_COMPLETED;
     return m_code_ret;
 }
 

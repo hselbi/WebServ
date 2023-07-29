@@ -86,7 +86,7 @@ void Server::feed_request(std::string request, long client_socket) // feed reque
 }
 
 
-bool Server::isReqFinished()
+bool Server::isReqFinished(int client_socket)
 {
 	// !  check methods that dont have body 
 	// !  check if the request is "Transfer-Encoding: chunked", and other stuff
