@@ -26,7 +26,9 @@ void Response::Method_GET()
                     {
                         std::cout << "Have CGI" << std::endl;
                         _have_cgi = true;
+                        std::cout << "Start CGI" << std::endl;
                         _cgi_file = _client->get_cgi().start_cgi(index);
+                        std::cout << _cgi_file << std::endl;
                         if (_cgi_file == -1)
                         {
                             std::cout << "CGI ERROR" << std::endl;
@@ -59,6 +61,8 @@ void Response::Method_GET()
                 std::cout << "Have CGI" << std::endl;
                 _have_cgi = true;
                 _cgi_file = _client->get_cgi().start_cgi(filePath);
+                std::cout << _cgi_file << std::endl;
+
                 if (_cgi_file == -1)
                 {
                     std::cout << "CGI ERROR" << std::endl;

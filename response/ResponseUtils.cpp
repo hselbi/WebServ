@@ -41,18 +41,14 @@ void Response::checkWhichRequestedMethod()
 void Response::setRediration(std::string location)
 {
 	t_responseHeader responseHeader;
-    std::cout << "REDIRECT TO: " << location << std::endl;
 	responseHeader.statusCode = 301;
 	responseHeader.statusMessage = Utils::getStatusMessage(301);
-	responseHeader.headers["Content-Length"] = "0";
 	responseHeader.headers["Location"] = location;
 	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	std::string str(_header_buffer, _header_buffer.length());
-	_client->append_response_data(str);
+	_client->append_response_data(_header_buffer);
 	_client->set_status(DONE);
-    std::cout << "REDIRECTION END" << std::endl;
 }
 
 void	Response::deleteAllFolderFiles()
