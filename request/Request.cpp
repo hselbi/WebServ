@@ -113,6 +113,7 @@ void Request::defaultReq()
 	m_headers["Content-Length"] = "";
 	m_headers["Authorization"] = "";
 	m_headers["Transfer-Encoding"] = "";
+	m_headers["Content-Disposition"] = "";
 
 }
 

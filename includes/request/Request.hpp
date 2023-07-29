@@ -75,6 +75,14 @@ public:
     void getRequest(const std::string &str) const ;
 
     void check_headers(std::string key, std::string value);
+
+
+    /*  check if request is finished or not */
+    bool isWhitespace(const std::string &str);
+    bool isFinished(const std::string &str);
+    bool isFinished();
+    bool isFinished(std::string &str, size_t &i);
+    
 };
 
 std::string plunder(std::string &str, char c);
