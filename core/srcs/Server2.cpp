@@ -124,7 +124,7 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 	send_response(client_socket);
 	if (get_client(client_socket) == NULL)
 		return;
-	if (get_client(client_socket)->get_status() == DONE)
+	if (get_client(client_socket)->get_res_status() == DONE)
 	{
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
 		{
@@ -139,7 +139,7 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 
 			get_client(client_socket)->reset_request_data();
 			get_client(client_socket)->reset_response_data();
-			get_client(client_socket)->set_status(NOT_STARTED);
+			get_client(client_socket)->set_res_status(NOT_STARTED);
 		}
 	}
 }

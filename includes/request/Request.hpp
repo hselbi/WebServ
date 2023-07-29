@@ -1,6 +1,11 @@
 #pragma once
 
 #include "../includes.hpp"
+// enum 
+enum requestFlag {
+    REQUEST_NOT_COMPLETED,
+    REQUEST_COMPLETED,
+};
 
 class Request
 {
@@ -17,6 +22,7 @@ private:
         std::map<std::string, std::string> m_env_cgi;
         std::list<std::pair<std::string, float> > m_language;
         static	std::vector<std::string>	methods;
+	    int _req_status;
         int m_code_ret;
         int m_port;
 public:
@@ -33,6 +39,9 @@ public:
     void setLanguage();
     void setQuery();
     int setPort();
+
+    int get_req_status();
+	void set_req_status(int status);
 
     static std::vector<std::string>    initMethods();
 
@@ -75,6 +84,14 @@ public:
     void getRequest(const std::string &str) const ;
 
     void check_headers(std::string key, std::string value);
+
+
+    /*  check if request is finished or not */
+    bool isWhitespace(const std::string &str);
+    bool isFinished(const std::string &str);
+    bool isFinished();
+    bool isFinished(std::string &str, size_t &i);
+    
 };
 
 std::string plunder(std::string &str, char c);
