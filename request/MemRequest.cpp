@@ -32,6 +32,91 @@ void    Request::check_headers(std::string key, std::string value)
     }
 }
 
+
+// check if request finished or not
+bool Request::isWhitespace(const std::string &str)
+{
+    for (std::size_t i = 0; i < str.length(); i++)
+    {
+        if (!std::isspace(str[i]))
+            return false;
+    }
+    return true;
+}
+
+bool Request::isFinished(std::string &str, size_t &i)
+{
+    if (m_code_ret == 400)
+        return true;
+    if (!m_headers["Content-Length"].empty())
+    {
+        if (m_headers["Content-Length"] == "0")
+            return true;
+        if (std::stoi(m_headers["Content-Length"]) == m_body.size())
+            return true;
+    }
+    if (!m_headers["Transfer-Encoding"].empty())
+    {
+        if (m_headers["Transfer-Encoding"] == "chunked")
+        {
+            if (str.size() == 0)
+                return false;
+            if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
+                return true;
+        }
+    }
+    return false;
+}
+
+bool Request::isFinished()
+{
+    if (m_code_ret == 400)
+        return true;
+    if (!m_headers["Content-Length"].empty())
+    {
+        if (m_headers["Content-Length"] == "0")
+            return true;
+        if (std::stoi(m_headers["Content-Length"]) == m_body.size())
+            return true;
+    }
+    if (!m_headers["Transfer-Encoding"].empty())
+    {
+        if (m_headers["Transfer-Encoding"] == "chunked")
+        {
+            if (m_body.size() == 0)
+                return false;
+            if (m_body[m_body.size() - 1] == '\n' && m_body[m_body.size() - 2] == '\r')
+                return true;
+        }
+    }
+    return false;
+}
+
+bool Request::isFinished(const std::string &str)
+{
+    if (m_code_ret == 400)
+        return true;
+    if (!m_headers["Content-Length"].empty())
+    {
+        if (m_headers["Content-Length"] == "0")
+            return true;
+        if (std::stoi(m_headers["Content-Length"]) == m_body.size())
+            return true;
+    }
+    if (!m_headers["Transfer-Encoding"].empty())
+    {
+        if (m_headers["Transfer-Encoding"] == "chunked")
+        {
+            if (str.size() == 0)
+                return false;
+            if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
+                return true;
+        }
+    }
+    return false;
+}
+
+
 int Request::parseReq(const std::string &str)
 {
     std::string key;
@@ -39,15 +124,6 @@ int Request::parseReq(const std::string &str)
     std::string line;
     size_t i(0);
     defaultReq();
-    // std::ifstream file;
-    // file.open(str, std::ios::in);
-    
-    // if (!file)
-    // {
-    //     std::cerr << "Error: no file" << std::endl;
-    //     exit(1);
-    // }
-    // std::string str(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
     reqLine(lineNext(str, i));
     /*
     *   check if line is not equal to "\r\n" or "" or 400
