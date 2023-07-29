@@ -52,7 +52,7 @@ void Response::autoIndex()
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
 	_client->append_response_data(strHeader);
 	_client->append_response_data(body);
-	_client->set_status(DONE);
+	_client->set_res_status(DONE);
 }
 
 bool Response::checkRequestIsFormed()
@@ -64,7 +64,7 @@ bool Response::checkRequestIsFormed()
 		errorPages(501);
 		return false;
 	}
-	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty()
+	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty()∏
 		&& _client->get_request().getMethod() == "POST")
 	{
 		errorPages(400);
@@ -101,7 +101,7 @@ void Response::readFile()
 	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	_client->set_status(ON_PROCESS);
+	_client->set_res_status(ON_PROCESS);
 }
 
 void Response::readFileByPath(std::string filePath)
@@ -122,18 +122,18 @@ void Response::readFileByPath(std::string filePath)
 
 	_header_buffer = "";
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	_client->set_status(ON_PROCESS);
+	_client->set_res_status(ON_PROCESS);
 }
 
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	if (_client->get_status() == NOT_STARTED)
+	if (_client->get_res_status() == NOT_STARTED)
 	{
 		if (checkRequestIsFormed() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
-	else if (!_have_cgi && _client->get_status() == ON_PROCESS)
+	else if (!_have_cgi && _client->get_res_status() == ON_PROCESS)
 	{
 		if (_header_buffer.length() > 0)
 		{
@@ -158,10 +158,10 @@ void Response::processing()
 		{
 			_file.close();
 			_buffer[0] = '\0';
-			_client->set_status(DONE);
+			_client->set_res_status(DONE);
 		}
 	}
-	else if (_have_cgi && _client->get_status() == ON_PROCESS) 
+	else if (_have_cgi && _client->get_res_status() == ON_PROCESS) 
 	{
 		ssize_t bytesRead;
 		if (_header_buffer.length() > 0)
@@ -188,10 +188,10 @@ void Response::processing()
 			close(_cgi_file);
 			_have_cgi = false;
 			_buffer[0] = '\0';
-			_client->set_status(DONE);
+			_client->set_res_status(DONE);
 		}
 	}
-	else if (_client->get_status() == DONE)
+	else if (_client->get_res_status() == DONE)
 	{
 		_have_cgi = false;
 		delete _location;
@@ -220,7 +220,7 @@ void Response::setRediration(std::string location)
 
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 
-	_client->set_status(ON_PROCESS);
+	_client->set_res_status(ON_PROCESS);
 }
 
 
@@ -238,7 +238,7 @@ void	Response::deleteFile()
 		responseHeader.headers["Content-Length"] = "0";
 		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-		_client->set_status(ON_PROCESS);
+		_client->set_res_status(ON_PROCESS);
 	}
 }
 
