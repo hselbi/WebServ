@@ -31,12 +31,13 @@ class ConfLoca
         // error_pages;
         
 
-        ConfLoca();
-        ~ConfLoca();
-        ConfLoca(const ConfLoca &copy);
-        ConfLoca &operator=(const ConfLoca &copy);
-        static MethodType strtoMethod(std::string str);
-        void print_loca_info();
+    ConfLoca();
+    ~ConfLoca();
+	std::string getRoot();
+	std::string getPath();
+    ConfLoca(const ConfLoca &copy);
+    static MethodType strtoMethod(std::string str);
+    void print_loca_info();
 
 };
 
