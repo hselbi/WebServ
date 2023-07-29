@@ -23,7 +23,7 @@ void Response::processing()
 	int buffer_size = RES_BUFFER_SIZE;
 	if (_client->get_status() == NOT_STARTED)
 	{
-		if (checkRequestIsFormed() && getMatchedLocation())
+		if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
 	else if (!_have_cgi && _client->get_status() == ON_PROCESS)
@@ -58,9 +58,9 @@ void Response::processing()
 		processingCgi();
 	else if (_client->get_status() == DONE)
 	{
-		// _have_cgi = false;
-		// delete _location;
-		// _location = NULL;
+		_have_cgi = false;
+		delete _location;
+		_location = NULL;
 	}
 }
 

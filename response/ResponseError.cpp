@@ -47,41 +47,50 @@ bool	Response::getMatchedLocation()
 	if (index != -1)
 	{
 		_location = new ConfLoca(locations[index]);
-		if (isLocationHaveRedirection())
-			return true;
-		else
+
+		if (isMethodAllowedInLocation())
 		{
-			if (isMethodAllowedInLocation())
-			{
-				std::cout << "Allowed method in location" << std::endl;
-				return true;
-			}
-			else
-				return false;
+			std::cout << "Allowed method in location" << std::endl;
+			return true;
 		}
+		else
+			return false;
+		
 	}
 	std::cout << "No matched location" << std::endl;
 	errorPages(404);
 	return false;
 }
 
-bool Response::isLocationHaveRedirection()
+bool Response::isServerHaveRedirection()
 {
-	t_responseHeader responseHeader;
+	t_responseHeader	responseHeader;
+	int 				redirectStatus = _client->get_server_block().getRedirectStatus();
+	if (redirectStatus == 301 || redirectStatus == 302 || redirectStatus == 307)
+	{
+		responseHeader.statusCode = redirectStatus;
+		responseHeader.statusMessage = Utils::getStatusMessage(redirectStatus);
+		responseHeader.headers["Location"] = _client->get_server_block().getRedirectUrl();
+		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
-		
-	// TODO: check if redirection is working
+		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
+		_client->append_response_data(_header_buffer);
+		_client->set_status(DONE);
+		return true;
+	}
+	else if (redirectStatus != -1)
+	{
+		responseHeader.statusCode = redirectStatus;
+		responseHeader.statusMessage = Utils::getStatusMessage(redirectStatus);
+		responseHeader.headers["Content-Type"] = "application/octet-stream";
+		responseHeader.headers["Content-Length"] = "0";
+		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
-	// if (_location->redirection != "")
-	// {
-	// 	responseHeader.statusCode = 301;
-	// 	responseHeader.statusMessage = Utils::getStatusMessage(301);
-	// 	responseHeader.headers["Location"] = _location->redirection;
-	// 	_header_buffer = "";
-	// 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	// 	_client->set_status(DONE);
-	// 	return true;
-	// }
+		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
+		_client->append_response_data(_header_buffer);
+		_client->set_status(DONE);
+		return true;
+	}
 		
 	return false;
 }
