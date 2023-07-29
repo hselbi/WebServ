@@ -9,7 +9,8 @@ private:
     std::string _type;
     // bool _chunked;
     // bool _length;
-    // bool _type;
+    std::string _type;
+    int _code;
 public:
     Post(Request &req);
     std::map<std::string, std::string> splitter(std::string body);

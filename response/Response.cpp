@@ -21,12 +21,12 @@ void Response::setClient(Client &client)
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	if (_client->get_status() == NOT_STARTED)
+	if (_client->get_res_status() == NOT_STARTED)
 	{
 		if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
-	else if (!_have_cgi && _client->get_status() == ON_PROCESS)
+	else if (!_have_cgi && _client->get_res_status() == ON_PROCESS)
 	{
 		if (_header_buffer.length() > 0)
 		{
@@ -51,7 +51,7 @@ void Response::processing()
 		{
 			_file.close();
 			_buffer[0] = '\0';
-			_client->set_status(DONE);
+			_client->set_res_status(DONE);
 		}
 	}
 	else if (_have_cgi && _client->get_status() == ON_PROCESS) 
