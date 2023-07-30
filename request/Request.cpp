@@ -116,6 +116,7 @@ void Request::defaultReq()
 	m_headers["Authorization"] = "";
 	m_headers["Transfer-Encoding"] = "";
 	m_headers["Content-Disposition"] = "";
+	m_headers["Cookie"] = "";
 
 }
 
