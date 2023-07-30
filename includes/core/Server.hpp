@@ -33,7 +33,7 @@
 #define DEFAULT_CONFIG_FILE "../assets/server.conf"
 #define SERVER_BLOCK_COUNT 1
 // 4096 kb = 4 mb = 4096 * 1024 bytes = 4194304 bytes
-#define BUFFER_SIZE 4194304 // 4 mb
+#define BUFFER_SIZE 64000 //
 
 struct Client;
 
@@ -79,6 +79,9 @@ struct Server
 	void match_client_request_to_server_block(long client_socket);
 
 	std::vector<long> &get_server_sockets();
+
+
+	void normal_response(int client_socket);
 
 private:
 	Config _config;

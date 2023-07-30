@@ -6,7 +6,7 @@ void	Response::errorPages(int statusCode)
 {
 	t_responseHeader	responseHeader;
 	std::string			filePath = getErrorPagePath(statusCode);
-	
+
 
 	_file.open(filePath.c_str(), std::ios::binary);
 	if (!_file.is_open())
@@ -36,7 +36,7 @@ bool	Response::getMatchedLocation()
 	size_t max_length = 0;
 	int		index = -1;
 	for (int i = 0; i < locations.size(); i++)
-	{	
+	{
 		if (requestPath.find(locations[i].path) == 0 && locations[i].path.length() > 0)
 		{
 			max_length = locations[i].path.length();
@@ -50,12 +50,12 @@ bool	Response::getMatchedLocation()
 
 		if (isMethodAllowedInLocation())
 		{
-			std::cout << "Allowed method in location" << std::endl;
+			// std::cout << "Allowed method in location" << std::endl;
 			return true;
 		}
 		else
 			return false;
-		
+
 	}
 	std::cout << "No matched location" << std::endl;
 	errorPages(404);
@@ -91,7 +91,7 @@ bool Response::isServerHaveRedirection()
 		_client->set_res_status(DONE);
 		return true;
 	}
-		
+
 	return false;
 }
 
