@@ -149,9 +149,9 @@ int Request::parseReq(const std::string &str)
     // file.close();
 
     if (isFinished())
-        m_req_status = REQUEST_COMPLETED;
+        _req_status = REQUEST_COMPLETED;
     else
-        m_req_status = REQUEST_NOT_COMPLETED;
+        _req_status = REQUEST_NOT_COMPLETED;
     return m_code_ret;
 }
 
