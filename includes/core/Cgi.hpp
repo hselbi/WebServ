@@ -14,6 +14,9 @@
 #include "../../includes/config/ConfLoca.hpp"
 #include "../../includes/request/Request.hpp"
 
+
+struct Client;
+
 // wrapper for cgi execution and environment variables
 struct Cgi
 {
@@ -21,10 +24,10 @@ struct Cgi
 	Cgi();
 	~Cgi();
 
-	void start_cgi(ConfServer &configServer, ConfLoca configLocation, Request &request);
-	void exec_cgi();
+	int start_cgi(std::string script_path);
+	int exec_cgi();
 
-	void init_env_vars(ConfServer &configServer, ConfLoca configLocation, Request &request);
+	void init_env_vars();
 	void clean_env_vars();
 
 	void set_body(std::string payload);
@@ -35,10 +38,13 @@ struct Cgi
 
 	std::string get_cgi_script_name(std::string path);
 
+	void				setClient(Client &client);
+
 private:
 	env_vars_t _env_vars;
 	char **_envp;
 	char **_argv;
+	Client				*_client;
 	std::string _extension;
 	std::string _body;
 	std::string _output;

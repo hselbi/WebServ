@@ -9,14 +9,7 @@ Server::~Server()
 
 void Server::load_config_file(const char *config_file)
 {
-	// std::cout << "===>" << config_file << std::endl;
 	_server_blocks = _config.parser(config_file);
-	// std::cout << "server blocks size: " << _server_blocks.size() << std::endl;
-	// if (_server_blocks.size() == 1)
-    // {
-    //     std::cout << RED <<"[ERROR] config parsing failed." << RESET << std::endl;
-	// 	exit(1);
-    // }
 }
 
 void Server::cleanup_by_closing_all_sockets()
@@ -39,8 +32,6 @@ std::vector<long> &Server::get_server_sockets() { return _server_sockets; }
 
 void Server::throw_error(std::string error_message)
 {
-	// throw std::runtime_error(error_message + " in server : " + std::to_string(get_server_id()) + ", on port : " + get_port() + ", on host : " + get_host() + "\n");
-	// throw std::runtime_error(error_message + " in server : " + "\n");
 	throw std::runtime_error(error_message + "\n");
 }
 
@@ -67,6 +58,7 @@ Client *Server::create_client()
 {
 	Client *client = new Client();
 	client->get_response().setClient(*client);
+	client->get_cgi().setClient(*client);
 	return (client);
 }
 
@@ -117,11 +109,7 @@ void Server::send_response(long client_socket)
 	}
 	else
 	{
-		// std::cout << "send bytes send == response length " <<  "\n";
-		// std::cout << "bytes_sent: " << bytes_sent << std::endl;
-		// std::cout << "response length: " << get_client(client_socket)->get_response_data().length() << std::endl;
 		get_client(client_socket)->get_response_data().clear();
-		// get_client(client_socket)->reset_total_bytes_sent();
 	}
 }
 
@@ -131,8 +119,8 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 }
 
 void Server::handle_outgoing_response(long client_socket) // ! send response to client
-{	
-	
+{
+
 	build_response(get_client(client_socket)->get_request(), client_socket);
 	send_response(client_socket);
 	if (get_client(client_socket) == NULL)
@@ -246,7 +234,7 @@ void Server::handle_incoming_request(long client_socket)
 	// 	exit(0);
 	// }
 	// ++i;
-
+	
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
@@ -265,6 +253,7 @@ void Server::handle_incoming_request(long client_socket)
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
 		{
 			match_client_request_to_server_block(client_socket);
+
 			FD_CLR(client_socket, &_read_set_pool);
 			FD_SET(client_socket, &_write_set_pool);
 		}
@@ -306,11 +295,7 @@ void Server::listen_on_socket(long server_socket)
 
 void Server::bind_socket(long server_socket_id, std::string host, int port)
 {
-	std::vector<ConfServer>::iterator server_block = _server_blocks.begin(); 
-	std::cout << "server_block->getHost(): " << server_block->getHost() << std::endl;
-	std::cout << "server_block->getPort(): " << server_block->getPort() << std::endl;
-	std::cout << "host: " << host << std::endl;
-	std::cout << "port: " << port << std::endl;
+	std::vector<ConfServer>::iterator server_block = _server_blocks.begin();
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
 	_server_addr.sin_port = htons(port);
@@ -383,21 +368,17 @@ void Server::start_server()
 	for (;;)
 	{
 		long ready_count = monitor_clients(); // monitor socket descriptors for activity
-		// std::cout << "ready_count: " << ready_count << std::endl;
 		for (long socket = 0; (socket <= _biggest_socket) && ready_count > 0; ++socket)
 		{
 			if (FD_ISSET(socket, &_read_set))
 			{
 				if (FD_ISSET(socket, &_server_socket_pool)) // ready to read
-				// if (socket == _server_sockets[0])
 				{
-					// std::cout << "server socket: " << socket << std::endl;
 					// ! new connection
 					accept_new_connection(socket);
 				}
 				else
 				{
-					// std::cout << "CLIENT socket: " << socket << std::endl;
 					// ! incoming request
 					handle_incoming_request(socket);
 				}
@@ -437,9 +418,4 @@ void Server::restart_server(std::string message)
 	cleanup_by_closing_all_sockets();
 	setup_server();
 	start_server();
-}
-
-std::string generate_request(const std::string &host, const std::string &path)
-{
-	return std::string("GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
 }

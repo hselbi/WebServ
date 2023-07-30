@@ -10,7 +10,7 @@ int Config::openfile(const char* filename)
 	std::ifstream fs;
 
 	content.clear();
-	std::cout << filename <<std::endl;
+	// std::cout << filename <<std::endl;
 	fs.open(filename);
 	if (fs.is_open())
 	{
@@ -131,7 +131,9 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 
 		if (key == "location")
 		{
+			// std::cout << "==> " << cur << std::endl;
 			result.locations.push_back(parse_location(&cur));
+			// std::cout << "============><=========" << std::endl;
 		}
 		else
 		{
@@ -168,6 +170,7 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 
 int	checkHost(std::string host)
 {
+	// std::cout << "host: " << host << std::endl;
 	std::vector<std::string> tmp = split(host, '.');
 	if (tmp.size() != 4  && tmp.size() != 1)
 		return -1;
@@ -177,6 +180,7 @@ int	checkHost(std::string host)
 		{
 			if (tmp[i].length() > 3)
 				return -1;
+			
 			for (unsigned long j = 0; j != tmp[i].length(); j++)
 			{
 				if (tmp[i][j] < '0' || tmp[i][j] > '9')
@@ -211,22 +215,27 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 				return -1;
 			}
 			serv->host = value;
-			serv->port = "80";
-			std::cout << " <----> " << value << std::endl;
+			serv->port = "8080";
+			// std::cout << " <----> " << value << std::endl;
 		}
 		else
 		{
-			// std::cout << value << " <----> " << std::endl;
+			// std::cout << serv->host << std::endl;
 			std::vector<std::string> tmp = split(value, ':');
-			if (serv->host != "" && serv->host != tmp[0])
+
+			if (tmp[0] == "")
+			{
+				std::cout << RED << "FAILED CONFIG: Host required" << RESET << std::endl;
 				return -1;
-			
+			}
 			serv->host = tmp[0];
+			// std::cout << " <----> " << serv->host << std::endl;
 			if (checkHost(serv->host) == -1)
 			{
 				std::cout << RED << "FAILED CONFIG: Host(1st)" << RESET << std::endl;
 				return -1;
 			}
+			// std::cout << " <----> " << tmp[0] << std::endl;
 			//  port : 0 to 65535
 			if (isAllDigits(tmp[1]) || tmp[1] == "0")
 				serv->port = tmp[1];
@@ -312,6 +321,7 @@ ConfLoca Config::parse_location(size_t *i)
 	size_t pre = content.find_first_not_of(" \t\n", *i);
 	size_t cur = content.find_first_of(" \t\n", pre);
 	result.path = content.substr(pre, cur - pre);
+	// std::cout << "============> " << result.path <<" <=========" << std::endl;
 
 	pre = content.find_first_not_of(" \t\n", cur);
 	if (pre == std::string::npos || content[pre] != '{')
@@ -324,6 +334,9 @@ ConfLoca Config::parse_location(size_t *i)
 	cur = content.find_first_not_of(" \t\n", pre);
 	while (cur != std::string::npos)
 	{
+		// std::cout << "==> " << cur << std::endl;
+
+		// here is the problem 
 
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
@@ -337,6 +350,9 @@ ConfLoca Config::parse_location(size_t *i)
             exit(1);
         }
 		std::string key = content.substr(pre, cur - pre);
+		// std::cout << GREEN << key << RESET << std::endl;
+		// std::cout << GREEN << content.substr(pre, cur - pre) << RESET << std::endl;
+		// std::cout << "=====><============" << std::endl;
 		if (key == "}")
 		{
 			*i = cur;
@@ -344,6 +360,7 @@ ConfLoca Config::parse_location(size_t *i)
 		}
 		else
 		{
+
 			if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
             {
                 std::cout << "[ERROR] config parsing failed. 3" << std::endl;
@@ -380,12 +397,12 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
     }
 	else if (key == "autoindex")
 	{
-		std::cout << "autoindex: " << value << std::endl;
+		// std::cout << "autoindex: " << value << std::endl;
 		loca->autoindex = (value == "on" ? ON : OFF);
 	}
     else if (key == "index")
     {
-		
+
 
 
         /*
@@ -418,13 +435,10 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 	}
     else if (key == "allow_methods")
     {
-		printf("hellow");
+		// printf("hellow");
         std::vector<std::string> tmp = split(value, ' ');
         for (unsigned long i = 0; i < tmp.size(); i++)
-        {
             loca->allow_methods.push_back(ConfLoca::strtoMethod(tmp[i]));
-        }
-		// printf("bye");
     }
     else if (key == "client_body_limit")
 	{
@@ -437,7 +451,7 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 		std::vector<std::string> tmp = split(value, ' ');
 		if (tmp.size() != 2)
 			return -1;
-		
+
 		loca->cgi_infos[tmp[0]] = tmp[1];
 	}
 	else
@@ -449,6 +463,7 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 
 int Config::check_line_syntax(std::string line)
 {
+	// std::cout << "line: " << line << std::endl;
     // remove the comments
     size_t sharp;
 	sharp = line.find_first_of("#");
@@ -458,6 +473,7 @@ int Config::check_line_syntax(std::string line)
 		if (line.find_first_not_of(" \t\n") != std::string::npos)
 			return -2;
 	}
+	
 
     // line must be end with semicolon
 	size_t semicol;

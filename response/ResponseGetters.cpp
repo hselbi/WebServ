@@ -12,10 +12,7 @@ bool Response::getAutoIndex()
 {
     //TODO: check if can location have also autoindex
     if (_location && _location->autoindex != DEFAULT)
-    {
-        std::cout << "AUTOINDEX: " << _location->autoindex << std::endl;
         return (_location->autoindex == ON) ? true : false;
-    }
     
     return _client->get_server_block().getAutoindex();
 }
