@@ -1,7 +1,7 @@
 #include "../includes/request/Request.hpp"
 #include "../includes/includes.hpp"
 
-// done some if request its already is done 
+// done some if request its already is done
 
 
 
@@ -44,7 +44,7 @@ void Request::resetReq(){
 Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
 	// std::cout << "Request constructor" << std::endl;
-	defaultReq();
+	resetReq();
 	m_env_cgi.clear();
 
 	std::string line;
@@ -180,13 +180,14 @@ std::string	Request::getHost() const {
 
 void	Request::setBody(const std::string& str)
 {
+	// std::cout << str << "bodyy ==> "<< this->m_body << std::endl;
 	if (str.size() == 0)
 		return ;
 	char	strip[] = {'\n', '\r'};
 
 	this->m_body.assign(str);
 	for (int i = 0; i < 4; i++)
-		if (this->m_body.size() > 0 && this->m_body[this->m_body.size() - 1] == strip[i % 2])
+		if (this->m_body.size() > 0)
 		{
 			if (m_body.size())
 				m_body.resize(m_body.size() - 1);
@@ -292,4 +293,4 @@ void Request::set_req_status(int status) { _req_status = status; }
 int Request::get_req_status() { return _req_status; }
 
 
-// ! need to 
+// ! need to
