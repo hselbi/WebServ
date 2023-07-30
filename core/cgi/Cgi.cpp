@@ -21,7 +21,7 @@ void Cgi::setClient(Client &client)
 int Cgi::start_cgi(std::string script_path)
 {
 	// std::cout << "start_cgi" << std::endl;
-	set_cgi_bin("/usr/bin/php");
+	set_cgi_bin("/usr/bin/php-cgi");
 	set_cgi_script(script_path);
 	init_env_vars();
 	// std::map<std::string, std::string>::iterator it = _env_vars.begin();
@@ -40,34 +40,32 @@ int Cgi::exec_cgi() // !! upload handiinng
 	_cgi_output_file = tmpfile();
 	if (!_cgi_output_file)
 	{
-		std::cerr << "tmpfile failed" << std::endl; return -1;
+		std::cerr << "tmpfile failed" << std::endl;
+		return -1;
 	}
 
-	if(pipe(write_to_cgi) == -1)
+	if (pipe(write_to_cgi) == -1)
 	{
-		std::cerr << "pipe failed" << std::endl; return -1;
+		std::cerr << "pipe failed" << std::endl;
+		return -1;
 	}
 
-// !!!!
+	// !!!!
 
 	set_body(_client->get_request().getBody());
+	std::cout << "-----------------------\n";
 	std::cout << _client->get_request().getBody() << std::endl;
 	std::cout << "-----------------------\n";
-	std::cout << _client->get_request().getBody().length() << std::endl;
-
-	write(write_to_cgi[1], _body.c_str(), _body.length()); // write to pipe
-	sleep(2);
+	// std::cout << _client->get_request().getBody().length() << std::endl;
 	_start_time = time(NULL);
 
-
-// !!!
-
+	// !!!
 
 	if ((_pid = fork()) == -1)
 	{
-		std::cerr << "fork failed" << std::endl; return -1;
+		std::cerr << "fork failed" << std::endl;
+		return -1;
 	}
-
 
 	if (_pid == 0)
 	{
@@ -77,21 +75,17 @@ int Cgi::exec_cgi() // !! upload handiinng
 		dup2(fileno(_cgi_output_file), 1);
 
 		close(write_to_cgi[0]);
-		char *newargv[] = {(char*)"/usr/bin/php", (char*)_cgi_script.c_str(), NULL};
-		execve("/usr/bin/php", newargv, _envp);
-		std::cout << "execve failed" << std::endl;
+		char *newargv[] = {(char *)"/usr/bin/php-cgi", (char *)_cgi_script.c_str(), NULL};
+		execve("/usr/bin/php-cgi", newargv, _envp);
 		exit(EXIT_FAILURE);
 	}
 	else
 	{
 		close(write_to_cgi[0]);
+		write(write_to_cgi[1], _body.c_str(), _body.length()); // write to pipe
 		close(write_to_cgi[1]);
 
-		// !! check if child process terminated∆
-		// sleep(3);
-        _ready_to_read_from_cgi = waitpid(_pid, 0, WNOHANG);
-		// std::cout << "_ready_to_read_from_cgi " << _ready_to_read_from_cgi << std::endl;
-		// !!! if result == 0, child process still running, if result == -1, error, else child process terminated
+		_ready_to_read_from_cgi = waitpid(_pid, 0, WNOHANG); // if result == 0, child process still running, if result == -1, error, else child process terminated
 
 		lseek(fileno(_cgi_output_file), 0, SEEK_SET);
 	}
@@ -142,7 +136,6 @@ void Cgi::reset()
 	_cgi_status = 0;
 	_start_time = 0;
 	_pid = 0;
-
 }
 
 int Cgi::get_ready_to_read_from_cgi()
@@ -223,12 +216,10 @@ void Cgi::clean_env_vars()
 	_env_vars.clear();
 }
 
-
 int Cgi::get_start_time()
 {
 	return _start_time;
 }
-
 
 /*
 
