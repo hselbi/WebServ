@@ -5,7 +5,7 @@ void Response::Method_GET()
 {
     std::string filePath = getRoot() + _client->get_request().getPath();
     std::string index = "";
-    std::cout << "FILE PATH: " << filePath << std::endl;
+
     if (Utils::fileExists(filePath))
     {
         std::cout << "File found"  << filePath << std::endl;
@@ -15,8 +15,7 @@ void Response::Method_GET()
             if (filePath[filePath.length() - 1] != '/')
             {
                 std::cout << "REDIRECT TO: " << _client->get_request().getPath() + "/" << std::endl;
-                setRediration(_client->get_request().getPath() + "/");
-                return;
+                return setRediration(_client->get_request().getPath() + "/");
             }
             else
             {
@@ -25,9 +24,7 @@ void Response::Method_GET()
                     // TODO: Add python also to this condition  (if file extension is .py)
                     if (_location && _location->cgi_infos.size() > 0 && (index.find(".php") != std::string::npos || index.find(".py") != std::string::npos))
                     {
-                        std::cout << "Have CGI" << std::endl;
                         _have_cgi = true;
-                        // TODO: Start cgi by index file path
                         _cgi_file = _client->get_cgi().start_cgi(index);
                         if (_cgi_file == -1)
                         {
@@ -61,6 +58,8 @@ void Response::Method_GET()
                 std::cout << "Have CGI" << std::endl;
                 _have_cgi = true;
                 _cgi_file = _client->get_cgi().start_cgi(filePath);
+                std::cout << _cgi_file << std::endl;
+
                 if (_cgi_file == -1)
                 {
                     std::cout << "CGI ERROR" << std::endl;
@@ -75,7 +74,7 @@ void Response::Method_GET()
     }
     else
     {
-        std::cout << "File not found"  << filePath << std::endl;
+        std::cout << "File not found: "  << filePath << std::endl;
         errorPages(404);
         return;
     }
@@ -217,7 +216,6 @@ void Response::Method_DELETE()
     std::string index = "";
     if (Utils::fileExists(filePath))
     {
-            
         if (Utils::isDirectory(filePath))
         {
             if (filePath[filePath.length() - 1] != '/')
@@ -232,50 +230,79 @@ void Response::Method_DELETE()
         errorPages(404);
 }
 
-void Response::readCgiFile()
-{
-    t_responseHeader responseHeader;
-    off_t fileSize;
-    ssize_t bytesRead;
-    int endHeaderPos = 0;
-    char buffer[10000];
 
-    fileSize = lseek(_cgi_file, 0, SEEK_END);
+// void Response::Method_POST()
+// {
+//     std::string filePath = getRoot() + _client->get_request().getPath();
+//     std::string index = "";
 
-    if (fileSize == (off_t)-1)
-    {
-        std::cerr << "Failed to seek to the end of file!" << std::endl;
-        close(_cgi_file);
-        _client->set_res_status(DONE);
-        errorPages(400);
-    }
+//     if (Utils::fileExists(filePath))
+//     {
+//         std::cout << "File found"  << filePath << std::endl;
 
-    if (lseek(_cgi_file, 0, SEEK_SET) == (off_t)-1)
-    {
-        std::cerr << "Failed to seek to the beginning of file!" << std::endl;
-        close(_cgi_file);
-        _client->set_res_status(DONE);
-        errorPages(400);
-    }
+//         if (Utils::isDirectory(filePath))
+//         {
+//             if (filePath[filePath.length() - 1] != '/')
+//             {
+//                 std::cout << "REDIRECT TO: " << _client->get_request().getPath() + "/" << std::endl;
+//                 return setRediration(_client->get_request().getPath() + "/");
+//             }
+//             else
+//             {
+//                 if ((index = isDirHasIndexFiles()) != "")
+//                 {
+//                     // TODO: Add python also to this condition  (if file extension is .py)
+//                     if (_location && _location->cgi_infos.size() > 0 && (index.find(".php") != std::string::npos || index.find(".py") != std::string::npos))
+//                     {
+//                         std::cout << "Have CGI" << std::endl;
+//                         _have_cgi = true;
+//                         std::cout << "Start CGI" << std::endl;
+//                         _cgi_file = _client->get_cgi().start_cgi(index);
+//                         std::cout << _cgi_file << std::endl;
+//                         if (_cgi_file == -1)
+//                         {
+//                             std::cout << "CGI ERROR" << std::endl;
+//                             errorPages(500);
+//                             return;
+//                         }
+//                         readCgiFile();
+//                     }
+//                     else
+//                     {
+//                         std::cout << "Have index file "  << filePath<< std::endl;
+//                         readFileByPath(index);
+//                     }
+//                 }
+//                 else 
+//                     return errorPages(403);
+//             }
+//         }
+//         else
+//         {
+//             // TODO: Add python also to this condition  (if file extension is .py)
+//             if (_location && _location->cgi_infos.size() > 0 && (filePath.find(".php") != std::string::npos || filePath.find(".py") != std::string::npos))
+//             {
+//                 std::cout << "Have CGI" << std::endl;
+//                 _have_cgi = true;
+//                 _cgi_file = _client->get_cgi().start_cgi(filePath);
+//                 std::cout << _cgi_file << std::endl;
 
-    while ((bytesRead = read(_cgi_file, buffer, sizeof(buffer) - 1)) > 0)
-    {
-        buffer[bytesRead] = '\0';
-        char *found = strstr(buffer, "\r\n\r\n");
-        if (found)
-        {
-            endHeaderPos = found - buffer;
-            break;
-        }
-    }
-    
-    lseek(_cgi_file, endHeaderPos, SEEK_SET);
-    responseHeader.statusCode = 200;
-    responseHeader.statusMessage = Utils::getStatusMessage(200);
-    responseHeader.headers["Content-Type"] = "text/html";
-    responseHeader.headers["Content-Length"] = Utils::toString(fileSize - endHeaderPos);
-    responseHeader.headers["Server"] = _client->get_server_block().getServerName();
-    _header_buffer = Utils::ResponseHeaderToString(responseHeader);
-    _client->set_res_status(ON_PROCESS);
-}
-
+//                 if (_cgi_file == -1)
+//                 {
+//                     std::cout << "CGI ERROR" << std::endl;
+//                     errorPages(500);
+//                     return;
+//                 }
+//                 readCgiFile();
+//             }
+//             else
+//                 readFileByPath(filePath);
+//         }
+//     }
+//     else
+//     {
+//         std::cout << "File not found: "  << filePath << std::endl;
+//         errorPages(404);
+//         return;
+//     }
+// }

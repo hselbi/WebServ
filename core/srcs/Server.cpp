@@ -79,14 +79,16 @@ void Server::drop_client(long client_socket)
 
 void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
 {
+	// std::cout << request << std::endl;
 
 	get_client(client_socket)->get_request().parseReq(request);
+	std::cout << get_client(client_socket)->get_request() << std::endl;
 
 
 }
 
 
-bool Server::isReqFinished()
+bool Server::isReqFinished(int client_socket)
 {
 	// !  check methods that dont have body 
 	// !  check if the request is "Transfer-Encoding: chunked", and other stuff

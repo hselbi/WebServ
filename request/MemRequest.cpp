@@ -116,9 +116,89 @@ bool Request::isFinished()
 //     return false;
 // }
 
+int								checkEnd(const std::string& str, const std::string& end)
+{
+	size_t	i = str.size();
+	size_t	j = end.size();
+
+	while (j > 0)
+	{
+		i--;
+		j--;
+		if (i < 0 || str[i] != end[j])
+			return (1);
+	}
+	return (0);
+}
+
+bool checkReq(const std::string &str)
+{
+    size_t	i = str.find("\r\n\r\n");
+	if (i != std::string::npos)
+	{
+		if (str.find("Content-Length: ") == std::string::npos)
+		{
+			if (str.find("Transfer-Encoding: chunked") != std::string::npos)
+			{
+				if (checkEnd(str, "0\r\n\r\n") == 0)
+					return (0);
+				else
+					return (1);
+			}
+			else
+				return (0);
+		}
+
+		size_t	len = std::atoi(str.substr(str.find("Content-Length: ") + 16, 10).c_str());
+		if (str.size() >= len + i + 4)
+			return (0);
+		else
+			return (1);
+	}
+
+	return (1);
+}
+
+
+void Request::chunkedProcess(const std::string &str)
+{
+
+    std::cout << str << std::endl;
+	std::string	head = str.substr(0, str.find("\r\n\r\n"));
+    std::cout << RED << head << RESET <<std::endl;
+	std::string	chunks = str.substr(str.find("\r\n\r\n") + 4, str.size() - 1);
+    std::cout << GREEN << chunks << RESET << std::endl;
+	// std::string	subchunk = chunks.substr(0, 100);
+    // std::cout << YELLOW << subchunk << RESET << std::endl;
+	// std::string	body = "";
+	// int			chunksize = strtol(subchunk.c_str(), NULL, 16);
+    // std::cout << BLUE << chunksize << RESET << std::endl;
+	// size_t		i = 0;
+
+	// while (chunksize)
+	// {
+	// 	i = chunks.find("\r\n", i) + 2;
+	// 	body += chunks.substr(i, chunksize);
+	// 	i += chunksize + 2;
+	// 	subchunk = chunks.substr(i, 100);
+	// 	chunksize = strtol(subchunk.c_str(), NULL, 16);
+	// }
+
+	// std::string req = head + "\r\n\r\n" + body + "\r\n\r\n";
+    // std::cout << PURPLE << req << std::endl;
+}
+
 
 int Request::parseReq(const std::string &str)
 {
+
+    // * check if chunked or not
+    if (checkReq(str))
+        std::cout << "True" << std::endl;
+    else
+        std::cout << "false" << std::endl;
+        
+    // std::cout << "here" << std::endl;
 
     std::string key;
     std::string value;
@@ -146,12 +226,9 @@ int Request::parseReq(const std::string &str)
         setBody(str.substr(i, std::string::npos));
     }
     setQuery();
+
     // file.close();
 
-    if (isFinished())
-        m_req_status = REQUEST_COMPLETED;
-    else
-        m_req_status = REQUEST_NOT_COMPLETED;
     return m_code_ret;
 }
 

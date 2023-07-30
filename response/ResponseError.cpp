@@ -7,7 +7,7 @@ void	Response::errorPages(int statusCode)
 	t_responseHeader	responseHeader;
 	std::string			filePath = getErrorPagePath(statusCode);
 	
-	open_file:
+
 	_file.open(filePath.c_str(), std::ios::binary);
 	if (!_file.is_open())
 	{
@@ -24,84 +24,8 @@ void	Response::errorPages(int statusCode)
 	responseHeader.statusMessage = Utils::getStatusMessage(statusCode);
 	responseHeader.headers["Content-Type"] = getContentType(filePath);
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-	_header_buffer = "";
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->set_res_status(ON_PROCESS);
 }
 
-bool	Response::getMatchedLocation()
-{
-	// TODO: Verify this function (!! High Priority)
-	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
-	std::string requestPath = _client->get_request().getPath();
-	size_t max_length = 0;
-	int		index = -1;
-	for (int i = 0; i < locations.size(); i++)
-	{	
-		if (requestPath.find(locations[i].path) == 0 && locations[i].path.length() > 0)
-		{
-			max_length = locations[i].path.length();
-			index = i;
-		}
-	}
 
-	if (index != -1)
-	{
-		_location = new ConfLoca(locations[index]);
-		if (isLocationHaveRedirection())
-			return true;
-		else
-		{
-			if (isMethodAllowedInLocation())
-			{
-				std::cout << "Allowed method in location" << std::endl;
-				return true;
-			}
-			else
-				return false;
-		}
-	}
-	std::cout << "No matched location" << std::endl;
-	errorPages(404);
-	return false;
-}
-
-bool Response::isLocationHaveRedirection()
-{
-	t_responseHeader responseHeader;
-
-		
-	// TODO: check if redirection is working
-
-	// if (_location->redirection != "")
-	// {
-	// 	responseHeader.statusCode = 301;
-	// 	responseHeader.statusMessage = Utils::getStatusMessage(301);
-	// 	responseHeader.headers["Location"] = _location->redirection;
-	// 	_header_buffer = "";
-	// 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	// 	_client->set_res_status(DONE);
-	// 	return true;
-	// }
-		
-	return false;
-}
-
-
-bool Response::isMethodAllowedInLocation()
-{
-	std::vector<MethodType> allow_methods;
-	if (_location)
-	{
-		allow_methods = _location->allow_methods;
-		if (std::find(allow_methods.begin(), allow_methods.end(), _location->strtoMethod(_client->get_request().getMethod())) != allow_methods.end())
-			return true;
-		else
-		{
-			std::cout << "Method not allowed in location" << std::endl;
-			errorPages(405);
-			return false;
-		}
-	}
-	return false;
-}
