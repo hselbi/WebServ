@@ -20,10 +20,16 @@ bool Response::getAutoIndex()
 std::string Response::getErrorPagePath(int statusCode)
 {
     // TODO: check if can location have also error_pages
-
+	if (_location && _location->error_pages.find(statusCode) != _location->error_pages.end() 
+		&& Utils::fileExists(_location->error_pages[statusCode]))
+	{
+		return _location->error_pages[statusCode];
+	}
     std::map<int, std::string>  pages = _client->get_server_block().getErrorPages();
     if (pages.find(statusCode) != pages.end() && Utils::fileExists(pages[statusCode]))
-        return pages[statusCode];
+    {
+		return pages[statusCode];
+	}
 
     return "./defaultPages/" + Utils::toString(statusCode) + ".html";
 }
