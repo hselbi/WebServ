@@ -1,8 +1,12 @@
 #include "../../includes/core/Cgi.hpp"
 #include "../../includes/core/Client.hpp"
 
-Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _output(""), _cgi_output_file(NULL), _envp(NULL), _argv(NULL), _extension("")
+Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _cgi_output_file(NULL), _envp(NULL), _argv(NULL), _extension("")
 {
+	_ready_to_read_from_cgi = 1;
+	_cgi_status = 0;
+	_start_time = 0;
+	_pid = 0;
 }
 
 Cgi::~Cgi()
@@ -16,10 +20,145 @@ void Cgi::setClient(Client &client)
 
 int Cgi::start_cgi(std::string script_path)
 {
-	set_cgi_bin("/Users/zmahmoud/Desktop/WebServ/config/cgi_binary/php-cgi");
+	// std::cout << "start_cgi" << std::endl;
+	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
 	set_cgi_script(script_path);
 	init_env_vars();
 	return exec_cgi();
+}
+
+int Cgi::exec_cgi() // !! upload handiinng
+{
+	pid_t _pid;
+	int write_to_cgi[2];
+
+	_cgi_output_file = tmpfile();
+	if (!_cgi_output_file)
+	{
+		std::cerr << "tmpfile failed" << std::endl; return -1;
+	}
+
+	if(pipe(write_to_cgi) == -1)
+	{
+		std::cerr << "pipe failed" << std::endl; return -1;
+	}
+
+	// ! TODO: SET BODY REQUEST TO CGI
+	std::string data = "hello lopez22"; // request body // _body.c_str();
+	set_body(data);
+	write(write_to_cgi[1], _body.c_str(), _body.length()); // write to pipe
+
+	_start_time = time(NULL);
+
+	if ((_pid = fork()) == -1)
+	{
+		std::cerr << "fork failed" << std::endl; return -1;
+	}
+
+
+	if (_pid == 0)
+	{
+		close(write_to_cgi[1]);
+
+		dup2(write_to_cgi[0], 0); // read from pipe
+		dup2(fileno(_cgi_output_file), 1);
+
+		close(write_to_cgi[0]);
+		char *newargv[] = {(char*)"/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi", (char*)_cgi_script.c_str(), NULL};
+		execve("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi", newargv, 0);
+		std::cout << "execve failed" << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		close(write_to_cgi[0]);
+		close(write_to_cgi[1]);
+
+		// !! check if child process terminated∆
+		// sleep(3);
+        _ready_to_read_from_cgi = waitpid(_pid, 0, WNOHANG);
+		std::cout << "_ready_to_read_from_cgi " << _ready_to_read_from_cgi << std::endl;
+		// !!! if result == 0, child process still running, if result == -1, error, else child process terminated
+
+		lseek(fileno(_cgi_output_file), 0, SEEK_SET);
+	}
+
+	return fileno(_cgi_output_file);
+}
+
+void Cgi::set_body(std::string payload)
+{
+	_body = payload;
+}
+
+void Cgi::set_cgi_bin(std::string cgi_bin)
+{
+	_cgi_bin = cgi_bin;
+}
+
+void Cgi::set_cgi_script(std::string cgi_script)
+{
+	_cgi_script = cgi_script;
+}
+
+// /board/time/index.php, find last occurence of / and get what is after it
+std::string Cgi::get_cgi_script_name(std::string path)
+{
+	std::string script_name;
+	size_t pos = path.find_last_of('/');
+	if (pos != std::string::npos)
+		script_name = path.substr(pos + 1);
+	return script_name;
+}
+
+int Cgi::get_pid()
+{
+	return _pid;
+}
+
+void Cgi::reset()
+{
+	// !!! clean_env_vars();
+	_cgi_bin.clear();
+	_cgi_script.clear();
+	_body.clear();
+	_cgi_output_file = NULL;
+	_envp = NULL;
+	_argv = NULL;
+	_ready_to_read_from_cgi = 1;
+	_cgi_status = 0;
+	_start_time = 0;
+	_pid = 0;
+
+}
+
+int Cgi::get_ready_to_read_from_cgi()
+{
+	return _ready_to_read_from_cgi;
+}
+
+void Cgi::set_ready_to_read_from_cgi(int ready_to_read_from_cgi)
+{
+	_ready_to_read_from_cgi = ready_to_read_from_cgi;
+}
+
+int Cgi::get_cgi_status()
+{
+	return _cgi_status;
+}
+
+void Cgi::set_cgi_status(int cgi_status_code)
+{
+	_cgi_status = cgi_status_code;
+}
+std::string Cgi::get_path_info(std::string url)
+{
+	std::string path_info;
+	long len = _env_vars["SCRIPT_NAME"].length();
+	size_t pos = url.find(_env_vars["SCRIPT_NAME"]);
+	if (pos != std::string::npos)
+		path_info = url.substr(pos + len);
+	return path_info;
 }
 
 void Cgi::init_env_vars()
@@ -71,108 +210,14 @@ void Cgi::clean_env_vars()
 	_env_vars.clear();
 }
 
-std::string get_query_string(std::string url) // get query params from url
+
+int Cgi::get_start_time()
 {
-	std::string query_string;
-	size_t pos = url.find('?');
-	if (pos != std::string::npos)
-		query_string = url.substr(pos + 1);
-	return query_string;
-}
-// example.com/index.php/parameter1/parameter2
-// get what is after index.php
-std::string Cgi::get_path_info(std::string url)
-{
-	std::string path_info;
-	long len = _env_vars["SCRIPT_NAME"].length();
-	size_t pos = url.find(_env_vars["SCRIPT_NAME"]);
-	if (pos != std::string::npos)
-		path_info = url.substr(pos + len);
-	return path_info;
+	return _start_time;
 }
 
-int Cgi::exec_cgi() // !! upload handiinng
-{
-	pid_t pid;
-	int write_to_cgi[2];
 
-	_cgi_output_file = tmpfile();
-	if (!_cgi_output_file)
-	{
-		std::cerr << "tmpfile failed" << std::endl;
-		return -1;
-	}
+/*
 
-	if(pipe(write_to_cgi) == -1)
-	{
-		std::cerr << "pipe failed" << std::endl;
-		return -1;
-	}
-
-	// ! TODO: SET BODY REQUEST TO CGI
-	std::string data = "hello lopez22"; // request body // _body.c_str();
-	set_body(data);
-	write(write_to_cgi[1], _body.c_str(), _body.length()); // write to pipe
-
-	if ((pid = fork()) == -1)
-	{
-		std::cerr << "fork failed" << std::endl;
-		return -1;
-	}
-	if (pid == 0)
-	{
-		close(write_to_cgi[1]);
-
-		dup2(write_to_cgi[0], 0); // read from pipe
-		dup2(fileno(_cgi_output_file), 1);
-
-		close(write_to_cgi[0]);
-
-		char *newargv[] = {(char*)"/Users/zmahmoud/Desktop/WebServ/config/cgi_binary/php-cgi", (char*)_cgi_script.c_str(), NULL};
-		if (execve("/Users/zmahmoud/Desktop/WebServ/config/cgi_binary/php-cgi", newargv, 0) == -1)
-		{
-			// TODO: handle error if execve failed (server hang)
-			std::cerr << "execve failedd" << std::endl;
-			return -1;
-		}
-	}
-	else
-	{
-		close(write_to_cgi[0]);
-		close(write_to_cgi[1]);
-		// DONT WAIT FOR CHILD PROCESS TO FINISH
-		waitpid(pid, NULL, 0); //
-		lseek(fileno(_cgi_output_file), 0, SEEK_SET);
-		// char buf[4024];
-		// printf("data from CGI: \n ------------------ \n");
-		// read(fileno(_cgi_output_file), buf, 100);
-		// std::cout << buf << std::endl;
-		// close(fileno(_cgi_output_file));
-	}
-	return fileno(_cgi_output_file);
-}
-
-void Cgi::set_body(std::string payload)
-{
-	_body = payload;
-}
-
-void Cgi::set_cgi_bin(std::string cgi_bin)
-{
-	_cgi_bin = cgi_bin;
-}
-
-void Cgi::set_cgi_script(std::string cgi_script)
-{
-	_cgi_script = cgi_script;
-}
-
-// /board/time/index.php, find last occurence of / and get what is after it
-std::string Cgi::get_cgi_script_name(std::string path)
-{
-	std::string script_name;
-	size_t pos = path.find_last_of('/');
-	if (pos != std::string::npos)
-		script_name = path.substr(pos + 1);
-	return script_name;
-}
+cgi status cdoe excve
+*/

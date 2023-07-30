@@ -45,6 +45,8 @@ void Response::readFileByPath(std::string filePath)
 
 void Response::readCgiFile()
 {
+	std::cout << "readCgiFile" << std::endl;
+	std::cout << "_cgi_file: " << _cgi_file << std::endl;
     t_responseHeader responseHeader;
     off_t fileSize;
     ssize_t bytesRead;
@@ -79,6 +81,7 @@ void Response::readCgiFile()
             break;
         }
     }
+
     lseek(_cgi_file, endHeaderPos, SEEK_SET);
     responseHeader.statusCode = 200;
     responseHeader.statusMessage = Utils::getStatusMessage(200);
@@ -86,5 +89,7 @@ void Response::readCgiFile()
     responseHeader.headers["Content-Length"] = Utils::toString(fileSize - endHeaderPos);
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
+	// std::cout << "--> "<< _header_buffer << std::endl;
     _client->set_res_status(ON_PROCESS);
+
 }

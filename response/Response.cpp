@@ -58,7 +58,10 @@ void Response::processing()
 		}
 	}
 	else if (_have_cgi && _client->get_res_status() == ON_PROCESS)
+	{
+		std::cout << "processingCgi1" << std::endl;
 		processingCgi();
+	}
 	else if (_client->get_res_status() == DONE)
 	{
 		_have_cgi = false;
@@ -69,6 +72,7 @@ void Response::processing()
 
 void Response::processingCgi()
 {
+	std::cout << "processingCgi" << std::endl;
 	ssize_t bytesRead;
 	int buffer_size = RES_BUFFER_SIZE;
 
@@ -134,4 +138,22 @@ void Response::autoIndex()
 	_client->append_response_data(strHeader);
 	_client->append_response_data(body);
 	_client->set_res_status(DONE);
+}
+
+bool Response::get_cgi_status()
+{
+	return _have_cgi;
+}
+void Response::set_cgi_status(bool status)
+{
+	_have_cgi = status;
+}
+
+int 				Response::get_cgi_file()
+{
+	return _cgi_file;
+}
+void 				Response::set_cgi_file(int fd)
+{
+	_cgi_file = fd;
 }

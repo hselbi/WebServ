@@ -88,9 +88,9 @@ void Server::feed_request(std::string request, long client_socket) // feed reque
 
 bool Server::isReqFinished(int client_socket)
 {
-	// !  check methods that dont have body 
+	// !  check methods that dont have body
 	// !  check if the request is "Transfer-Encoding: chunked", and other stuff
-	
+
     if (get_client(client_socket)->get_request().getCodeRet() == 400)
 		return true;
     if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
@@ -130,11 +130,6 @@ void Server::send_response(long client_socket)
 		drop_client(client_socket);
 		return;
 	}
-	// else if (bytes_sent == 0)
-	// {
-	// 	std::cout << "send bytes send 0 " <<  "\n";
-	// 	return;
-	// }
 	else if (bytes_sent < get_client(client_socket)->get_response_data().length()) // if send returns less than the number of bytes requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data.
 	{
 		std::cout << "send bytes send < response length "
@@ -152,15 +147,22 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 	get_client(client_socket)->get_response().processing();
 }
 
-void Server::handle_outgoing_response(long client_socket) // ! send response to client
-{
 
-	build_response(get_client(client_socket)->get_request(), client_socket);
+void Server::normal_response(int client_socket)
+{
 	send_response(client_socket);
+
+	// std::cout << "normal response" << std::endl;
 	if (get_client(client_socket) == NULL)
 		return;
-	if (get_client(client_socket)->get_res_status() == DONE)
+	if (get_client(client_socket)->get_res_status() == DONE )
 	{
+		std::cout << "RSPONSE DONE" << std::endl;
+		get_client(client_socket)->get_cgi().reset();
+		get_client(client_socket)->get_request().resetReq();
+		get_client(client_socket)->get_response().set_cgi_file(0);
+
+		// get_client(client_socket)->get_response().resetResponse();
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
 		{
 			// std::cout << "Connection: close" << std::endl;
@@ -175,11 +177,20 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 			get_client(client_socket)->reset_request_data();
 			get_client(client_socket)->reset_response_data();
 			get_client(client_socket)->set_res_status(NOT_STARTED);
-
-			get_client(client_socket)->get_request().resetReq();
-			// TODO: reset response
 		}
 	}
+}
+
+void Server::handle_outgoing_response(long client_socket) // ! send response to client
+{
+
+	build_response(get_client(client_socket)->get_request(), client_socket);
+	// std::cout << "response data: " << get_client(client_socket)->get_response_data() << std::endl;
+// // if cgi and
+// 	if (get_client(client_socket)->get_response().get_cgi_status() == true &&   = CGI_ON_PROCESS)
+// 		cgi_response();
+// 	else
+	normal_response(client_socket);
 }
 
 // !! GET /index.html HTTP/1.1 | POST /form HTTP/1.1
@@ -258,21 +269,12 @@ void Server::match_client_request_to_server_block(long client_socket)
 		}
 	}
 }
-// int i = 0;
 void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
 
-	// std::cout << YELLOW << "inside recv" << RESET << "\n";
-	// if (i == 1)
-	// {
-	// 	std::cout << GREEN << "inside iiiiiiiii " << RESET << "\n";
-	// 	exit(0);
-	// }
-	// ++i;
-	
-	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
+	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1)
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
 		drop_client(client_socket);
@@ -287,10 +289,10 @@ void Server::handle_incoming_request(long client_socket)
 	{
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
 		feed_request(std::string(received_data), client_socket);
-		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
+		// !! remove this, only for testing
+		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
 		{
 			match_client_request_to_server_block(client_socket);
-
 			FD_CLR(client_socket, &_read_set_pool);
 			FD_SET(client_socket, &_write_set_pool);
 		}
@@ -340,7 +342,6 @@ void Server::bind_socket(long server_socket_id, std::string host, int port)
 		host = "127.0.0.1";
 	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0) // !! host.c_str() should be valid ip address,
 		throw_error("inet_aton failed, invalid ip address format");
-
 	// _server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1)
 		throw_error("server socket binding failed");
@@ -425,6 +426,7 @@ void Server::start_server()
 				// ! outgoing response
 				handle_outgoing_response(socket); // !! send response to client
 			}
+
 		}
 	}
 }

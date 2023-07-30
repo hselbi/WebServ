@@ -63,7 +63,7 @@ void	Response::deleteAllFolderFiles()
 		while ((ent = readdir(dir)) != NULL)
 		{
 			filePath = path + ent->d_name;
-			std::cout << "filePath: " << filePath << std::endl;
+			// std::cout << "filePath: " << filePath << std::endl;
 			if (remove(filePath.c_str()) != 0)
 				errorPages(500);
 		}
