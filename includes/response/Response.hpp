@@ -18,7 +18,7 @@ class Response {
 
 		void				processing();
 		void				setClient(Client &client);
-		std::string				getRoot();
+		std::string			getRoot();
 		
 	private:
 		Client				*_client;
@@ -50,5 +50,6 @@ class Response {
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
 		void					processingCgi();
+		void 					resetResponse();
 		
 };

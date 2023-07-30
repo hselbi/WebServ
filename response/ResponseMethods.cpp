@@ -24,11 +24,8 @@ void Response::Method_GET()
                     // TODO: Add python also to this condition  (if file extension is .py)
                     if (_location && _location->cgi_infos.size() > 0 && (index.find(".php") != std::string::npos || index.find(".py") != std::string::npos))
                     {
-                        std::cout << "Have CGI" << std::endl;
                         _have_cgi = true;
-                        std::cout << "Start CGI" << std::endl;
                         _cgi_file = _client->get_cgi().start_cgi(index);
-                        std::cout << _cgi_file << std::endl;
                         if (_cgi_file == -1)
                         {
                             std::cout << "CGI ERROR" << std::endl;
@@ -89,7 +86,6 @@ void Response::Method_DELETE()
     std::string index = "";
     if (Utils::fileExists(filePath))
     {
-            
         if (Utils::isDirectory(filePath))
         {
             if (filePath[filePath.length() - 1] != '/')
