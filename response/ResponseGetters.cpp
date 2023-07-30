@@ -34,7 +34,6 @@ std::string Response::getErrorPagePath(int statusCode)
     return "./defaultPages/" + Utils::toString(statusCode) + ".html";
 }
 
-
 std::string Response::getContentType(const std::string &filePath)
 {
 	std::map<std::string, std::string>::const_iterator it;
@@ -118,6 +117,41 @@ bool	Response::getMatchedLocation()
 	errorPages(404);
 	return false;
 }
+
+std::string Response::getRequestPath()
+{
+	std::string path = _client->get_request().getPath();
+	std::string root = getRoot();
+	// std::cout << "++path " << path << std::endl;
+	// std::cout << "++root " << root << std::endl;
+	if (_location)
+	{
+		// std::cout << "__PATH: " << path.replace(0, _location->path.length(), root) << std::endl;
+		// return  path.replace(0, _location->path.length(), root);
+	}
+
+	// return path.replace(0, 1, root);
+	// std::cout << "__2-PATH: " << path.replace(0, 1, root) << std::endl;
+
+	// temporary solution
+	// return path.replace(0, 1, root);
+	return getRoot() + _client->get_request().getPath();
+}
+
+std::string Response::tmp_getRequestPath()
+{
+	std::string path = _client->get_request().getPath();
+	std::string root = getRoot();
+	if (_location)
+	{
+		
+		return  path.replace(0, _location->path.length(), root);
+	}
+
+	// return path.replace(0, 1, root);
+	return "";
+}
+
 
 std::string Response::isDirHasIndexFiles()
 {

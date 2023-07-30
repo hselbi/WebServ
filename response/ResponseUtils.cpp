@@ -55,7 +55,7 @@ void Response::setRediration(std::string location)
 
 void	Response::deleteAllFolderFiles()
 {
-	std::string path = getRoot() + _client->get_request().getPath();
+	std::string path = getRequestPath();
 	DIR *dir;
 	struct dirent *ent;
 	std::string filePath;
@@ -78,7 +78,7 @@ void	Response::deleteAllFolderFiles()
 
 void	Response::deleteFile()
 {
-	std::string filePath = getRoot() + _client->get_request().getPath();
+	std::string filePath = getRequestPath();
 
 	if (remove(filePath.c_str()) != 0)
 		errorPages(500);
@@ -116,7 +116,7 @@ void Response::autoIndex()
 	std::string strHeader, path, body, tmp;
 	t_responseHeader responseHeader;
 
-	path = getRoot() + _client->get_request().getPath();
+	path = getRequestPath();
 	body = "<html><head><title>Index of " + _client->get_request().getPath() + "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
 	if ((dir = opendir(path.c_str())) != NULL)
 	{
