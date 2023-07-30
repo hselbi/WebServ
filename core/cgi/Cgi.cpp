@@ -48,11 +48,20 @@ int Cgi::exec_cgi() // !! upload handiinng
 		std::cerr << "pipe failed" << std::endl; return -1;
 	}
 
+// !!!!
+
 	set_body(_client->get_request().getBody());
+	std::cout << _client->get_request().getBody() << std::endl;
+	std::cout << "-----------------------\n";
+	std::cout << _client->get_request().getBody().length() << std::endl;
 
 	write(write_to_cgi[1], _body.c_str(), _body.length()); // write to pipe
-	sleep(1);
+	sleep(2);
 	_start_time = time(NULL);
+
+
+// !!!
+
 
 	if ((_pid = fork()) == -1)
 	{
