@@ -7,7 +7,7 @@
 #include "../config/ConfLoca.hpp"
 
 # define RES_BUFFER_SIZE 64000
-# define TIMEOUT_CGI 3
+# define TIMEOUT_CGI 6
 
 struct Client;
 
@@ -30,6 +30,7 @@ class Response {
 		Client				*_client;
 		ConfLoca 			*_location;
 		std::ifstream		_file;
+		std::map<std::string, std::ifstream>		_files;
 		int					_cgi_file;
 
 		std::string			_header_buffer;
@@ -57,4 +58,5 @@ class Response {
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
 		void					processingCgi();
+		void					resetResponse();
 };

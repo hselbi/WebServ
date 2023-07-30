@@ -148,16 +148,13 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 }
 
 
-void Server::normal_response(int client_socket)
+void Server::disconnect_connection(int client_socket)
 {
-	send_response(client_socket);
-
-	// std::cout << "normal response" << std::endl;
 	if (get_client(client_socket) == NULL)
 		return;
 	if (get_client(client_socket)->get_res_status() == DONE )
 	{
-		std::cout << "RSPONSE DONE" << std::endl;
+		// std::cout << "RSPONSE DONE" << std::endl;
 		get_client(client_socket)->get_cgi().reset();
 		get_client(client_socket)->get_request().resetReq();
 		get_client(client_socket)->get_response().set_cgi_file(0);
@@ -165,12 +162,12 @@ void Server::normal_response(int client_socket)
 		// get_client(client_socket)->get_response().resetResponse();
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
 		{
-			// std::cout << "Connection: close" << std::endl;
+			std::cout << "Connection: close" << std::endl;
 			drop_client(client_socket); // Connection: close
 		}
 		else // Connection: keep-alive
 		{
-			// std::cout << "Connection: keep-alive" << std::endl;
+			std::cout << "Connection: keep-alive" << std::endl; 
 			FD_CLR(client_socket, &_write_set_pool);
 			FD_SET(client_socket, &_read_set_pool);
 
@@ -181,16 +178,14 @@ void Server::normal_response(int client_socket)
 	}
 }
 
+
 void Server::handle_outgoing_response(long client_socket) // ! send response to client
 {
-
 	build_response(get_client(client_socket)->get_request(), client_socket);
-	// std::cout << "response data: " << get_client(client_socket)->get_response_data() << std::endl;
-// // if cgi and
-// 	if (get_client(client_socket)->get_response().get_cgi_status() == true &&   = CGI_ON_PROCESS)
-// 		cgi_response();
-// 	else
-	normal_response(client_socket);
+
+	send_response(client_socket);
+
+	disconnect_connection(client_socket);
 }
 
 // !! GET /index.html HTTP/1.1 | POST /form HTTP/1.1
@@ -417,8 +412,14 @@ void Server::start_server()
 				}
 				else
 				{
+					// std::cout << "socket " << socket << " 11111" << std::endl;
+
 					// ! incoming request
-					handle_incoming_request(socket);
+					if (!FD_ISSET(socket, &_write_set))
+					{
+						// std::cout << "socket " << socket << " 22222" << std::endl;
+						handle_incoming_request(socket);
+					}
 				}
 			}
 			else if (FD_ISSET(socket, &_write_set)) // ready to write

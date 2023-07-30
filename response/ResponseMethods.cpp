@@ -79,15 +79,15 @@ void Response::Method_GET()
 					// std::cout << "COND2: " << _cgi_file << std::endl;
 
 					_client->get_cgi().set_ready_to_read_from_cgi(waitpid(_client->get_cgi().get_pid(), 0, WNOHANG));
-					std::cout << "READY TO READ FROM CGI: " << _client->get_cgi().get_ready_to_read_from_cgi() << std::endl;
+					// std::cout << "READY TO READ FROM CGI: " << _client->get_cgi().get_ready_to_read_from_cgi() << std::endl;
 					if (_client->get_cgi().get_ready_to_read_from_cgi() == 0)
 					{
 						if (time(NULL) - _client->get_cgi().get_start_time() >= TIMEOUT_CGI)
 						{
 							std::cout << "CGI TIMEOUT" << std::endl;
-							_client->set_res_status(DONE);
+                            _have_cgi = false;
+							// kill(0, SIGKILL);
 							errorPages(500);
-							kill(-1, SIGTERM);
 							return;
 						}
 					}
@@ -159,7 +159,7 @@ void Response::Method_POST()
                         _have_cgi = true;
                         std::cout << "Start CGI" << std::endl;
                         _cgi_file = _client->get_cgi().start_cgi(index);
-                        std::cout << _cgi_file << std::endl;
+                        // std::cout << _cgi_file << std::endl;
                         if (_cgi_file == -1)
                         {
                             std::cout << "CGI ERROR" << std::endl;
@@ -186,7 +186,7 @@ void Response::Method_POST()
                 // std::cout << "Have CGI" << std::endl;
                 _have_cgi = true;
                 _cgi_file = _client->get_cgi().start_cgi(filePath);
-                std::cout << _cgi_file << std::endl;
+                // std::cout << _cgi_file << std::endl;
 
                 if (_cgi_file == -1)
                 {

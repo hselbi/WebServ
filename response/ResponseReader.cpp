@@ -45,8 +45,8 @@ void Response::readFileByPath(std::string filePath)
 
 void Response::readCgiFile()
 {
-	std::cout << "readCgiFile" << std::endl;
-	std::cout << "_cgi_file: " << _cgi_file << std::endl;
+	// std::cout << "readCgiFile" << std::endl;
+	// std::cout << "_cgi_file: " << _cgi_file << std::endl;
     t_responseHeader responseHeader;
     off_t fileSize;
     ssize_t bytesRead;

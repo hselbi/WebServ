@@ -81,7 +81,7 @@ struct Server
 	std::vector<long> &get_server_sockets();
 
 
-	void normal_response(int client_socket);
+	void disconnect_connection(int client_socket);
 
 private:
 	Config _config;
