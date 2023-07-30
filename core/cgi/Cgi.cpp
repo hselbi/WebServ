@@ -72,7 +72,8 @@ void Cgi::init_env_vars()
 	_env_vars["QUERY_STRING"] = _client->get_request().getQuery();
 	_env_vars["PATH_INFO"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
 	_env_vars["PATH_TRANSLATED"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
-
+	if (_client->get_request().getHeaders()["Cookie"] != "")
+		_env_vars["COOKIES"] = _client->get_request().getHeaders()["Cookie"];
 	if (_client->get_request().getMethod() == "POST")
 	{
 		_env_vars["CONTENT_TYPE"] = _client->get_request().getHeaders()["Content-Type"];
