@@ -12,7 +12,7 @@ void	Response::errorPages(int statusCode)
 	if (!_file.is_open())
 	{
 		std::cout << RED <<  "Failed to open file: " << filePath << RESET << std::endl;
-		_client->set_status(DONE);
+		_client->set_res_status(DONE);
 		return;
 	}
 
@@ -26,7 +26,7 @@ void	Response::errorPages(int statusCode)
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	_header_buffer = "";
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	_client->set_status(ON_PROCESS);
+	_client->set_res_status(ON_PROCESS);
 }
 
 bool	Response::getMatchedLocation()
@@ -80,7 +80,7 @@ bool Response::isLocationHaveRedirection()
 	// 	responseHeader.headers["Location"] = _location->redirection;
 	// 	_header_buffer = "";
 	// 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	// 	_client->set_status(DONE);
+	// 	_client->set_res_status(DONE);
 	// 	return true;
 	// }
 		

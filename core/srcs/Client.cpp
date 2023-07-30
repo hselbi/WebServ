@@ -1,7 +1,7 @@
 #include "../../includes/core/Client.hpp"
 #include "../../includes/request/Request.hpp"
 
-Client::Client() : _request_body_size(0), _status(0) {}
+Client::Client() : _request_body_size(0), _res_status(NOT_STARTED) {}
 
 // Client::Client(long client_socket) { }
 Client::~Client() {}
@@ -50,9 +50,9 @@ Response &Client::get_response() { return _response; }
 
 Cgi &Client::get_cgi() { return _cgi; }
 
-int Client::get_status() { return _status; }
+int Client::get_res_status() { return _res_status; }
 
-void Client::set_status(int status) { _status = status; }
+void Client::set_res_status(int status) { _res_status = status; }
 
 void Client::set_server_block(ConfServer &config) { _config = config; }
 
