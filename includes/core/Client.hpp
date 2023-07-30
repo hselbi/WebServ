@@ -14,6 +14,13 @@ enum E_RESPONSE_STATUS
 	DONE
 };
 
+enum E_CGI_RESPONSE_STATUS
+{
+	CGI_NOT_STARTED,
+	CGI_ON_PROCESS,
+	CGI_DONE
+};
+
 class Request;
 class Response;
 class Cgi;
