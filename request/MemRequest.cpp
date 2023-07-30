@@ -119,7 +119,7 @@ bool Request::isFinished()
 
 int Request::parseReq(const std::string &str)
 {
-	std::cout << "here parser!!" << std::endl;
+	// std::cout << "here parser!!" << std::endl;
 
     std::string key;
     std::string value;
