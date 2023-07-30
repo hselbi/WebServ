@@ -44,29 +44,29 @@ bool Request::isWhitespace(const std::string &str)
     return true;
 }
 
-bool Request::isFinished(std::string &str, size_t &i)
-{
-    if (m_code_ret == 400)
-        return true;
-    if (!m_headers["Content-Length"].empty())
-    {
-        if (m_headers["Content-Length"] == "0")
-            return true;
-        if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-            return true;
-    }
-    if (!m_headers["Transfer-Encoding"].empty())
-    {
-        if (m_headers["Transfer-Encoding"] == "chunked")
-        {
-            if (str.size() == 0)
-                return false;
-            if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-                return true;
-        }
-    }
-    return false;
-}
+// bool Request::isFinished(std::string &str, size_t &i)
+// {
+//     if (m_code_ret == 400)
+//         return true;
+//     if (!m_headers["Content-Length"].empty())
+//     {
+//         if (m_headers["Content-Length"] == "0")
+//             return true;
+//         if (std::stoi(m_headers["Content-Length"]) == m_body.size())
+//             return true;
+//     }
+//     if (!m_headers["Transfer-Encoding"].empty())
+//     {
+//         if (m_headers["Transfer-Encoding"] == "chunked")
+//         {
+//             if (str.size() == 0)
+//                 return false;
+//             if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
+//                 return true;
+//         }
+//     }
+//     return false;
+// }
 
 bool Request::isFinished()
 {
@@ -92,33 +92,34 @@ bool Request::isFinished()
     return false;
 }
 
-bool Request::isFinished(const std::string &str)
-{
-    if (m_code_ret == 400)
-        return true;
-    if (!m_headers["Content-Length"].empty())
-    {
-        if (m_headers["Content-Length"] == "0")
-            return true;
-        if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-            return true;
-    }
-    if (!m_headers["Transfer-Encoding"].empty())
-    {
-        if (m_headers["Transfer-Encoding"] == "chunked")
-        {
-            if (str.size() == 0)
-                return false;
-            if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-                return true;
-        }
-    }
-    return false;
-}
+// bool Request::isFinished(const std::string &str)
+// {
+//     if (m_code_ret == 400)
+//         return true;
+//     if (!m_headers["Content-Length"].empty())
+//     {
+//         if (m_headers["Content-Length"] == "0")
+//             return true;
+//         if (std::stoi(m_headers["Content-Length"]) == m_body.size())
+//             return true;
+//     }
+//     if (!m_headers["Transfer-Encoding"].empty())
+//     {
+//         if (m_headers["Transfer-Encoding"] == "chunked")
+//         {
+//             if (str.size() == 0)
+//                 return false;
+//             if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
+//                 return true;
+//         }
+//     }
+//     return false;
+// }
 
 
 int Request::parseReq(const std::string &str)
 {
+
     std::string key;
     std::string value;
     std::string line;
@@ -147,6 +148,10 @@ int Request::parseReq(const std::string &str)
     setQuery();
     // file.close();
 
+    if (isFinished())
+        m_req_status = REQUEST_COMPLETED;
+    else
+        m_req_status = REQUEST_NOT_COMPLETED;
     return m_code_ret;
 }
 

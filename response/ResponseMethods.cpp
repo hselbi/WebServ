@@ -246,7 +246,7 @@ void Response::readCgiFile()
     {
         std::cerr << "Failed to seek to the end of file!" << std::endl;
         close(_cgi_file);
-        _client->set_status(DONE);
+        _client->set_res_status(DONE);
         errorPages(400);
     }
 
@@ -254,7 +254,7 @@ void Response::readCgiFile()
     {
         std::cerr << "Failed to seek to the beginning of file!" << std::endl;
         close(_cgi_file);
-        _client->set_status(DONE);
+        _client->set_res_status(DONE);
         errorPages(400);
     }
 
@@ -276,6 +276,6 @@ void Response::readCgiFile()
     responseHeader.headers["Content-Length"] = Utils::toString(fileSize - endHeaderPos);
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
-    _client->set_status(ON_PROCESS);
+    _client->set_res_status(ON_PROCESS);
 }
 

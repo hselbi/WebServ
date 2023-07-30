@@ -47,8 +47,9 @@ struct Client
 	Response &get_response();
 	Cgi &get_cgi();
 
-	int get_status();
-	void set_status(int status);
+	int get_res_status();
+	void set_res_status(int status);
+
 	void set_server_block(ConfServer &config);
 	ConfServer &get_server_block();
 
@@ -57,7 +58,7 @@ struct Client
 
 private:
 	long _server_socket;
-	int _status;
+	int _res_status;
 	ConfServer _config;
 	Request _request;
 	Response _response;
