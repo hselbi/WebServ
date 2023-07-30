@@ -23,11 +23,12 @@ void Response::setClient(Client &client)
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	std::string filePath = getRoot() + _client->get_request().getPath();
-
+	std::string filePath = getRequestPath();
 
 	if (_client->get_res_status() == NOT_STARTED)
 	{
+		std::cout << "FILE PATH: " << filePath << std::endl;
+		std::cout << "}}}}}---> |" << tmp_getRequestPath() << "|" << std::endl;
 		if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}

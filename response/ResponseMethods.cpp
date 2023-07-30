@@ -3,7 +3,7 @@
 
 void Response::Method_GET()
 {
-    std::string filePath = getRoot() + _client->get_request().getPath();
+    std::string filePath = getRequestPath();
     std::string index = "";
 
     if (Utils::fileExists(filePath))
@@ -12,10 +12,11 @@ void Response::Method_GET()
 
         if (Utils::isDirectory(filePath))
         {
+            std::cout << "FilePath:" << filePath << std::endl;
             if (filePath[filePath.length() - 1] != '/')
             {
-                std::cout << "REDIRECT TO: " << _client->get_request().getPath() + "/" << std::endl;
-                return setRediration(_client->get_request().getPath() + "/");
+                std::cout << "REDIRECT TO: " << getRequestPath() + "/" << std::endl;
+                return setRediration(getRequestPath() + "/");
             }
             else
             {
@@ -113,7 +114,7 @@ void Response::Method_GET()
 
 void Response::Method_DELETE()
 {
-    std::string filePath = getRoot() + _client->get_request().getPath();
+    std::string filePath = getRequestPath();
     std::string index = "";
     if (Utils::fileExists(filePath))
     {
@@ -134,7 +135,7 @@ void Response::Method_DELETE()
 
 void Response::Method_POST()
 {
-    std::string filePath = getRoot() + _client->get_request().getPath();
+    std::string filePath = getRequestPath();
     std::string index = "";
 
     if (Utils::fileExists(filePath))
@@ -145,8 +146,8 @@ void Response::Method_POST()
         {
             if (filePath[filePath.length() - 1] != '/')
             {
-                std::cout << "REDIRECT TO: " << _client->get_request().getPath() + "/" << std::endl;
-                return setRediration(_client->get_request().getPath() + "/");
+                std::cout << "REDIRECT TO: " << getRequestPath() + "/" << std::endl;
+                return setRediration(getRequestPath() + "/");
             }
             else
             {
