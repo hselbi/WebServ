@@ -10,7 +10,6 @@ std::string Response::getRoot()
 
 bool Response::getAutoIndex()
 {
-    //TODO: check if can location have also autoindex
     if (_location && _location->autoindex != DEFAULT)
         return (_location->autoindex == ON) ? true : false;
     
@@ -38,10 +37,8 @@ std::string Response::isDirHasIndexFiles()
         if (Utils::fileExists(dirPath + indexFiles[i]))
             return dirPath + indexFiles[i];
     }
-
     if (Utils::fileExists(dirPath + "index.html"))
         return dirPath + "index.html";
-
     return "";
 }
 
@@ -74,8 +71,16 @@ std::string Response::getContentType(const std::string &filePath)
     contentTypes[".mp3"] = "audio/mpeg";
     contentTypes[".wav"] = "audio/wav";
     contentTypes[".avi"] = "video/x-msvideo";
-
-
+    contentTypes[".mpeg"] = "video/mpeg";
+    contentTypes[".mpg"] = "video/mpeg";
+    contentTypes[".webm"] = "video/webm";
+    contentTypes[".wmv"] = "video/x-ms-wmv";
+    contentTypes[".flv"] = "video/x-flv";
+    contentTypes[".ogg"] = "video/ogg";
+    contentTypes[".ogv"] = "video/ogg";
+    contentTypes[".ogx"] = "application/ogg";
+    contentTypes[".3gp"] = "video/3gpp";
+    
 	dotPos = filePath.rfind('.');
 	if (dotPos != std::string::npos)
 		extension = filePath.substr(dotPos);
