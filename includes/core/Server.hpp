@@ -72,6 +72,7 @@ struct Server
 	void drop_client(long client_id);
 	bool is_connection_close(std::string &request);
 	void throw_error(std::string error_message);
+	bool isReqFinished(int client_socket);
 
 	// getters and setters
 	Client *get_client(long client_id);

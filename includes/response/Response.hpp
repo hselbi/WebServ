@@ -18,7 +18,7 @@ class Response {
 
 		void				processing();
 		void				setClient(Client &client);
-		std::string				getRoot();
+		std::string			getRoot();
 		
 	private:
 		std::string			_response;
@@ -50,11 +50,13 @@ class Response {
 		void					Method_DELETE();
 		void					setRediration(std::string location);
 		bool					checkRequestIsFormed();
-		bool					isLocationHaveRedirection();
+		bool					isServerHaveRedirection();
 		bool					getMatchedLocation();
 		bool					isMethodAllowedInLocation();
 		bool 					getAutoIndex();
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
+		void					processingCgi();
+		void 					resetResponse();
 		
 };

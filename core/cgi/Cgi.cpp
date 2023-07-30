@@ -16,7 +16,7 @@ void Cgi::setClient(Client &client)
 
 int Cgi::start_cgi(std::string script_path)
 {
-	set_cgi_bin("/Users/zmahmoud/Desktop/php-cgi");
+	set_cgi_bin("/Users/zmahmoud/Desktop/WebServ/config/cgi_binary/php-cgi");
 	set_cgi_script(script_path);
 	init_env_vars();
 	return exec_cgi();
@@ -128,10 +128,11 @@ int Cgi::exec_cgi() // !! upload handiinng
 
 		close(write_to_cgi[0]);
 
-		char *newargv[] = {(char*)"/Users/zmahmoud/Desktop/php-cgi", (char*)_cgi_script.c_str(), NULL};
-		if (execve("/Users/zmahmoud/Desktop/php-cgi", newargv, 0) == -1)
+		char *newargv[] = {(char*)"/Users/zmahmoud/Desktop/WebServ/config/cgi_binary/php-cgi", (char*)_cgi_script.c_str(), NULL};
+		if (execve("/Users/zmahmoud/Desktop/WebServ/config/cgi_binary/php-cgi", newargv, 0) == -1)
 		{
-			std::cerr << "execve failed" << std::endl;
+			// TODO: handle error if execve failed (server hang)
+			std::cerr << "execve failedd" << std::endl;
 			return -1;
 		}
 	}
