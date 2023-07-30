@@ -68,29 +68,32 @@ void Response::Method_GET()
 					if (_cgi_file == -1)
 					{
 						std::cout << "CGI ERROR" << std::endl;
+						_have_cgi = false;
 						errorPages(500);
 						return;
 					}
+
 					_client->get_cgi().set_cgi_status(1);
 					// _ready_to_read_from_cgi = 0;
 				}
 				if (_client->get_cgi().get_cgi_status()  == 1 && _client->get_cgi().get_ready_to_read_from_cgi() == 0)
 				{
-					// std::cout << "COND2: " << _cgi_file << std::endl;
 
 					_client->get_cgi().set_ready_to_read_from_cgi(waitpid(_client->get_cgi().get_pid(), 0, WNOHANG));
 					// std::cout << "READY TO READ FROM CGI: " << _client->get_cgi().get_ready_to_read_from_cgi() << std::endl;
-					if (_client->get_cgi().get_ready_to_read_from_cgi() == 0)
-					{
-						if (time(NULL) - _client->get_cgi().get_start_time() >= TIMEOUT_CGI)
-						{
-							std::cout << "CGI TIMEOUT" << std::endl;
-                            _have_cgi = false;
-							// kill(0, SIGKILL);
-							errorPages(500);
-							return;
-						}
-					}
+					// if (_client->get_cgi().get_ready_to_read_from_cgi() == 0)
+					// {
+					// 	if (time(NULL) - _client->get_cgi().get_start_time() >= TIMEOUT_CGI)
+					// 	{
+					// 		std::cout << "CGI TIMEOUT" << std::endl;
+                    //         _have_cgi = false;
+					// 		// kill(0, SIGKILL);
+					// 		errorPages(500);
+					// 		return;
+					// 	}
+					// }
+
+
 				}
 				if (_client->get_cgi().get_cgi_status() == 1 && _client->get_cgi().get_ready_to_read_from_cgi() != 0)
                 	{

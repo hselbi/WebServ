@@ -1,16 +1,16 @@
 LEADER: {
-
+	- limit body config
 },
 7OFFAR: {
 
 }
 SECURITYTY:
 {
-
+	- cookies
 }
 
 ALL:{
-    
+
 }
 
 fsanitize

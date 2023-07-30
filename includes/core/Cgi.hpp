@@ -21,7 +21,6 @@
 #include <signal.h>
 #include <ctime>
 
-
 struct Client;
 
 // wrapper for cgi execution and environment variables
@@ -45,10 +44,8 @@ struct Cgi
 
 	std::string get_cgi_script_name(std::string path);
 
-	void				setClient(Client &client);
+	void setClient(Client &client);
 	void reset();
-
-	
 
 	int get_ready_to_read_from_cgi();
 	void set_ready_to_read_from_cgi(int ready_to_read_from_cgi);
@@ -63,79 +60,24 @@ struct Cgi
 
 	int get_start_time();
 
-	// int get_current_time();
-	// void set_current_time(int current_time);
-
+	int get_status();
+	void set_status(int status);
 
 private:
-
 	env_vars_t _env_vars;
 	char **_envp;
 	char **_argv;
-	Client				*_client;
+	Client *_client;
 	std::string _extension;
 	std::string _body;
 	std::string _cgi_bin;
 	std::string _cgi_script;
 	FILE *_cgi_output_file;
-
-
-
-			int _ready_to_read_from_cgi;
-		int _cgi_status;
+	int _ready_to_read_from_cgi;
+	int _cgi_status;
 	pid_t _pid;
 	int _time_out;
 	int _start_time;
-	// int _current_time;
-
-
+		int _status;
 
 };
-
-/*
-expecting from the request class:
-- request body
-- request body length
-- request headers
-- request method
-- requested resource
-
-
-*/
-
-/*
-CGI Environments Variables
-
-CONTENT_LENGTH: Optionally provides the length, in bytes. It’s available only for POST requests.
-CONTENT_TYPE: Optionally provides the sort of content i.e. the data type of the content.
-HTTP_COOKIE: come back the visitor’s cookies, if one is ready within the type of key try.
-PATH_INFO: It provides the trail for the CGI script.
-REMOTE_HOST: The hostname of the visitor, i.e. the totally qualified name of the host creating the request
-REQUEST_METHOD: The method used for the request. It’s either GET or POST.
-SCRIPT_FILENAME: The absolute path of the CGI script.
-SCRIPT_NAME: The name of the CGI script.
-PATH_INFO: The path of the CGI script.
-QUERY_STRING: The query string, if any, that was contained in the request.
-
-
-
-CGI error codes
-bad gateway error code 502 on unsuccessful execution of CGI script. (unsupoorted gateway)
-bad gateway error code 502
-*/
-
-/*
-	child process run script, output to pipe, parent process read from pipe and store in a string
-	get the request payload and store it in a string _payload and pass it to the script, so he can read it from stdin and use it
-
-	if (post)
-		{
-			payload = request.get_body();
-			_env["CONTENT_TYPE"] = request.get_content_type();
-			_env["CONTENT_LENGTH"] = payload.length();
-		}
-		else if (get)
-		{
-			_env["QUERY_STRING"] = request.get_query_string();
-			}
-*/
