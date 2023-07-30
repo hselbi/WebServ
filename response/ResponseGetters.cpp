@@ -107,7 +107,7 @@ bool	Response::getMatchedLocation()
 
 		if (isMethodAllowedInLocation())
 		{
-			std::cout << "Allowed method in location" << std::endl;
+			// std::cout << "Allowed method in location" << std::endl;
 			return true;
 		}
 		else

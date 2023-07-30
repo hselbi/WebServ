@@ -48,7 +48,7 @@ struct Cgi
 	void				setClient(Client &client);
 	void reset();
 
-
+	
 
 	int get_ready_to_read_from_cgi();
 	void set_ready_to_read_from_cgi(int ready_to_read_from_cgi);

@@ -36,6 +36,8 @@ void Response::checkWhichRequestedMethod()
 		Method_GET();
 	else if (method == "DELETE")
 		Method_DELETE();
+	else if (method == "POST")
+		Method_GET();
 }
 
 void Response::setRediration(std::string location)

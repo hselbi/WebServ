@@ -21,9 +21,14 @@ void Cgi::setClient(Client &client)
 int Cgi::start_cgi(std::string script_path)
 {
 	// std::cout << "start_cgi" << std::endl;
-	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
+	set_cgi_bin("/usr/bin/php");
 	set_cgi_script(script_path);
 	init_env_vars();
+	// std::map<std::string, std::string>::iterator it = _env_vars.begin();
+	// for (; it != _env_vars.end(); ++it)
+	// {
+	// 	std::cout << it->first << ": " << it->second << std::endl;
+	// }
 	return exec_cgi();
 }
 
@@ -43,11 +48,10 @@ int Cgi::exec_cgi() // !! upload handiinng
 		std::cerr << "pipe failed" << std::endl; return -1;
 	}
 
-	// ! TODO: SET BODY REQUEST TO CGI
-	std::string data = "hello lopez22"; // request body // _body.c_str();
-	set_body(data);
-	write(write_to_cgi[1], _body.c_str(), _body.length()); // write to pipe
+	set_body(_client->get_request().getBody());
 
+	write(write_to_cgi[1], _body.c_str(), _body.length()); // write to pipe
+	sleep(1);
 	_start_time = time(NULL);
 
 	if ((_pid = fork()) == -1)
@@ -64,8 +68,8 @@ int Cgi::exec_cgi() // !! upload handiinng
 		dup2(fileno(_cgi_output_file), 1);
 
 		close(write_to_cgi[0]);
-		char *newargv[] = {(char*)"/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi", (char*)_cgi_script.c_str(), NULL};
-		execve("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi", newargv, 0);
+		char *newargv[] = {(char*)"/usr/bin/php", (char*)_cgi_script.c_str(), NULL};
+		execve("/usr/bin/php", newargv, _envp);
 		std::cout << "execve failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
@@ -77,7 +81,7 @@ int Cgi::exec_cgi() // !! upload handiinng
 		// !! check if child process terminated∆
 		// sleep(3);
         _ready_to_read_from_cgi = waitpid(_pid, 0, WNOHANG);
-		std::cout << "_ready_to_read_from_cgi " << _ready_to_read_from_cgi << std::endl;
+		// std::cout << "_ready_to_read_from_cgi " << _ready_to_read_from_cgi << std::endl;
 		// !!! if result == 0, child process still running, if result == -1, error, else child process terminated
 
 		lseek(fileno(_cgi_output_file), 0, SEEK_SET);
@@ -169,7 +173,7 @@ void Cgi::init_env_vars()
 	_env_vars["SERVER_NAME"] = _client->get_server_block().getServerName();
 	_env_vars["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env_vars["SERVER_PROTOCOL"] = "HTTP/1.1";
-	_env_vars["SERVER_PORT"] = _client->get_server_block().getPort();
+	_env_vars["SERVER_PORT"] = std::to_string(_client->get_server_block().getPort());
 	_env_vars["REQUEST_METHOD"] = _client->get_request().getMethod();
 	_env_vars["REQUEST_URI"] = _client->get_request().getPath();
 	_env_vars["DOCUMENT_ROOT"] = root;
