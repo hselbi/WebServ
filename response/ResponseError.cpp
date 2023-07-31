@@ -12,7 +12,7 @@ void	Response::errorPages(int statusCode)
 	if (!_file.is_open())
 	{
 		std::cout << RED <<  "Failed to open file: " << filePath << RESET << std::endl;
-		_client->set_res_status(DONE);
+		setResStatus(DONE);
 		return;
 	}
 
@@ -26,7 +26,7 @@ void	Response::errorPages(int statusCode)
 	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 
-	_client->set_res_status(ON_PROCESS);
+	setResStatus(ON_PROCESS);
 }
 
 

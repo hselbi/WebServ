@@ -5,6 +5,8 @@
 #include <sys/socket.h>
 #include "Utils.hpp"
 #include "../config/ConfLoca.hpp"
+#include <sys/types.h>
+#include <sys/wait.h>
 
 # define RES_BUFFER_SIZE 64000
 # define TIMEOUT_CGI 6
@@ -60,5 +62,5 @@ class Response {
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
 		void					processingCgi();
-		void					resetResponse();
+		void					setResStatus(int status);
 };

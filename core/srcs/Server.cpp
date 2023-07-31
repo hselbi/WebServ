@@ -154,12 +154,7 @@ void Server::disconnect_connection(int client_socket)
 		return;
 	if (get_client(client_socket)->get_res_status() == DONE )
 	{
-		// std::cout << "RSPONSE DONE" << std::endl;
-		get_client(client_socket)->get_cgi().reset();
-		get_client(client_socket)->get_request().resetReq();
-		get_client(client_socket)->get_response().set_cgi_file(0);
 
-		// get_client(client_socket)->get_response().resetResponse();
 		if (is_connection_close(get_client(client_socket)->get_request_data()))
 		{
 			std::cout << "Connection: close" << std::endl;
@@ -167,7 +162,7 @@ void Server::disconnect_connection(int client_socket)
 		}
 		else // Connection: keep-alive
 		{
-			std::cout << "Connection: keep-alive" << std::endl; 
+			std::cout << "Connection: keep-alive" << std::endl;
 			FD_CLR(client_socket, &_write_set_pool);
 			FD_SET(client_socket, &_read_set_pool);
 
@@ -333,11 +328,11 @@ void Server::bind_socket(long server_socket_id, std::string host, int port)
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
 	_server_addr.sin_port = htons(port);
+	// _server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (host == "localhost")
 		host = "127.0.0.1";
 	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0) // !! host.c_str() should be valid ip address,
 		throw_error("inet_aton failed, invalid ip address format");
-	// _server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1)
 		throw_error("server socket binding failed");
 }
@@ -412,14 +407,14 @@ void Server::start_server()
 				}
 				else
 				{
-					// std::cout << "socket " << socket << " 11111" << std::endl;
+					std::cout << "socket " << socket << " 11111" << std::endl;
 
 					// ! incoming request
-					if (!FD_ISSET(socket, &_write_set))
-					{
+					// if (!FD_ISSET(socket, &_write_set))
+					// {
 						// std::cout << "socket " << socket << " 22222" << std::endl;
 						handle_incoming_request(socket);
-					}
+					// }
 				}
 			}
 			else if (FD_ISSET(socket, &_write_set)) // ready to write

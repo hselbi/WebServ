@@ -12,7 +12,7 @@ bool Response::getAutoIndex()
 {
     if (_location && _location->autoindex != DEFAULT)
         return (_location->autoindex == ON) ? true : false;
-    
+
     return _client->get_server_block().getAutoindex();
 }
 
@@ -20,7 +20,7 @@ bool Response::getAutoIndex()
 std::string Response::getErrorPagePath(int statusCode)
 {
     // TODO: check if can location have also error_pages
-	if (_location && _location->error_pages.find(statusCode) != _location->error_pages.end() 
+	if (_location && _location->error_pages.find(statusCode) != _location->error_pages.end()
 		&& Utils::fileExists(_location->error_pages[statusCode]))
 	{
 		return _location->error_pages[statusCode];
@@ -72,7 +72,7 @@ std::string Response::getContentType(const std::string &filePath)
     contentTypes[".ogv"] = "video/ogg";
     contentTypes[".ogx"] = "application/ogg";
     contentTypes[".3gp"] = "video/3gpp";
-    
+
 	dotPos = filePath.rfind('.');
 	if (dotPos != std::string::npos)
 		extension = filePath.substr(dotPos);
@@ -92,7 +92,7 @@ bool	Response::getMatchedLocation()
 	size_t max_length = 0;
 	int		index = -1;
 	for (int i = 0; i < locations.size(); i++)
-	{	
+	{
 		if (requestPath.find(locations[i].path) == 0 && locations[i].path.length() > 0)
 		{
 			max_length = locations[i].path.length();
@@ -111,7 +111,7 @@ bool	Response::getMatchedLocation()
 		}
 		else
 			return false;
-		
+
 	}
 	std::cout << "No matched location" << std::endl;
 	errorPages(404);
@@ -182,7 +182,7 @@ bool Response::isServerHaveRedirection()
 
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 		_client->append_response_data(_header_buffer);
-		_client->set_res_status(DONE);
+		setResStatus(DONE);
 		return true;
 	}
 	else if (redirectStatus != -1)
@@ -195,10 +195,10 @@ bool Response::isServerHaveRedirection()
 
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 		_client->append_response_data(_header_buffer);
-		_client->set_res_status(DONE);
+		setResStatus(DONE);
 		return true;
 	}
-		
+
 	return false;
 }
 
