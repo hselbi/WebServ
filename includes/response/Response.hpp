@@ -33,9 +33,9 @@ class Response {
 		ConfLoca 			*_location;
 		std::ifstream		_file;
 		std::map<std::string, std::ifstream>		_files;
-		int					_cgi_file;
 
 		std::string			_header_buffer;
+		std::string			_cgi_file_path;
 		char	 			_buffer[RES_BUFFER_SIZE];
 		bool				_have_cgi;
 

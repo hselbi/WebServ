@@ -48,6 +48,15 @@ void Response::readCgiFile()
 	// std::cout << "readCgiFile" << std::endl;
 	// std::cout << "_cgi_file: " << _cgi_file << std::endl;
     t_responseHeader responseHeader;
+    std::streampos fileSize;
+
+	_file.open(_cgi_file_path.c_str(), std::ios::binary);
+    _file.seekg(0, std::ios::end);
+    fileSize = _file.tellg();
+    _file.seekg(0, std::ios::beg);
+
+
+
     off_t fileSize;
     ssize_t bytesRead;
     char *found;
