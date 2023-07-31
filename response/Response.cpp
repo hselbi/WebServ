@@ -58,7 +58,7 @@ void Response::processing()
 		{
 			_file.close();
 			_buffer[0] = '\0';
-			_client->set_res_status(DONE);
+			setResStatus(DONE);
 		}
 	}
 	else if (_have_cgi && _client->get_res_status() == ON_PROCESS)
@@ -68,6 +68,7 @@ void Response::processing()
 	}
 	else if (_client->get_res_status() == DONE)
 	{
+
 		_have_cgi = false;
 		delete _location;
 		_location = NULL;
@@ -104,7 +105,7 @@ void Response::processingCgi()
 		close(_cgi_file);
 		_have_cgi = false;
 		_buffer[0] = '\0';
-		_client->set_res_status(DONE);
+		setResStatus(DONE);
 	}
 }
 
@@ -125,4 +126,30 @@ int 				Response::get_cgi_file()
 void 				Response::set_cgi_file(int fd)
 {
 	_cgi_file = fd;
+}
+
+void Response::setResStatus(int status)
+{
+	if (status == DONE)
+	{
+		_client->set_res_status(DONE);
+		if (_have_cgi)
+		{
+			_have_cgi = false;
+			_client->get_cgi().reset();
+			if (_location)
+			{
+				delete _location;
+				_location = NULL;
+			}
+			close(_cgi_file);
+		}
+		if (_file.is_open())
+			_file.close();
+		_header_buffer = "";
+		_buffer[0] = '\0';
+		_client->get_request().resetReq();
+	}
+	else
+		_client->set_res_status(status);
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../includes.hpp"
-// enum 
+// enum
 enum requestFlag {
     REQUEST_NOT_COMPLETED,
     REQUEST_COMPLETED,
@@ -17,6 +17,7 @@ private:
         std::string m_query;
         std::string m_raw;
         std::string m_host;
+		std::string m_cookie;
         std::map<std::string, std::string> m_body_query;
         std::map<std::string, std::string> m_headers;
         std::map<std::string, std::string> m_env_cgi;
@@ -31,7 +32,7 @@ public:
     ~Request();
     Request &operator=(const Request &other);
     Request(const Request &other);
-    
+
     /* setters */
     void setMethod(const std::string &method);
     void setBody(const std::string &body);
@@ -91,7 +92,7 @@ public:
     bool isFinished(const std::string &str);
     bool isFinished();
     bool isFinished(std::string &str, size_t &i);
-    
+
 };
 
 std::string plunder(std::string &str, char c);
