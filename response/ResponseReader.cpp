@@ -20,7 +20,7 @@ void Response::readFile()
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
-    _client->set_res_status(ON_PROCESS);
+    setResStatus(ON_PROCESS);
 }
 
 void Response::readFileByPath(std::string filePath)
@@ -40,7 +40,7 @@ void Response::readFileByPath(std::string filePath)
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
-    _client->set_res_status(ON_PROCESS);
+    setResStatus(ON_PROCESS);
 }
 
 void Response::readCgiFile()
@@ -59,7 +59,7 @@ void Response::readCgiFile()
     {
         std::cerr << "Failed to seek to the end of file!" << std::endl;
         close(_cgi_file);
-        _client->set_res_status(DONE);
+        setResStatus(DONE);
         return errorPages(400);
     }
 
@@ -67,7 +67,7 @@ void Response::readCgiFile()
     {
         std::cerr << "Failed to seek to the beginning of file!" << std::endl;
         close(_cgi_file);
-        _client->set_res_status(DONE);
+        setResStatus(DONE);
         return errorPages(400);
     }
 
@@ -90,6 +90,6 @@ void Response::readCgiFile()
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	// std::cout << "--> "<< _header_buffer << std::endl;
-    _client->set_res_status(ON_PROCESS);
+    setResStatus(ON_PROCESS);
 
 }
