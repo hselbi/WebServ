@@ -6,7 +6,7 @@ Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _cgi_output_file(NULL), _
 Cgi::~Cgi() {}
 
 
-int Cgi::start_cgi(std::string script_path)
+std::string Cgi::start_cgi(std::string script_path)
 {
 	// set_cgi_bin("/usr/bin/php-cgi");
 	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
@@ -16,64 +16,73 @@ int Cgi::start_cgi(std::string script_path)
 	return exec_cgi();
 }
 
-int Cgi::exec_cgi() // !! upload handiinng
+std::string Cgi::exec_cgi()
 {
 	int write_to_cgi[2];
 
-	_cgi_output_file = tmpfile();
+    std::string tempFileName = "/tmp/cgioutput" + std::to_string(getpid()); // generate a unique temp file name
+    std::ofstream tempFile(tempFileName, std::ios::out | std::ios::binary);
 
-	if (!_cgi_output_file) { return -1; }
+    if (!tempFile.is_open()) { return "-1"; }
 
-	if (pipe(write_to_cgi) == -1) { return -1; }
+    if (pipe(write_to_cgi) == -1) { return "-1"; }
 
-	set_body(_client->get_request().getBody());
+    set_body(_client->get_request().getBody());
 
-	_start_time = time(NULL);
+    _start_time = time(NULL);
 
-	if ((_pid = fork()) == -1) { return -1; }
+    if ((_pid = fork()) == -1) { return "-1"; }
 
-	if (_pid == 0)
-	{
-		close(write_to_cgi[1]);
-		dup2(write_to_cgi[0], 0);
-		dup2(fileno(_cgi_output_file), 1);
-		close(write_to_cgi[0]);
+    if (_pid == 0)
+    {
+        close(write_to_cgi[1]);
+        dup2(write_to_cgi[0], 0);
+        dup2(fileno(tempFile.) 1); // get the file descriptor from the streambuf
+        close(write_to_cgi[0]);
 
-		char *newargv[] = {(char *)_cgi_bin.c_str(), (char *)_cgi_script.c_str(), NULL};
-		execve(_cgi_bin.c_str(), newargv, _envp);
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		close(write_to_cgi[0]);
-		write(write_to_cgi[1], _body.c_str(), _body.length());
-		close(write_to_cgi[1]);
+        char newargv[] = {(char)_cgi_bin.c_str(), (char *)_cgi_script.c_str(), NULL};
+        execve(_cgi_bin.c_str(), newargv, _envp);
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        close(write_to_cgi[0]);
+        write(write_to_cgi[1], _body.c_str(), _body.length());
+        close(write_to_cgi[1]);
 
-		_ready_to_read_from_cgi = waitpid(_pid, &_status, WNOHANG); // if result == 0, child process still running, if result == -1, error, else child process terminated
+        _ready_to_read_from_cgi = waitpid(_pid, &_status, WNOHANG); // if result == 0, child process still running, if result == -1, error, else child process terminated
+    }
 
-		lseek(fileno(_cgi_output_file), 0, SEEK_SET);
-	}
+    tempFile.close(); // Close the ofstream first before reading with ifstream
 
-	return fileno(_cgi_output_file);
+    std::ifstream cgiOutput(tempFileName, std::ios::in | std::ios::binary);
+    if (!cgiOutput.is_open()) { return "-1"; }
+
+    // Read the contents from the ifstream as needed...
+
+    cgiOutput.close();
+    remove(tempFileName.c_str()); // Delete the temporary file
+
+    return "0"; // Return a success code or modify as necessary
 }
 
 void Cgi::init_env_vars()
 {
 	std::string root = _client->get_response().getRoot();
-
+	std::string path = _cgi_script;
 	_env_vars["SERVER_SOFTWARE"] = "MortalKOMBAT/1.0";
 	_env_vars["SERVER_NAME"] = _client->get_server_block().getServerName();
 	_env_vars["SERVER_PORT"] = std::to_string(_client->get_server_block().getPort());
 	_env_vars["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env_vars["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env_vars["REQUEST_METHOD"] = _client->get_request().getMethod();
-	_env_vars["REQUEST_URI"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
+	_env_vars["REQUEST_URI"] = path;
 	_env_vars["DOCUMENT_ROOT"] = root;
-	_env_vars["SCRIPT_NAME"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
+	_env_vars["SCRIPT_NAME"] = path;
 	_env_vars["SCRIPT_FILENAME"] = _env_vars["SCRIPT_NAME"];
 	_env_vars["QUERY_STRING"] = _client->get_request().getQuery();
-	_env_vars["PATH_INFO"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
-	_env_vars["PATH_TRANSLATED"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
+	_env_vars["PATH_INFO"] = path;
+	_env_vars["PATH_TRANSLATED"] = path;
 	if (_client->get_request().getHeaders()["Cookie"] != "")
 		_env_vars["COOKIES"] = _client->get_request().getHeaders()["Cookie"];
 	if (_client->get_request().getMethod() == "POST")
@@ -196,3 +205,4 @@ void Cgi::set_status(int status)
 cookies
 
 */
+

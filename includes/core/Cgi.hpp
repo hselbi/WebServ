@@ -20,6 +20,12 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <ctime>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 struct Client;
 
@@ -29,9 +35,8 @@ struct Cgi
 	typedef std::map<std::string, std::string> env_vars_t;
 	Cgi();
 	~Cgi();
-
-	int start_cgi(std::string script_path);
-	int exec_cgi();
+	std::string start_cgi(std::string script_path);
+	std::string exec_cgi();
 
 	void init_env_vars();
 	void clean_env_vars();
