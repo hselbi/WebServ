@@ -60,5 +60,5 @@ class Response {
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
 		void					processingCgi();
-		void					resetResponse();
+		void					setResStatus(int status);
 };

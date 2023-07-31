@@ -50,7 +50,7 @@ void Response::setRediration(std::string location)
 
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->append_response_data(_header_buffer);
-	_client->set_res_status(DONE);
+	setResStatus(DONE);
 }
 
 void	Response::deleteAllFolderFiles()
@@ -90,24 +90,10 @@ void	Response::deleteFile()
 		responseHeader.headers["Content-Length"] = "0";
 		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-		_client->set_res_status(ON_PROCESS);
+		setResStatus(ON_PROCESS);
 	}
 }
 
-void Response::resetResponse()
-{
-	_header_buffer = "";
-	_buffer[0] = '\0';
-	_have_cgi = false;
-	_client->set_res_status(NOT_STARTED);
-	if (_location)
-	{
-		delete _location;
-		_location = NULL;
-	}
-	if (_file.is_open())
-		_file.close();
-}
 
 void Response::autoIndex()
 {
@@ -142,5 +128,5 @@ void Response::autoIndex()
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
 	_client->append_response_data(strHeader);
 	_client->append_response_data(body);
-	_client->set_res_status(DONE);
+	setResStatus(DONE);
 }

@@ -87,7 +87,7 @@ void Response::Method_GET()
 					// 	{
 					// 		std::cout << "CGI TIMEOUT" << std::endl;
                     //         _have_cgi = false;
-					// 		// kill(0, SIGKILL);
+					// 		// (0, SIGKILL);
 					// 		errorPages(500);
 					// 		return;
 					// 	}
