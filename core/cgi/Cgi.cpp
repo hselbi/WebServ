@@ -9,7 +9,7 @@ Cgi::~Cgi() {}
 int Cgi::start_cgi(std::string script_path)
 {
 	// set_cgi_bin("/usr/bin/php-cgi");
-	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
+	set_cgi_bin("/Users/zmahmoud/Desktop/WebServ/config/cgi_binary/php-cgi");
 	std::cout << "Script path: " << script_path << std::endl;
 	set_cgi_script(script_path);
 	init_env_vars();
@@ -60,6 +60,8 @@ int Cgi::exec_cgi() // !! upload handiinng
 void Cgi::init_env_vars()
 {
 	std::string root = _client->get_response().getRoot();
+	std::string tmp_path = "www/html/cgi/index.php";
+
 
 	_env_vars["SERVER_SOFTWARE"] = "MortalKOMBAT/1.0";
 	_env_vars["SERVER_NAME"] = _client->get_server_block().getServerName();
@@ -67,13 +69,13 @@ void Cgi::init_env_vars()
 	_env_vars["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env_vars["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env_vars["REQUEST_METHOD"] = _client->get_request().getMethod();
-	_env_vars["REQUEST_URI"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
+	_env_vars["REQUEST_URI"] = tmp_path;
 	_env_vars["DOCUMENT_ROOT"] = root;
-	_env_vars["SCRIPT_NAME"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
+	_env_vars["SCRIPT_NAME"] = tmp_path;
 	_env_vars["SCRIPT_FILENAME"] = _env_vars["SCRIPT_NAME"];
 	_env_vars["QUERY_STRING"] = _client->get_request().getQuery();
-	_env_vars["PATH_INFO"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
-	_env_vars["PATH_TRANSLATED"] = "/home/sbb3/cursus/WebServ/www/html/cgi/index.php";
+	_env_vars["PATH_INFO"] = tmp_path;
+	_env_vars["PATH_TRANSLATED"] = tmp_path;
 	if (_client->get_request().getHeaders()["Cookie"] != "")
 		_env_vars["COOKIES"] = _client->get_request().getHeaders()["Cookie"];
 	if (_client->get_request().getMethod() == "POST")

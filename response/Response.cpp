@@ -55,11 +55,7 @@ void Response::processing()
 			_header_buffer = "";
 		}
 		else
-		{
-			_file.close();
-			_buffer[0] = '\0';
 			setResStatus(DONE);
-		}
 	}
 	else if (_have_cgi && _client->get_res_status() == ON_PROCESS)
 	{
@@ -98,13 +94,9 @@ void Response::processingCgi()
 		std::string str(_buffer, bytesRead);
 		str = (_header_buffer.length() > 0) ? _header_buffer + str : str;
 		_client->append_response_data(str);
-		_header_buffer = "";
 	}
 	else
 	{
-		close(_cgi_file);
-		_have_cgi = false;
-		_buffer[0] = '\0';
 		setResStatus(DONE);
 	}
 }
