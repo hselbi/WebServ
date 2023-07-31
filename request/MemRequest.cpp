@@ -119,7 +119,6 @@ bool Request::isFinished()
 
 int Request::parseReq(const std::string &str)
 {
-
     std::string key;
     std::string value;
     std::string line;
