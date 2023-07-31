@@ -55,9 +55,12 @@ void Response::readCgiFile()
     int endHeaderPos = 0;
 
     fileSize = lseek(_cgi_file, 0, SEEK_END);
+	std::cout << "fileSize: " << fileSize << std::endl;
+	std::cout << "cgi file size: " << _cgi_file << std::endl;
     if (fileSize == (off_t)-1)
     {
         std::cerr << "Failed to seek to the end of file!" << std::endl;
+		std::cout << "errno: " << errno << std::endl;
         close(_cgi_file);
         setResStatus(DONE);
         return errorPages(400);
