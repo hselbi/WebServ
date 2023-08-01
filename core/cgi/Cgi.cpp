@@ -1,31 +1,28 @@
 #include "../../includes/core/Cgi.hpp"
 #include "../../includes/core/Client.hpp"
-
 Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _cgi_output_file(NULL), _envp(NULL), _argv(NULL), _extension(""), _ready_to_read_from_cgi(1), _cgi_status(0), _start_time(0), _pid(0), _status(0) {}
+
+size_t Cgi::_counter = 0;
 
 Cgi::~Cgi() {}
 
 std::string Cgi::start_cgi(std::string script_path)
 {
 	// set_cgi_bin("/usr/bin/php-cgi");
-	set_cgi_bin("/Users/zmahmoud/Desktop/WebServ/config/cgi_binary/php-cgi");
+	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
 	std::cout << "Script path: " << script_path << std::endl;
 	set_cgi_script(script_path);
 	init_env_vars();
 	return exec_cgi();
 }
 
-int Cgi::get_random_number()
-{
-	srand(time(NULL));
-	return rand() % 1000000;
-}
 
 std::string Cgi::exec_cgi() // !! upload handiinng
 {
 	int write_to_cgi[2];
 
-	std::string tmp_filename = "/tmp/cgi_output_" + std::to_string(get_random_number());
+	std::string tmp_filename = "/tmp/cgi_output_" + std::to_string(time(NULL) + _counter++);
+	std::cout << "tmp_filename: " << tmp_filename << std::endl;
 	FILE *_cgi_output_file = fopen(tmp_filename.c_str(), "w+");
 
 	if (!_cgi_output_file)
