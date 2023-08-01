@@ -100,38 +100,3 @@ void Response::processingCgi()
 	}
 }
 
-void Response::autoIndex()
-{
-	DIR *dir;
-	struct dirent *ent;
-	std::string strHeader, path, body, tmp;
-	t_responseHeader responseHeader;
-
-	path = getRoot() + _client->get_request().getPath();
-	body = "<html><head><title>Index of " + _client->get_request().getPath() + "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
-	if ((dir = opendir(path.c_str())) != NULL)
-	{
-		body.append("<a href=\"./\">./</a><br>");
-		body.append("<a href=\"../\">../</a><br>");
-		while ((ent = readdir(dir)) != NULL)
-		{
-			tmp = ent->d_name;
-			if (Utils::isDirectory(path + "/" + tmp) && tmp != "." && tmp != "..")
-				body.append("<a href=\"" + tmp + "/\">" + tmp + "/</a><br>");
-			else if (tmp != "." && tmp != "..")
-				body.append("<a href=\"" + tmp + "\">" + tmp + "</a><br>");
-		}
-		body.append("</pre><hr></body></html>");
-		closedir(dir);
-	}
-	responseHeader.statusCode = 200;
-	responseHeader.statusMessage = Utils::getStatusMessage(200);
-	responseHeader.headers["Content-Type"] = "text/html";
-	responseHeader.headers["Content-Length"] = Utils::toString(body.length());
-	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
-
-	strHeader = Utils::ResponseHeaderToString(responseHeader);
-	_client->append_response_data(strHeader);
-	_client->append_response_data(body);
-	_client->set_res_status(DONE);
-}

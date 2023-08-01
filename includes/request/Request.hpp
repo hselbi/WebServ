@@ -86,6 +86,9 @@ public:
     void check_headers(std::string key, std::string value);
 
 
+
+    /* process chunked */
+    void chunkedProcess(const std::string &str);
     /*  check if request is finished or not */
     bool isWhitespace(const std::string &str);
     bool isFinished(const std::string &str);

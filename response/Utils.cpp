@@ -48,6 +48,7 @@ bool Utils::fileExists(const std::string& path)
     return file.good();
 }
 
+
 std::string Utils::getStatusMessage(int statusCode)
 {
 	switch (statusCode)
