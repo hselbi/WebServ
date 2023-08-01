@@ -9,8 +9,8 @@ Cgi::~Cgi() {}
 std::string Cgi::start_cgi(std::string script_path)
 {
 	std::cout << RED << "START CGI: " << script_path << RESET << std::endl;
-	set_cgi_bin("/usr/bin/php-cgi");
-	// set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
+	// set_cgi_bin("/usr/bin/php-cgi");
+	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
 	std::cout << "Script path: " << script_path << std::endl;
 	set_cgi_script(script_path);
 	init_env_vars();
@@ -95,14 +95,14 @@ void Cgi::init_env_vars()
 		_env_vars["CONTENT_TYPE"] = _client->get_request().getHeaders()["Content-Type"];
 		_env_vars["CONTENT_LENGTH"] = _client->get_request().getHeaders()["Content-Length"];
 	}
-	
+
 	// !! TODO: CHANGE (Anass Me (Zakaria) Change This Part)
 	size_t dot_pos = path.rfind(".");
 	if ((dot_pos != std::string::npos) && path.substr(dot_pos) == ".php")
 	{
 		_env_vars["REDIRECT_STATUS"] = "200";
 	}
-	
+
 	_envp = new char *[_env_vars.size() + 1];
 	int i = 0;
 	for (env_vars_t::iterator it = _env_vars.begin(); it != _env_vars.end(); ++it, ++i)

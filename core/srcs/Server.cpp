@@ -124,6 +124,7 @@ std::string generate_response()
 
 void Server::send_response(long client_socket)
 {
+	std::cout << "Sending response to client socket " << client_socket << "\n";
 	long bytes_sent;
 	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), 0)) == -1)
 	{
@@ -155,22 +156,7 @@ void Server::disconnect_connection(int client_socket)
 		return;
 	if (get_client(client_socket)->get_res_status() == DONE )
 	{
-
-		// if (is_connection_close(get_client(client_socket)->get_request_data()))
-		// {
-			std::cout << "Connection: close" << std::endl;
-			drop_client(client_socket); // Connection: close
-		// }
-		// else // Connection: keep-alive
-		// {
-		// 	std::cout << "Connection: keep-alive" << std::endl;
-		// 	FD_CLR(client_socket, &_write_set_pool);
-		// 	FD_SET(client_socket, &_read_set_pool);
-
-		// 	get_client(client_socket)->reset_request_data();
-		// 	get_client(client_socket)->reset_response_data();
-		// 	get_client(client_socket)->set_res_status(NOT_STARTED);
-		// }
+		drop_client(client_socket); // Connection: close
 	}
 }
 
@@ -408,8 +394,6 @@ void Server::start_server()
 				}
 				else
 				{
-					std::cout << "socket " << socket << " 11111" << std::endl;
-
 					// ! incoming request
 					// if (!FD_ISSET(socket, &_write_set))
 					// {
@@ -421,6 +405,7 @@ void Server::start_server()
 			else if (FD_ISSET(socket, &_write_set)) // ready to write
 			{
 				// ! outgoing response
+				std::cout << "----->>handle_outgoing_response<<---" << std::endl;
 				handle_outgoing_response(socket); // !! send response to client
 			}
 
