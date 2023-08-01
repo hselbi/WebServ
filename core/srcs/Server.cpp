@@ -79,9 +79,10 @@ void Server::drop_client(long client_socket)
 
 void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
 {
-	std::cerr << "request: " << request << "\n";
+	// std::cout << request << std::endl;
 
 	get_client(client_socket)->get_request().parseReq(request);
+	std::cout << get_client(client_socket)->get_request() << std::endl;
 
 
 }
