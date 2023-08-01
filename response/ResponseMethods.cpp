@@ -3,20 +3,19 @@
 
 void Response::Method_GET()
 {
-    std::string filePath = getRequestPath();
+    std::string filePath = getRequestPathFile();
     std::string index = "";
 
     if (Utils::fileExists(filePath))
     {
-        // std::cout << "File found"  << filePath << std::endl;
+        // std::cout << "File found: "  << filePath << std::endl;
 
         if (Utils::isDirectory(filePath))
         {
-            std::cout << "FilePath:" << filePath << std::endl;
             if (filePath[filePath.length() - 1] != '/')
             {
-                std::cout << "REDIRECT TO: " << getRequestPath() + "/" << std::endl;
-                return setRediration(getRequestPath() + "/");
+                // std::cout << BLUE <<"REDIRECT TO: " << _client->get_request().getPath() + "/" << RESET << std::endl;
+                return setRediration( _client->get_request().getPath() + "/");
             }
             else
             {
@@ -30,7 +29,7 @@ void Response::Method_GET()
                         _cgi_file_path = _client->get_cgi().start_cgi(index);
                         if (_cgi_file_path == "-1")
                         {
-                            std::cout << YELLOW << "CGI ERROR" << RESET << std::endl;
+                            // std::cout << YELLOW << "CGI ERROR" << RESET << std::endl;
                             errorPages(500);
                             return;
                         }
@@ -38,7 +37,7 @@ void Response::Method_GET()
                     }
                     else
                     {
-                        std::cout << "Have index file "  << filePath<< std::endl;
+                        // std::cout << "Have index file "  << filePath<< std::endl;
                         readFileByPath(index);
                     }
                 }
@@ -66,7 +65,7 @@ void Response::Method_GET()
 					// std::cout << "COND1: " << _cgi_file << std::endl;
 					if (_cgi_file_path == "-1")
 					{
-						std::cout << "CGI ERROR" << std::endl;
+						// std::cout << "CGI ERROR" << std::endl;
 						_have_cgi = false;
 						errorPages(500);
 						return;
@@ -115,7 +114,7 @@ void Response::Method_GET()
 
 void Response::Method_DELETE()
 {
-    std::string filePath = getRequestPath();
+    std::string filePath = getRequestPathFile();
     std::string index = "";
     if (Utils::fileExists(filePath))
     {

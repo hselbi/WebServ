@@ -5,7 +5,7 @@ std::string Response::getRoot()
 {
     if (_location && _location->root != "")
         return _location->root;
-    return _client->get_server_block().getRoot() != "" ? _client->get_server_block().getRoot() : "./www/html";
+    return _client->get_server_block().getRoot() != "" ? _client->get_server_block().getRoot() : "www/html";
 }
 
 bool Response::getAutoIndex()
@@ -89,6 +89,7 @@ bool	Response::getMatchedLocation()
 	// TODO: Verify this function (!! High Priority)
 	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
 	std::string requestPath = _client->get_request().getPath();
+	// std::cout << "Request path: " << requestPath << std::endl;
 	size_t max_length = 0;
 	int		index = -1;
 	for (int i = 0; i < locations.size(); i++)
@@ -103,7 +104,6 @@ bool	Response::getMatchedLocation()
 	if (index != -1)
 	{
 		_location = new ConfLoca(locations[index]);
-
 		if (isMethodAllowedInLocation())
 		{
 			// std::cout << "Allowed method in location" << std::endl;
@@ -113,29 +113,24 @@ bool	Response::getMatchedLocation()
 			return false;
 
 	}
-	std::cout << "No matched location" << std::endl;
+	// std::cout << "No matched location" << std::endl;
 	errorPages(404);
 	return false;
 }
 
-std::string Response::getRequestPath()
+std::string Response::getRequestPathFile()
 {
 	std::string path = _client->get_request().getPath();
 	std::string root = getRoot();
-	// std::cout << "++path " << path << std::endl;
-	// std::cout << "++root " << root << std::endl;
-	if (_location)
-	{
-		// std::cout << "__PATH: " << path.replace(0, _location->path.length(), root) << std::endl;
-		// return  path.replace(0, _location->path.length(), root);
-	}
 
-	// return path.replace(0, 1, root);
-	// std::cout << "__2-PATH: " << path.replace(0, 1, root) << std::endl;
+	if (_location && path.find(_location->path) == 0)
+		path =  (_location->path != "/") ? path.substr(_location->path.length()) : path;
+	else
+		path = "/";
 
-	// temporary solution
-	// return path.replace(0, 1, root);
-	return getRoot() + _client->get_request().getPath();
+	// std::cout << BLUE << "++path: [" << path << "]   |  root: [" << root;
+	// std::cout << "] --> [" << Utils::getWebservRootPath()  + root + path << "]" << RESET << std::endl;
+	return  Utils::getWebservRootPath()  + root + path;
 }
 
 std::string Response::tmp_getRequestPath()
@@ -155,7 +150,7 @@ std::string Response::tmp_getRequestPath()
 
 std::string Response::isDirHasIndexFiles()
 {
-    std::string dirPath = getRoot() + _client->get_request().getPath();
+    std::string dirPath = getRequestPathFile();
     std::vector<std::string> indexFiles = _client->get_server_block().getIndex();
     for (size_t i = 0; i < indexFiles.size(); i++)
     {
@@ -164,6 +159,7 @@ std::string Response::isDirHasIndexFiles()
     }
     if (Utils::fileExists(dirPath + "index.html"))
         return dirPath + "index.html";
+
     return "";
 }
 
@@ -213,7 +209,7 @@ bool Response::isMethodAllowedInLocation()
 			return true;
 		else
 		{
-			std::cout << "Method not allowed in location" << std::endl;
+			// std::cout << "Method not allowed in location" << std::endl;
 			errorPages(405);
 			return false;
 		}

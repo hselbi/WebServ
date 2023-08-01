@@ -9,7 +9,7 @@ Response::Response()
 
 Response::~Response()
 {
-	std::cout << "Response destructor called" << std::endl;
+	// std::cout << "Response destructor called" << std::endl;
 	if (_location)
 		delete _location;
 	_file.close();
@@ -23,13 +23,11 @@ void Response::setClient(Client &client)
 void Response::processing()
 {
 	int buffer_size = RES_BUFFER_SIZE;
-	std::string filePath = getRequestPath();
 
 	if (_client->get_res_status() == NOT_STARTED)
 	{
-		// std::cout << "FILE PATH: " << filePath << std::endl;
-		// std::cout << "}}}}}---> |" << tmp_getRequestPath() << "|" << std::endl;
-		
+		// ! TODO: CALL MULTIPLE TIMES IN THE SAME REQUEST IN CASE OF CGI 
+   			std::cout << GREEN << "NOT_STARTED" << RESET << std::endl;
 		if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
@@ -77,7 +75,7 @@ void Response::setResStatus(int status)
 		if (_have_cgi)
 		{
 			_client->get_cgi().reset();
-			// remove(_cgi_file_path.c_str());
+			remove(_cgi_file_path.c_str());
 		}
 		if (_location)
 		{
