@@ -98,8 +98,10 @@ void Response::readCgiFile()
     ofile << content;
     ofile.close();
 
+	std::cout << RED << header_file << RESET << std::endl;
     cgi_headers = parseCgiHeader(header_file);
     it = cgi_headers.begin();
+	responseHeader.statusCode = -1;
     while (it != cgi_headers.end())
     {
         if (it->first == "Status")
@@ -116,6 +118,13 @@ void Response::readCgiFile()
     }
 
     _file.open(_cgi_file_path.c_str(), std::ios::binary);
+	if (responseHeader.statusCode == -1)
+	{
+		responseHeader.statusCode = 200;
+        responseHeader.statusMessage = Utils::getStatusMessage(200);
+
+
+	}
     responseHeader.headers["Content-Length"] = Utils::toString(content.length());
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
