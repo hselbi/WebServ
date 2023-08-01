@@ -98,7 +98,6 @@ void Response::readCgiFile()
     ofile << content;
     ofile.close();
 
-	std::cout << RED << header_file << RESET << std::endl;
     cgi_headers = parseCgiHeader(header_file);
     it = cgi_headers.begin();
 	responseHeader.statusCode = -1;
