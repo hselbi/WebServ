@@ -25,8 +25,7 @@ class Response {
 		bool get_cgi_status();
 		void set_cgi_status(bool status);
 
-		int 				get_cgi_file();
-		void 				set_cgi_file(int fd);
+
 
 	private:
 		Client				*_client;
@@ -61,6 +60,6 @@ class Response {
 		bool 					getAutoIndex();
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
-		void					processingCgi();
 		void					setResStatus(int status);
+		std::map<std::string, std::string> parseCgiHeader(std::string header);
 };

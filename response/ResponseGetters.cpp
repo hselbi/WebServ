@@ -27,11 +27,11 @@ std::string Response::getErrorPagePath(int statusCode)
 	}
     std::map<int, std::string>  pages = _client->get_server_block().getErrorPages();
     if (pages.find(statusCode) != pages.end() && Utils::fileExists(pages[statusCode]))
-    {
 		return pages[statusCode];
-	}
-
-    return "./defaultPages/" + Utils::toString(statusCode) + ".html";
+	else if (Utils::fileExists("./defaultPages/" + Utils::toString(statusCode) + ".html"))
+		return "./defaultPages/" + Utils::toString(statusCode) + ".html";
+	else
+		return "./defaultPages/500.html";
 }
 
 std::string Response::getContentType(const std::string &filePath)

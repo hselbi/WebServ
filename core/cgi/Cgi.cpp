@@ -8,8 +8,8 @@ Cgi::~Cgi() {}
 
 std::string Cgi::start_cgi(std::string script_path)
 {
-	// set_cgi_bin("/usr/bin/php-cgi");
-	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
+	set_cgi_bin("/usr/bin/php-cgi");
+	// set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
 	std::cout << "Script path: " << script_path << std::endl;
 	set_cgi_script(script_path);
 	init_env_vars();

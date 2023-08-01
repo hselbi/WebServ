@@ -7,7 +7,8 @@ void	Response::errorPages(int statusCode)
 	t_responseHeader	responseHeader;
 	std::string			filePath = getErrorPagePath(statusCode);
 
-
+	if (_file.is_open())
+		_file.close();
 	_file.open(filePath.c_str(), std::ios::binary);
 	if (!_file.is_open())
 	{
