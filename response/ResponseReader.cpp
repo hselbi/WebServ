@@ -43,35 +43,85 @@ void Response::readFileByPath(std::string filePath)
     setResStatus(ON_PROCESS);
 }
 
+
+
+std::map<std::string, std::string> Response::parseCgiHeader(std::string header)
+{
+    std::map<std::string, std::string> headers;
+    std::string key;
+    std::string value;
+    size_t pos = 0;
+
+   while ((pos = header.find(":")) != std::string::npos)
+    {
+        key = header.substr(0, pos);
+        header.erase(0, pos + 1);
+        pos = header.find("\r\n");
+        value = header.substr(0, pos);
+        header.erase(0, pos + 2);
+        headers[key] = value;
+    }
+    return headers;
+}
+
+
+
 void Response::readCgiFile()
 {
 
     t_responseHeader responseHeader;
+    std::map<std::string, std::string> cgi_headers;
+    std::map<std::string, std::string>::iterator it;
+    std::ifstream ifile;
+    std::ofstream ofile;
+    std::string content;
+    std::string header_file = "";
 
-    std::cout << "CGI FILE PATH: " << _cgi_file_path << std::endl;
-    std::fstream file(_cgi_file_path, std::ios::in | std::ios::out | std::ios::binary);
-
-    if (!file) {
+    
+    ifile.open(_cgi_file_path.c_str(), std::ios::binary);
+    if (!ifile) {
         std::cerr << "Failed to open the file!" << std::endl;
         return errorPages(500);
     }
+    else
+    {
+        std::getline(ifile, content, '\0');
+        ifile.close();
+    }
 
-    std::ostringstream oss;
-    oss << file.rdbuf();
-    std::string content = oss.str();
 
     size_t pos = content.find("\r\n\r\n");
     if (pos != std::string::npos)
-        content.erase(0, pos + 4);
+    {
+        header_file = content.substr(0, pos + 4);
+        content = content.erase(0, pos + 4);
+    }
+    
+    ofile.open(_cgi_file_path.c_str(), std::ios::binary);
+    ofile << content;
+    ofile.close();
+    
 
-    file.clear();
-    file.seekp(0, std::ios::beg);
-    file << content;
-    file.close();
 
+    cgi_headers = parseCgiHeader(header_file);
+    it  = cgi_headers.begin();
+    while (it != cgi_headers.end())
+    {
+        if (it->first == "Status")
+        {
+            int statusCode = std::stoi(it->second.substr(0, 4));
+            if (statusCode < 100 || statusCode >= 500)
+                return (statusCode == 502)? errorPages(502) : errorPages(500);
+            responseHeader.statusCode = statusCode;
+            responseHeader.statusMessage = it->second.substr(4, it->second.length() - 4);
+        }
+        else
+            responseHeader.headers[it->first] = it->second;
+        it++;
+    }
+
+    
     _file.open(_cgi_file_path.c_str(), std::ios::binary);
-    responseHeader.statusMessage = Utils::getStatusMessage(200);
-    responseHeader.headers["Content-Type"] = "text/html";
     responseHeader.headers["Content-Length"] = Utils::toString(content.length());
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
