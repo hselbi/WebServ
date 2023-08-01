@@ -77,7 +77,7 @@ void Response::setResStatus(int status)
 		if (_have_cgi)
 		{
 			_client->get_cgi().reset();
-			remove(_cgi_file_path.c_str());
+			// remove(_cgi_file_path.c_str());
 		}
 		if (_location)
 		{
