@@ -5,7 +5,6 @@ Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _cgi_output_file(NULL), _
 
 Cgi::~Cgi() {}
 
-
 std::string Cgi::start_cgi(std::string script_path)
 {
 	// set_cgi_bin("/usr/bin/php-cgi");
@@ -16,55 +15,63 @@ std::string Cgi::start_cgi(std::string script_path)
 	return exec_cgi();
 }
 
-std::string Cgi::exec_cgi()
+int Cgi::get_random_number()
+{
+	srand(time(NULL));
+	return rand() % 1000000;
+}
+
+std::string Cgi::exec_cgi() // !! upload handiinng
 {
 	int write_to_cgi[2];
 
-    std::string tempFileName = "/tmp/cgioutput" + std::to_string(getpid()); // generate a unique temp file name
-    std::ofstream tempFile(tempFileName, std::ios::out | std::ios::binary);
+	std::string tmp_filename = "/tmp/cgi_output_" + std::to_string(get_random_number());
+	FILE *_cgi_output_file = fopen(tmp_filename.c_str(), "w+");
 
-    if (!tempFile.is_open()) { return "-1"; }
+	if (!_cgi_output_file)
+	{
+		std::cout << "Failed to open the file! 2222" << std::endl;
+		return "-1";
+	}
 
-    if (pipe(write_to_cgi) == -1) { return "-1"; }
+	if (pipe(write_to_cgi) == -1)
+	{
+		return "-1";
+	}
 
-    set_body(_client->get_request().getBody());
+	set_body(_client->get_request().getBody());
 
-    _start_time = time(NULL);
+	_start_time = time(NULL);
 
-    if ((_pid = fork()) == -1) { return "-1"; }
+	if ((_pid = fork()) == -1)
+	{
+		return "-1";
+	}
 
-    if (_pid == 0)
-    {
-        close(write_to_cgi[1]);
-        dup2(write_to_cgi[0], 0);
-        dup2(fileno(tempFile.) 1); // get the file descriptor from the streambuf
-        close(write_to_cgi[0]);
+	if (_pid == 0)
+	{
+		close(write_to_cgi[1]);
+		dup2(write_to_cgi[0], 0);
+		dup2(fileno(_cgi_output_file), 1);
+		close(write_to_cgi[0]);
 
-        char newargv[] = {(char)_cgi_bin.c_str(), (char *)_cgi_script.c_str(), NULL};
-        execve(_cgi_bin.c_str(), newargv, _envp);
-        exit(EXIT_FAILURE);
-    }
-    else
-    {
-        close(write_to_cgi[0]);
-        write(write_to_cgi[1], _body.c_str(), _body.length());
-        close(write_to_cgi[1]);
+		char *newargv[] = {(char *)_cgi_bin.c_str(), (char *)_cgi_script.c_str(), NULL};
+		execve(_cgi_bin.c_str(), newargv, _envp);
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		close(write_to_cgi[0]);
+		write(write_to_cgi[1], _body.c_str(), _body.length());
+		close(write_to_cgi[1]);
+		_ready_to_read_from_cgi = waitpid(_pid, &_status, WNOHANG); // if result == 0, child process still running, if result == -1, error, else child process terminated
 
-        _ready_to_read_from_cgi = waitpid(_pid, &_status, WNOHANG); // if result == 0, child process still running, if result == -1, error, else child process terminated
-    }
+	}
 
-    tempFile.close(); // Close the ofstream first before reading with ifstream
-
-    std::ifstream cgiOutput(tempFileName, std::ios::in | std::ios::binary);
-    if (!cgiOutput.is_open()) { return "-1"; }
-
-    // Read the contents from the ifstream as needed...
-
-    cgiOutput.close();
-    remove(tempFileName.c_str()); // Delete the temporary file
-
-    return "0"; // Return a success code or modify as necessary
+	fclose(_cgi_output_file);
+	return tmp_filename;
 }
+
 
 void Cgi::init_env_vars()
 {
@@ -150,7 +157,6 @@ void Cgi::reset()
 	_cgi_status = 0;
 	_start_time = 0;
 	_pid = 0;
-
 }
 
 int Cgi::get_ready_to_read_from_cgi()
@@ -206,3 +212,8 @@ cookies
 
 */
 
+// int Cgi::exec_cgi() // !! upload handling
+// {
+// }
+
+/**/

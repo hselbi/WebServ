@@ -45,54 +45,35 @@ void Response::readFileByPath(std::string filePath)
 
 void Response::readCgiFile()
 {
-	// std::cout << "readCgiFile" << std::endl;
-	// std::cout << "_cgi_file: " << _cgi_file << std::endl;
+
     t_responseHeader responseHeader;
-    off_t fileSize;
-    ssize_t bytesRead;
-    char *found;
-    char buffer[10000];
-    int endHeaderPos = 0;
 
-    fileSize = lseek(_cgi_file, 0, SEEK_END);
-	std::cout << "fileSize: " << fileSize << std::endl;
-	std::cout << "cgi file size: " << _cgi_file << std::endl;
-    if (fileSize == (off_t)-1)
-    {
-        std::cerr << "Failed to seek to the end of file!" << std::endl;
-		std::cout << "errno: " << errno << std::endl;
-        close(_cgi_file);
-        setResStatus(DONE);
-        return errorPages(400);
+    std::cout << "CGI FILE PATH: " << _cgi_file_path << std::endl;
+    std::fstream file(_cgi_file_path, std::ios::in | std::ios::out | std::ios::binary);
+
+    if (!file) {
+        std::cerr << "Failed to open the file!" << std::endl;
+        return errorPages(500);
     }
 
-    if (lseek(_cgi_file, 0, SEEK_SET) == (off_t)-1)
-    {
-        std::cerr << "Failed to seek to the beginning of file!" << std::endl;
-        close(_cgi_file);
-        setResStatus(DONE);
-        return errorPages(400);
-    }
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    std::string content = oss.str();
 
-    while ((bytesRead = read(_cgi_file, buffer, sizeof(buffer) - 1)) > 0)
-    {
-        buffer[bytesRead] = '\0';
-        found = strstr(buffer, "\r\n\r\n");
-        if (found)
-        {
-            endHeaderPos = found - buffer;
-            break;
-        }
-    }
+    size_t pos = content.find("\r\n\r\n");
+    if (pos != std::string::npos)
+        content.erase(0, pos + 4);
 
-    lseek(_cgi_file, endHeaderPos, SEEK_SET);
-    responseHeader.statusCode = 200;
+    file.clear();
+    file.seekp(0, std::ios::beg);
+    file << content;
+    file.close();
+
+    _file.open(_cgi_file_path.c_str(), std::ios::binary);
     responseHeader.statusMessage = Utils::getStatusMessage(200);
     responseHeader.headers["Content-Type"] = "text/html";
-    responseHeader.headers["Content-Length"] = Utils::toString(fileSize - endHeaderPos);
+    responseHeader.headers["Content-Length"] = Utils::toString(content.length());
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	// std::cout << "--> "<< _header_buffer << std::endl;
     setResStatus(ON_PROCESS);
-
 }

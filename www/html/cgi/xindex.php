@@ -1,7 +1,8 @@
 <?php
 
-while (true) {
+$i = 1;
+while ($i++ < 5) {
 	sleep(1);
-	echo "Hello World!";
+	echo "Hello World!<br>";
 }
 ?>
