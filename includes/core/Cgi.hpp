@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+
 struct Client;
 
 // wrapper for cgi execution and environment variables
@@ -67,6 +68,7 @@ struct Cgi
 
 	int get_status();
 	void set_status(int status);
+	int get_random_number();
 
 private:
 	env_vars_t _env_vars;

@@ -75,6 +75,7 @@ void Server::drop_client(long client_socket)
 	get_client(client_socket)->get_request_body_length() = 0;
 	close(client_socket);
 	_clients.erase(client_socket);
+	std::cout << "Closed client socket " << client_socket << "\n";
 }
 
 void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
@@ -127,7 +128,7 @@ void Server::send_response(long client_socket)
 	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), 0)) == -1)
 	{
 		std::cerr << "Error: send() failed on client socket " << client_socket << "\n";
-		drop_client(client_socket);
+		drop_client(client_socket); // Connection: close
 		return;
 	}
 	else if (bytes_sent < get_client(client_socket)->get_response_data().length()) // if send returns less than the number of bytes requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data.
@@ -155,21 +156,21 @@ void Server::disconnect_connection(int client_socket)
 	if (get_client(client_socket)->get_res_status() == DONE )
 	{
 
-		if (is_connection_close(get_client(client_socket)->get_request_data()))
-		{
+		// if (is_connection_close(get_client(client_socket)->get_request_data()))
+		// {
 			std::cout << "Connection: close" << std::endl;
 			drop_client(client_socket); // Connection: close
-		}
-		else // Connection: keep-alive
-		{
-			std::cout << "Connection: keep-alive" << std::endl;
-			FD_CLR(client_socket, &_write_set_pool);
-			FD_SET(client_socket, &_read_set_pool);
+		// }
+		// else // Connection: keep-alive
+		// {
+		// 	std::cout << "Connection: keep-alive" << std::endl;
+		// 	FD_CLR(client_socket, &_write_set_pool);
+		// 	FD_SET(client_socket, &_read_set_pool);
 
-			get_client(client_socket)->reset_request_data();
-			get_client(client_socket)->reset_response_data();
-			get_client(client_socket)->set_res_status(NOT_STARTED);
-		}
+		// 	get_client(client_socket)->reset_request_data();
+		// 	get_client(client_socket)->reset_response_data();
+		// 	get_client(client_socket)->set_res_status(NOT_STARTED);
+		// }
 	}
 }
 
@@ -377,7 +378,7 @@ long Server::monitor_clients()
 {
 	struct timeval timeout;
 	long ready_count = 0;
-	timeout.tv_sec = 1;
+	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
 	FD_ZERO(&_read_set);
