@@ -68,8 +68,8 @@ struct Cgi
 
 	int get_status();
 	void set_status(int status);
-	int get_random_number();
-
+	static size_t _counter;
+	
 private:
 	env_vars_t _env_vars;
 	char **_envp;
