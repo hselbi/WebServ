@@ -80,6 +80,9 @@ struct Server
 
 	std::vector<long> &get_server_sockets();
 
+	bool checkReq(const std::string &str);
+	void		processChunk(long socket);
+
 private:
 	Config _config;
 	std::map<long, int> _server_port;
@@ -94,6 +97,10 @@ private:
 	fd_set _read_set; // sets of file descriptors to monitor for read
 	fd_set _write_set;
 	struct sockaddr_in _server_addr, _client_addr;
+
+	std::map<long, std::string>	_requests;
+	
+	size_t body_length;
 };
 
 //  http header = method + path + version + headers + body
