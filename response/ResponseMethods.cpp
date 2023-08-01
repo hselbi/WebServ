@@ -63,6 +63,8 @@ void Response::Method_GET()
 				{
 					_cgi_file_path = _client->get_cgi().start_cgi(filePath);
 					// std::cout << "COND1: " << _cgi_file << std::endl;
+					// std::cout << PURPLE <<  "_cgi_file_path: " << _cgi_file_path << RESET << std::endl;
+
 					if (_cgi_file_path == "-1")
 					{
 						// std::cout << "CGI ERROR" << std::endl;
