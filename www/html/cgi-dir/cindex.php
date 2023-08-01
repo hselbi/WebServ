@@ -1,11 +1,16 @@
 <?php
 // // Process the input data
-// phpinfo();
+phpinfo();
 // echo "Hello World";
 // echo "Hello World";
 // echo "Hello World";
 // echo "Hello World";
-echo "Hello World";
-echo "\0";
-echo "Yes";
+// echo "Hello World";
+// echo "\0";
+// echo "es";
+
+// session_start();
+
+// $_SESSION['username'] = "zmahmoud";
+
 ?>

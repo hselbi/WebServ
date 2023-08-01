@@ -12,7 +12,7 @@ void	Response::errorPages(int statusCode)
 	_file.open(filePath.c_str(), std::ios::binary);
 	if (!_file.is_open())
 	{
-		std::cout << RED <<  "Failed to open file: " << filePath << RESET << std::endl;
+		// std::cout << RED <<  "Failed to open file: " << filePath << RESET << std::endl;
 		setResStatus(DONE);
 		return;
 	}

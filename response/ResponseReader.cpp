@@ -6,7 +6,7 @@ void Response::readFile()
 {
     t_responseHeader responseHeader;
     std::streampos fileSize;
-    std::string filePath = getRequestPath();
+    std::string filePath = getRequestPathFile();
 
     _file.open(filePath.c_str(), std::ios::binary);
     _file.seekg(0, std::ios::end);

@@ -1,5 +1,15 @@
 #include "../includes/response/Utils.hpp"
 
+
+std::string Utils::getWebservRootPath() {
+    int		bufferSize = 2048;
+    char	buffer[bufferSize];
+
+    if (getcwd(buffer, bufferSize) != NULL)
+        return std::string(buffer) + "/";
+    return "";
+}
+
 std::string	Utils::toString(int value) {
 	std::stringstream ss;
 	ss << value;
