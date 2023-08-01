@@ -8,10 +8,10 @@ Cgi::~Cgi() {}
 
 std::string Cgi::start_cgi(std::string script_path)
 {
-	std::cout << RED << "START CGI: " << script_path << RESET << std::endl;
+	// std::cout << RED << "START CGI: " << script_path << RESET << std::endl;
 	// set_cgi_bin("/usr/bin/php-cgi");
 	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
-	std::cout << "Script path: " << script_path << std::endl;
+	// std::cout << "Script path: " << script_path << std::endl;
 	set_cgi_script(script_path);
 	init_env_vars();
 	return exec_cgi();
@@ -23,7 +23,6 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	int write_to_cgi[2];
 
 	std::string tmp_filename = "/tmp/cgi_output_" + std::to_string(time(NULL) + _counter++);
-	std::cout << "tmp_filename: " << tmp_filename << std::endl;
 	FILE *_cgi_output_file = fopen(tmp_filename.c_str(), "w+");
 
 	if (!_cgi_output_file)

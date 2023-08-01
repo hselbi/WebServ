@@ -64,6 +64,7 @@ Client *Server::create_client()
 
 void Server::drop_client(long client_socket)
 {
+	get_client(client_socket)->set_res_status(NOT_STARTED);
 	FD_CLR(client_socket, &_read_set);
 	FD_CLR(client_socket, &_read_set_pool);
 	FD_CLR(client_socket, &_write_set);
@@ -74,6 +75,8 @@ void Server::drop_client(long client_socket)
 	get_client(client_socket)->get_request_body().clear();
 	get_client(client_socket)->get_request_body_length() = 0;
 	close(client_socket);
+	if (get_client(client_socket))
+		delete get_client(client_socket);
 	_clients.erase(client_socket);
 	std::cout << "Closed client socket " << client_socket << "\n";
 }
@@ -124,7 +127,8 @@ std::string generate_response()
 
 void Server::send_response(long client_socket)
 {
-	std::cout << "Sending response to client socket " << client_socket << "\n";
+	// std::cout << "Sending response to client socket " << client_socket << "\n";
+	// std::cout << "Response: " << get_client(client_socket)->get_response_data() << "\n";
 	long bytes_sent;
 	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), 0)) == -1)
 	{
@@ -152,7 +156,7 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 
 void Server::disconnect_connection(int client_socket)
 {
-	if (get_client(client_socket) == NULL)
+	if (get_client(client_socket) == NULL) // !!!!!!!!! after send failed
 		return;
 	if (get_client(client_socket)->get_res_status() == DONE )
 	{
@@ -265,9 +269,9 @@ void Server::handle_incoming_request(long client_socket)
 	else
 	{
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
-		feed_request(std::string(received_data), client_socket);
 		// !! remove this, only for testing
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
+		feed_request(std::string(received_data), client_socket);
 		{
 			match_client_request_to_server_block(client_socket);
 			FD_CLR(client_socket, &_read_set_pool);
@@ -405,7 +409,7 @@ void Server::start_server()
 			else if (FD_ISSET(socket, &_write_set)) // ready to write
 			{
 				// ! outgoing response
-				std::cout << "----->>handle_outgoing_response<<---" << std::endl;
+				// std::cout << "----->>handle_outgoing_response<<---" << std::endl;
 				handle_outgoing_response(socket); // !! send response to client
 			}
 
