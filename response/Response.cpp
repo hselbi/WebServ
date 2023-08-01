@@ -26,13 +26,15 @@ void Response::processing()
 
 	if (_client->get_res_status() == NOT_STARTED)
 	{
-		// ! TODO: CALL MULTIPLE TIMES IN THE SAME REQUEST IN CASE OF CGI 
-   			std::cout << GREEN << "NOT_STARTED" << RESET << std::endl;
+		// ! TODO: CALL MULTIPLE TIMES IN THE SAME REQUEST IN CASE OF CGI
+   			// std::cout << GREEN << "NOT_STARTED" << RESET << std::endl;
 		if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
+
 	}
 	else if (_client->get_res_status() == ON_PROCESS)
 	{
+		// std::cout << YELLOW << "ON_PROCESS" << RESET << std::endl;
 		if (_header_buffer.length() > 0)
 		{
 			if (_header_buffer.length() >= buffer_size)
@@ -71,7 +73,7 @@ void Response::setResStatus(int status)
 {
 	if (status == DONE)
 	{
-		
+
 		if (_have_cgi)
 		{
 			_client->get_cgi().reset();
@@ -91,6 +93,9 @@ void Response::setResStatus(int status)
 		_client->get_request().resetReq();
 		_client->set_res_status(DONE);
 	}
-	else
-		_client->set_res_status(status);
+	else if (status == ON_PROCESS)
+	{
+
+		_client->set_res_status(ON_PROCESS);
+	}
 }
