@@ -78,27 +78,10 @@ void Response::Method_GET()
 				}
 				if (_client->get_cgi().get_cgi_status()  == 1 && _client->get_cgi().get_ready_to_read_from_cgi() == 0)
 				{
-
 					_client->get_cgi().set_ready_to_read_from_cgi(waitpid(_client->get_cgi().get_pid(), 0, WNOHANG));
-					// std::cout << "READY TO READ FROM CGI: " << _client->get_cgi().get_ready_to_read_from_cgi() << std::endl;
-					// if (_client->get_cgi().get_ready_to_read_from_cgi() == 0)
-					// {
-					// 	if (time(NULL) - _client->get_cgi().get_start_time() >= TIMEOUT_CGI)
-					// 	{
-					// 		std::cout << "CGI TIMEOUT" << std::endl;
-                    //         _have_cgi = false;
-					// 		// (0, SIGKILL);
-					// 		errorPages(500);
-					// 		return;
-					// 	}
-					// }
-
-
 				}
 				if (_client->get_cgi().get_cgi_status() == 1 && _client->get_cgi().get_ready_to_read_from_cgi() != 0)
                 	{
-					// std::cout << "COND3: " << _cgi_file << std::endl;
-
 						readCgiFile();
 					}
             }

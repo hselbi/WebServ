@@ -69,7 +69,7 @@ struct Cgi
 	int get_status();
 	void set_status(int status);
 	static size_t _counter;
-	
+
 private:
 	env_vars_t _env_vars;
 	char **_envp;
