@@ -86,10 +86,7 @@ void Cgi::init_env_vars()
 	_env_vars["PATH_TRANSLATED"] = path;
 	_env_vars["REDIRECT_STATUS"] = "200";
 	if (_client->get_request().getHeaders()["Cookie"] != "")
-	{
-		std::cout << "COOKIE: " << _client->get_request().getHeaders()["Cookie"] << std::endl;
 		_env_vars["HTTP_COOKIE"] = _client->get_request().getHeaders()["Cookie"];
-	}
 	if (_client->get_request().getMethod() == "POST")
 	{
 		_env_vars["CONTENT_TYPE"] = _client->get_request().getHeaders()["Content-Type"];
