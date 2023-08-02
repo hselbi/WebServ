@@ -92,8 +92,6 @@ bool Server::isReqFinished(int client_socket)
 	// !  check methods that dont have body
 	// !  check if the request is "Transfer-Encoding: chunked", and other stuff
 
-    if (get_client(client_socket)->get_request().getCodeRet() == 400)
-		return true;
     if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
     {
         if (get_client(client_socket)->get_request().getHeaders()["Content-Length"] == "0")
@@ -186,6 +184,8 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 
 	std::string http_method = get_http_method(request);
 
+	if (get_client(client_socket)->get_request().getCodeRet() == 400)
+		return true;
 	if (http_method == "POST") // !! not finished - need to check if the request is "Transfer-Encoding: chunked", and other stuff
 	{
 
