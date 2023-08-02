@@ -31,7 +31,6 @@ void Response::processing()
 	{
 		if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
-
 	}
 	else if (_client->get_res_status() == ON_PROCESS)
 	{

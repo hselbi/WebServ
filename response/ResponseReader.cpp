@@ -57,7 +57,14 @@ std::map<std::string, std::string> Response::parseCgiHeader(std::string header)
         pos = header.find("\r\n");
         value = header.substr(0, pos);
         header.erase(0, pos + 2);
-        headers[key] = value;
+        check_key:
+        if (headers.find(key) == headers.end())
+            headers[key] = value;
+        else
+        {
+            key += " ";
+            goto check_key;
+        }
     }
     return headers;
 }
@@ -112,7 +119,17 @@ void Response::readCgiFile()
             responseHeader.statusMessage = it->second.substr(4, it->second.length() - 4);
         }
         else
-            responseHeader.headers[it->first] = it->second;
+        {
+            std::string key = it->first;
+            check_key:
+            if (responseHeader.headers.find(key) == responseHeader.headers.end())
+                responseHeader.headers[key] = it->second;
+            else
+            {
+                key += " ";
+                goto check_key;
+            }
+        }
         it++;
     }
 
@@ -121,8 +138,6 @@ void Response::readCgiFile()
 	{
 		responseHeader.statusCode = 200;
         responseHeader.statusMessage = Utils::getStatusMessage(200);
-
-
 	}
     responseHeader.headers["Content-Length"] = Utils::toString(content.length());
     responseHeader.headers["Server"] = _client->get_server_block().getServerName();
