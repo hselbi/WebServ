@@ -53,7 +53,7 @@ class Response {
 		void					Method_POST();
 		void					Method_DELETE();
 		void					setRediration(std::string location);
-		bool					parseCgiHeader(std::string header, int contentLength);
+		bool					parseCgiHeader(std::string header, int contentLength, int delimiterLength);
 		bool					checkRequestIsFormed();
 		bool					isServerHaveRedirection();
 		bool					getMatchedLocation();

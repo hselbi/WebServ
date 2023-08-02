@@ -1,0 +1,8 @@
+Set-Cookie: test="Hello\054 World!"; Path=/
+Content-Type: text/html
+
+<html><body>
+<h1>Cookie Set!</h1>
+
+
+</body></html>
