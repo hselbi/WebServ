@@ -51,7 +51,7 @@ void Response::Method_GET()
         else
         {
             // TODO: Add python also to this condition  (if file extension is .py)
-            if (_location && _location->cgi_infos.size() > 0 && (index.rfind(".php") != std::string::npos || index.rfind(".py") != std::string::npos))
+            if (_location && _location->cgi_infos.size() > 0 && (filePath.rfind(".php") != std::string::npos || filePath.rfind(".py") != std::string::npos))
             {
                 _have_cgi = true;
                 if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)
