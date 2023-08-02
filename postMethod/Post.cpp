@@ -340,9 +340,9 @@ ResponseHeader::~ResponseHeader(void)
 {
 }
 
-std::string FileExtension()
+std::string FileExtension(std::string path)
 {
-    std::string path = RequestHeaders["Content-Type"];
+    // std::string path = RequestHeaders["Content-Type"];
     if (path.find("text/css") != std::string::npos)
         return ".css";
     if (path.find("text/csv") != std::string::npos)

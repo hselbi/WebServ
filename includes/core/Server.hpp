@@ -101,6 +101,8 @@ private:
 	std::map<long, std::string>	_requests;
 	
 	size_t body_length;
+	long prev_socket;
+
 };
 
 //  http header = method + path + version + headers + body

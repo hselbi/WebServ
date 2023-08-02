@@ -193,10 +193,10 @@ int Request::parseReq(const std::string &str)
 {
 
     // * check if chunked or not
-    if (checkRequ(str))
-        std::cout << "True" << std::endl;
-    else
-        std::cout << "false" << std::endl;
+    // if (checkRequ(str))
+    //     std::cout << "True" << std::endl;
+    // else
+    //     std::cout << "false" << std::endl;
         
     // std::cout << "here" << std::endl;
 

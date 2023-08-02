@@ -22,6 +22,7 @@ private:
         std::map<std::string, std::string> m_env_cgi;
         std::list<std::pair<std::string, float> > m_language;
         static	std::vector<std::string>	methods;
+
 	    int _req_status;
         int m_code_ret;
         int m_port;

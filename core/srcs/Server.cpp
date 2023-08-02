@@ -1,6 +1,6 @@
 #include "../../includes/core/Server.hpp"
 
-Server::Server() : _biggest_socket(0), _server_count(1) {}
+Server::Server() : _biggest_socket(0), _server_count(1), prev_socket(0) {}
 
 Server::~Server()
 {
@@ -82,7 +82,7 @@ void Server::feed_request(std::string request, long client_socket) // feed reque
 	// std::cout << request << std::endl;
 
 	get_client(client_socket)->get_request().parseReq(request);
-	std::cout << get_client(client_socket)->get_request() << std::endl;
+	// std::cout << get_client(client_socket)->get_request() << std::endl;
 
 
 }
@@ -260,6 +260,11 @@ void Server::match_client_request_to_server_block(long client_socket)
 		}
 	}
 }
+
+
+/*
+!	======================= From Hafid ===================================
+*/
 int     checkEnd(const std::string& str, const std::string& end)
 {
 	size_t	i = str.size();
@@ -397,11 +402,18 @@ std::string checkingRecv(const std::string &str)
 	return str;
 }
 
+
+/*
+!	======================= From Hafid ===================================
+*/
+
+
+
 void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
-
+	std::cout << client_socket << std::endl;
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1)
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
@@ -415,13 +427,48 @@ void Server::handle_incoming_request(long client_socket)
 	}
 	else
 	{
-		// std::cout << "===$$$> " <<bytes_read << std::endl;
-		get_client(client_socket)->append_request_data(received_data, bytes_read);
-		
-		/*======================> this hafid <====================*/
+		if (client_socket != prev_socket)
+		{
+			std::cout << "this is first time!" << std::endl;
+			prev_socket = client_socket;
+			feed_request(std::string(received_data), client_socket);
+			
+		}
+		else
+		{
+			std::cout << "this is not first time!" << std::endl;
+			std::string str = std::string(received_data);
+			// std::cout << YELLOW << "1===> " << str.size() << RESET << std::endl;
+			size_t cr = str.find("\r\n");
+			std::cout << RED << cr<< RESET << std::endl;
+			std::string numb = str.substr(0, cr);
+			std::cout << numb << std::endl;
 
-		std::string afterReq = checkingRecv(std::string(received_data));
-		_requests[client_socket] += afterReq;
+			std::cout << PURPLE << "2===> " << (str.substr(cr)).size() << "/" << str.size() << RESET << std::endl;
+			
+			std::cout << BLUE << hextodec(numb) << RESET << std::endl;
+			size_t len = hextodec(numb);
+			size_t i = 0;
+			std::string _body;
+			while (len)
+			{
+				_body += str[i];
+				len--;
+				i++;
+			}
+
+			std::cout << GREEN << "3===> " << _body.size() << "/" << str.size() << RESET << std::endl;
+			
+
+		}
+		
+
+		// std::cout << "===$$$> " <<bytes_read << std::endl;
+		// get_client(client_socket)->append_request_data(received_data, bytes_read);
+		// std::string afterReq = checkingRecv(std::string(received_data));
+		// _requests[client_socket] += afterReq;
+		
+
 		// if (checkReq(_requests[client_socket]))
 		// 	std::cout << GREEN << "==> chunked" << RESET << std::endl;
 		// else
@@ -434,7 +481,6 @@ void Server::handle_incoming_request(long client_socket)
 		
 		
 		/*======================> this hafid <====================*/
-		// feed_request(std::string(received_data), client_socket);
 		// !! remove this, only for testing
 		if (!isComplete(_requests[client_socket]))
 		{
