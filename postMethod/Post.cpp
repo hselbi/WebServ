@@ -1,6 +1,8 @@
 #include "Post.hpp"
 
 
+
+
 void			Response::postMethod(Request & request, RequestConfig & requestConf)
 {
 	ResponseHeader	head;
@@ -338,6 +340,95 @@ ResponseHeader::~ResponseHeader(void)
 {
 }
 
+std::string FileExtension()
+{
+    std::string path = RequestHeaders["Content-Type"];
+    if (path.find("text/css") != std::string::npos)
+        return ".css";
+    if (path.find("text/csv") != std::string::npos)
+        return ".csv";
+    if (path.find("image/gif") != std::string::npos)
+        return "gif";
+    if (path.find("text/htm") != std::string::npos)
+        return ".html";
+    if (path.find("text/html") != std::string::npos)
+        return ".html";
+    if (path.find("video/mp4") != std::string::npos)
+        return ".mp4";
+    if (path.find("image/x-icon") != std::string::npos)
+        return ".ico";
+    if (path.find("image/jpeg") != std::string::npos)
+        return ".jpeg";
+    if (path.find("image/jpg") != std::string::npos)
+        return ".jpeg";
+    if (path.find("application/javascript") != std::string::npos)
+        return ".js";
+    if (path.find("application/json") != std::string::npos)
+        return ".json";
+    if (path.find("image/png") != std::string::npos)
+        return ".png";
+    if (path.find("application/pdf") != std::string::npos)
+        return ".pdf";
+    if (path.find("image/svg+xml") != std::string::npos)
+        return ".svg";
+    if (path.find("text/plain") != std::string::npos)
+        return ".txt";
+    return "";
+}
+
+
+
+/*
+
+! size_read is ===> bytes_read <=== for US
+*/
+void getBody(const char *str, size_t size_read)
+{
+    size_t PosChunked = RequestHeaders["Transfer-Encoding"].find("chunked");
+
+    if (PosChunked != std::string::npos)
+        ParseChunked(str, size_read);
+    else
+        Binary(str, size_read);
+}
+
+void Binary(const char *str, size_t size_read)
+{
+    std::fstream requestBody;
+    requestBody.open("bodyRequest" + FileExtension(), std::ios_base::out | std::ios_base::app | std::ios_base::binary);
+    requestBody.write(str, size_read);
+    lenghtBody += size_read;
+    if ((unsigned int)stringToInt((RequestHeaders["Content-Length"])) == (i - lenghtHeader))
+    {
+        setlenghtBodyFile(stringToInt((RequestHeaders["Content-Length"])));
+        set_has_request(true);
+        requestBody.close();
+    }
+}
+
+size_t FindStringInBuffer(const char *buffer, size_t buffer_size, const char *str, int pos)
+{
+    size_t str_len = strlen(str);
+    if (buffer_size < str_len)
+        return std::string::npos;
+    if (pos == 0)
+    {
+        for (size_t i = 0; i < buffer_size - str_len + 1; i++)
+            if (strncmp(buffer + i, str, str_len) == 0)
+                return i;
+    }
+    else
+    {
+        for (size_t i = pos; i < buffer_size - str_len + 1; i++)
+            if (strncmp(buffer + i, str, str_len) == 0)
+                return i;
+    }
+    return std::string::npos;
+}
+
+
+void	setlenghtBodyFile(std::streampos len){lenghtBodyFile = len;}
+
 Post::Post(Request &req)
 {
     std::string _response; /*this one from response */
@@ -345,6 +436,54 @@ Post::Post(Request &req)
     size_t i = 0;
     size_t j = _response.size() - 1;
     
+	/********************************/
+
+	if (fileExists((std::string("/Users/slops/Desktop/webserv_team/") + "bodyRequest" + FileExtension()).c_str()))
+	{
+		std::remove((std::string("/Users/slops/Desktop/webserv_team/") + "bodyRequest" + FileExtension()).c_str());
+	}
+	std::ofstream requestBody;
+	size_t PosChunked = RequestHeaders["Transfer-Encoding"].find("chunked");
+	requestBody.open("bodyRequest" + FileExtension(), std::ios_base::out | std::ios_base::app | std::ios_base::binary);
+	std::string ss(str, size_read);
+	lenghtHeader = ss.find("\r\n\r\n") + 4;
+	body.assign(ss.erase(0, lenghtHeader));
+	if (PosChunked != std::string::npos)
+	{
+		size_t pos = 0;
+		std::string token;
+		while ((pos = body.find("\r\n")) != std::string::npos)
+		{
+			token = body.substr(0, pos);
+			if (isHexadecimal(token))
+			{
+				if (token == "0")
+				{
+					requestBody.close();
+					// make flag true is finished
+					// has_request
+					set_has_request(true);
+					return(0);
+				}
+				body.erase(0, pos + 2);
+				continue;
+			}
+			requestBody << token + "\r\n";
+			body.erase(0, pos + 2);
+		}
+	}
+	requestBody << body;
+	if ((unsigned int)stringToInt((RequestHeaders["Content-Length"])) == (i - lenghtHeader)){
+		requestBody.close();
+		set_has_request(true);
+		return 0;
+	}
+	requestBody.seekg(0, std::ios::end);
+    int lenghtBodyFile = requestBody.tellg();
+    setlenghtBodyFile(lenghtBodyFile);
+    requestBody.seekg(0, std::ios::beg);
+    requestBody.close();
+
 
     // ! 1st etap: check is cgi exist or not
 
