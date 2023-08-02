@@ -32,15 +32,11 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	{
 		return "-1";
 	}
-
 	set_body(_client->get_request().getBody());
-
 	_start_time = time(NULL);
 
 	if ((_pid = fork()) == -1)
-	{
 		return "-1";
-	}
 
 	if (_pid == 0)
 	{
@@ -59,7 +55,8 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 		write(write_to_cgi[1], _body.c_str(), _body.length());
 		close(write_to_cgi[1]);
 		_ready_to_read_from_cgi = waitpid(_pid, &_status, WNOHANG); // if result == 0, child process still running, if result == -1, error, else child process terminated
-
+		 // 0 means parent  process not ready to read from cgi
+		 // not 0 means parent process ready to read from cgi
 	}
 
 	fclose(_cgi_output_file);
@@ -71,6 +68,8 @@ void Cgi::init_env_vars()
 {
 	std::string root = _client->get_response().getRoot();
 	std::string path = _cgi_script;
+	_env_vars["REMOTE_ADDR"] =  _client->get_request().getHeaders()["Host"];
+	_env_vars["REMOTE_HOST"] = _client->get_server_block().getServerName();
 	_env_vars["SERVER_SOFTWARE"] = "MortalKOMBAT/1.0";
 	_env_vars["SERVER_NAME"] = _client->get_server_block().getServerName();
 	_env_vars["SERVER_PORT"] = std::to_string(_client->get_server_block().getPort());
@@ -146,6 +145,7 @@ void Cgi::reset()
 	_cgi_status = 0;
 	_start_time = 0;
 	_pid = 0;
+	_status = 0;
 }
 
 int Cgi::get_ready_to_read_from_cgi()

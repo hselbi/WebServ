@@ -12,10 +12,17 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+typedef struct Header {
+	std::string key;
+	std::string value;
+} t_header;
+
 typedef struct ResponseHeader {
     int statusCode;
     std::string statusMessage;
-    std::map<std::string, std::string> headers;
+    std::map<std::string, std::string> m_headers;
+    std::vector<Header> v_headers;
+
 } t_responseHeader;
 
 
