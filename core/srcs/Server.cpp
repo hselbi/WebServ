@@ -279,12 +279,26 @@ void Server::handle_incoming_request(long client_socket)
 	}
 	else
 	{
+		std::cout << "===> " << bytes_read << std::endl;
 		if (client_socket != prev_socket)
 		{
 			std::cout << "this is first request!!!" << std::endl;
-			get_client(client_socket)->append_request_data(received_data, bytes_read);
+			feed_request(std::string(received_data), client_socket);
+			// get_client(client_socket)->append_request_data(received_data, bytes_read);
+			prev_socket = client_socket;
 		}
-		feed_request(std::string(received_data), client_socket);
+		else {
+
+			std::cout << "this next chunked ==> " << std::endl;
+			std::string str = std::string(received_data);
+			size_t cr = str.find('\r\n');
+			std::cout << RED << cr << RESET << std::endl;
+			std::string numb = str.substr(0, cr);
+			std::cout << numb << std::endl;
+
+			std::cout << 
+
+		}
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
 		{
 			match_client_request_to_server_block(client_socket);
@@ -361,7 +375,7 @@ void Server::create_server_socket()
 	struct timeval timeout;
 	timeout.tv_sec = 3; // Timeout value in seconds
 	timeout.tv_usec = 0;
-	if (setsockopt(server_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
+	if (setsockopt(server_socket, SOL_SOCKET, SO_RCVTIM:EO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
 		throw_error("setsockopt SO_RCVTIMEO failed");
 
 	if (setsockopt(server_socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
