@@ -33,7 +33,7 @@
 #define DEFAULT_CONFIG_FILE "../assets/server.conf"
 #define SERVER_BLOCK_COUNT 1
 // 4096 kb = 4 mb = 4096 * 1024 bytes = 4194304 bytes
-#define BUFFER_SIZE 64000 //
+#define BUFFER_SIZE 2000 // 2kb
 
 struct Client;
 
