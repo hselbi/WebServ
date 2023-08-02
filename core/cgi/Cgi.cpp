@@ -59,7 +59,8 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 		write(write_to_cgi[1], _body.c_str(), _body.length());
 		close(write_to_cgi[1]);
 		_ready_to_read_from_cgi = waitpid(_pid, &_status, WNOHANG); // if result == 0, child process still running, if result == -1, error, else child process terminated
-
+		 // 0 means parent  process not ready to read from cgi
+		 // not 0 means parent process ready to read from cgi
 	}
 
 	fclose(_cgi_output_file);
@@ -146,6 +147,7 @@ void Cgi::reset()
 	_cgi_status = 0;
 	_start_time = 0;
 	_pid = 0;
+	_status = 0;
 }
 
 int Cgi::get_ready_to_read_from_cgi()

@@ -83,10 +83,7 @@ void Server::drop_client(long client_socket)
 
 void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
 {
-
 	get_client(client_socket)->get_request().parseReq(request);
-
-
 }
 
 
@@ -270,8 +267,8 @@ void Server::handle_incoming_request(long client_socket)
 	{
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
 		// !! remove this, only for testing
-		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
 		feed_request(std::string(received_data), client_socket);
+		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
 		{
 			match_client_request_to_server_block(client_socket);
 			FD_CLR(client_socket, &_read_set_pool);
@@ -338,9 +335,9 @@ void Server::create_server_socket()
 	if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) == -1) // socket, level, level options
 		throw_error("setsockopt SO_REUSEADDR failed");
 
-	// int nosigpipe = 1;
-	// if (setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == -1) // socket, level, level options
-	// 	throw_error("setsockopt SO_NOSIGPIPE failed");
+	int nosigpipe = 1;
+	if (setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == -1) // socket, level, level options
+		throw_error("setsockopt SO_NOSIGPIPE failed");
 
 	struct timeval timeout;
 	timeout.tv_sec = 3; // Timeout value in seconds
@@ -393,23 +390,15 @@ void Server::start_server()
 			{
 				if (FD_ISSET(socket, &_server_socket_pool)) // ready to read
 				{
-					// ! new connection
 					accept_new_connection(socket);
 				}
 				else
 				{
-					// ! incoming request
-					// if (!FD_ISSET(socket, &_write_set))
-					// {
-						// std::cout << "socket " << socket << " 22222" << std::endl;
-						handle_incoming_request(socket);
-					// }
+					handle_incoming_request(socket);
 				}
 			}
 			else if (FD_ISSET(socket, &_write_set)) // ready to write
 			{
-				// ! outgoing response
-				// std::cout << "----->>handle_outgoing_response<<---" << std::endl;
 				handle_outgoing_response(socket); // !! send response to client
 			}
 
