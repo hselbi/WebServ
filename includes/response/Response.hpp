@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-# define RES_BUFFER_SIZE 64000
+# define RES_BUFFER_SIZE 2000
 
 struct Client;
 
@@ -44,6 +44,7 @@ class Response {
 		char	 			_buffer[RES_BUFFER_SIZE];
 		bool				_have_cgi;
 
+		t_header				setHeaderElement(std::string key, std::string value);
 		std::string				getContentType(const std::string& filePath);
 		std::string				startCgi(std::string script_path);
 		std::string				getErrorPagePath(int statusCode);
@@ -69,4 +70,5 @@ class Response {
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
 		void					setResStatus(int status);
+
 };
