@@ -43,6 +43,7 @@ class Response {
 		std::string				isDirHasIndexFiles();
 		std::string				getRequestPathFile();
 		std::string				tmp_getRequestPath();
+		std::string				startCgi(std::string script_path);
 		void					readFile();
 		void					readCgiFile();
 		void					readFileByPath(std::string filePath);

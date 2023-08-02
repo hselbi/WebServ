@@ -205,6 +205,7 @@ bool Response::isMethodAllowedInLocation()
 	if (_location)
 	{
 		allow_methods = _location->allow_methods;
+
 		if (std::find(allow_methods.begin(), allow_methods.end(), _location->strtoMethod(_client->get_request().getMethod())) != allow_methods.end())
 			return true;
 		else

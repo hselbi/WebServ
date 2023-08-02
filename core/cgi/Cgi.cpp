@@ -6,12 +6,9 @@ size_t Cgi::_counter = 0;
 
 Cgi::~Cgi() {}
 
-std::string Cgi::start_cgi(std::string script_path)
+std::string Cgi::start_cgi(std::string binary, std::string script_path)
 {
-	// std::cout << RED << "START CGI: " << script_path << RESET << std::endl;
-	// set_cgi_bin("/usr/bin/php-cgi");
-	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
-	// std::cout << "Script path: " << script_path << std::endl;
+	set_cgi_bin(binary);
 	set_cgi_script(script_path);
 	init_env_vars();
 	return exec_cgi();
@@ -87,19 +84,16 @@ void Cgi::init_env_vars()
 	_env_vars["QUERY_STRING"] = _client->get_request().getQuery();
 	_env_vars["PATH_INFO"] = path;
 	_env_vars["PATH_TRANSLATED"] = path;
+	_env_vars["REDIRECT_STATUS"] = "200";
 	if (_client->get_request().getHeaders()["Cookie"] != "")
-		_env_vars["COOKIES"] = _client->get_request().getHeaders()["Cookie"];
+	{
+		std::cout << "COOKIE: " << _client->get_request().getHeaders()["Cookie"] << std::endl;
+		_env_vars["HTTP_COOKIE"] = _client->get_request().getHeaders()["Cookie"];
+	}
 	if (_client->get_request().getMethod() == "POST")
 	{
 		_env_vars["CONTENT_TYPE"] = _client->get_request().getHeaders()["Content-Type"];
 		_env_vars["CONTENT_LENGTH"] = _client->get_request().getHeaders()["Content-Length"];
-	}
-
-	// !! TODO: CHANGE (Anass Me (Zakaria) Change This Part)
-	size_t dot_pos = path.rfind(".");
-	if ((dot_pos != std::string::npos) && path.substr(dot_pos) == ".php")
-	{
-		_env_vars["REDIRECT_STATUS"] = "200";
 	}
 
 	_envp = new char *[_env_vars.size() + 1];
