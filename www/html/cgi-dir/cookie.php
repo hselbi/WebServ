@@ -23,7 +23,7 @@ foreach ($cookies as $cookie) {
         $value = $cookie["value"];
         echo "================== $key ==================<br>";
         echo "Cookie is set! [key = $key, value = $value]<br>";
-        echo "=============================================<br>";
+        echo "=========================================<br><br>";
     } else {
         echo "Cookie '" . $cookie["key"] . "' is not set!<br>";
         setcookie($cookie["key"], $cookie["value"], time() + (86400 * 30), "/"); // 86400 = 1 day

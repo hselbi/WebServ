@@ -43,7 +43,7 @@ void Response::readFileByPath(std::string filePath)
     setResStatus(ON_PROCESS);
 }
 
-bool Response::parseCgiHeader(std::string header, int contentLength)
+bool Response::parseCgiHeader(std::string header, int contentLength, int delimiterLength)
 {
     t_responseHeader responseHeader;
     std::vector<Header> headers;
@@ -56,7 +56,7 @@ bool Response::parseCgiHeader(std::string header, int contentLength)
     {
         key = header.substr(0, pos);
         header.erase(0, pos + 1);
-        pos = header.find("\r\n");
+        pos = header.find(delimiterLength == 4 ? "\r\n" : "\n");
         value = header.substr(0, pos);
         header.erase(0, pos + 2);
         headers.push_back({key, value});
@@ -83,11 +83,11 @@ bool Response::parseCgiHeader(std::string header, int contentLength)
     }
 
     _file.open(_cgi_file_path.c_str(), std::ios::binary);
-	if (responseHeader.statusCode == -1)
-	{
-		responseHeader.statusCode = 200;
+    if (responseHeader.statusCode == -1)
+    {
+        responseHeader.statusCode = 200;
         responseHeader.statusMessage = Utils::getStatusMessage(200);
-	}
+    }
     responseHeader.v_headers.push_back({"Content-Length", Utils::toString(contentLength)});
     responseHeader.v_headers.push_back({"Server", _client->get_server_block().getServerName()});
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
@@ -102,6 +102,8 @@ void Response::readCgiFile()
     std::ofstream ofile;
     std::string content = "";
     std::string cgi_header = "";
+    size_t delimiterLength;
+    size_t pos;
 
     ifile.open(_cgi_file_path.c_str(), std::ios::binary);
     if (!ifile)
@@ -117,17 +119,20 @@ void Response::readCgiFile()
         ifile.close();
     }
 
-    size_t pos = content.find("\r\n\r\n");
+    if ((pos = content.find("\r\n\r\n")) != std::string::npos)
+        delimiterLength = 4;
+    else if ((pos = content.find("\n\n")) != std::string::npos)
+        delimiterLength = 2;
+
     if (pos != std::string::npos)
     {
-        cgi_header = content.substr(0, pos + 4);
-        content = content.erase(0, pos + 4);
+        cgi_header = content.substr(0, pos + delimiterLength);
+        content = content.erase(0, pos + delimiterLength);
     }
-
     ofile.open(_cgi_file_path.c_str(), std::ios::binary);
     ofile << content;
     ofile.close();
 
-    if (parseCgiHeader(cgi_header, content.length()))
+    if (parseCgiHeader(cgi_header, content.length(), delimiterLength))
         setResStatus(ON_PROCESS);
 }
