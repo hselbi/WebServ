@@ -191,6 +191,7 @@ void Request::chunkedProcess(const std::string &str)
 
 int Request::parseReq(const std::string &str)
 {
+	// std::cout << "here parser!!" << std::endl;
 
     // * check if chunked or not
     // if (checkRequ(str))
@@ -204,7 +205,7 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
-    defaultReq();
+    resetReq();
     reqLine(lineNext(str, i));
     /*
     *   check if line is not equal to "\r\n" or "" or 400
@@ -221,9 +222,11 @@ int Request::parseReq(const std::string &str)
 		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
 	}
     setLanguage();
+	// std::cout << "===>" << i << std::endl;
     if (i != std::string::npos)
     {
-        setBody(str.substr(i, std::string::npos));
+		// std::cout << str << std::endl;
+        setBody(str.substr(i));
     }
     setQuery();
 
@@ -243,7 +246,7 @@ std::vector<std::string>		split(const std::string& str, char c)
 	return tokens;
 }
 
-// comparison, 
+// comparison,
 bool langsComparition (const std::pair<std::string, float> first, const std::pair<std::string, float> second)
 {
   return ( first.second < second.second );
@@ -338,7 +341,7 @@ int Request::reqLine(const std::string &line)
     i = line.find_first_of('\n');
     str = line.substr(0, i);
     i = line.find_first_of(' ');
-    
+
     if (i == std::string::npos)
     {
         m_code_ret = 400;
@@ -419,7 +422,7 @@ int Request::methodChecker()
 std::string Request::lineNext(const std::string &str, size_t &i)
 {
     std::string line;
-    
+
     size_t  j;
     if (i == std::string::npos)
         return "";
@@ -436,7 +439,7 @@ std::string Request::lineNext(const std::string &str, size_t &i)
         i = j;
     else
         i = j + 1;
-    
+
     return line;
 }
 

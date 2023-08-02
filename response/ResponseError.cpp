@@ -6,13 +6,14 @@ void	Response::errorPages(int statusCode)
 {
 	t_responseHeader	responseHeader;
 	std::string			filePath = getErrorPagePath(statusCode);
-	
 
+	if (_file.is_open())
+		_file.close();
 	_file.open(filePath.c_str(), std::ios::binary);
 	if (!_file.is_open())
 	{
-		std::cout << RED <<  "Failed to open file: " << filePath << RESET << std::endl;
-		_client->set_res_status(DONE);
+		// std::cout << RED <<  "Failed to open file: " << filePath << RESET << std::endl;
+		setResStatus(DONE);
 		return;
 	}
 
@@ -22,10 +23,13 @@ void	Response::errorPages(int statusCode)
 
 	responseHeader.statusCode = statusCode;
 	responseHeader.statusMessage = Utils::getStatusMessage(statusCode);
-	responseHeader.headers["Content-Type"] = getContentType(filePath);
-	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
+	responseHeader.m_headers["Content-Type"] = getContentType(filePath);
+	responseHeader.m_headers["Content-Length"] = Utils::toString(fileSize);
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-	_client->set_res_status(ON_PROCESS);
+
+	setResStatus(ON_PROCESS);
 }
+
+
 
 

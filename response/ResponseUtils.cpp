@@ -36,6 +36,8 @@ void Response::checkWhichRequestedMethod()
 		Method_GET();
 	else if (method == "DELETE")
 		Method_DELETE();
+	else if (method == "POST")
+		Method_POST();
 }
 
 void Response::setRediration(std::string location)
@@ -43,17 +45,17 @@ void Response::setRediration(std::string location)
 	t_responseHeader responseHeader;
 	responseHeader.statusCode = 301;
 	responseHeader.statusMessage = Utils::getStatusMessage(301);
-	responseHeader.headers["Location"] = location;
-	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+	responseHeader.m_headers["Location"] = location;
+	responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 	_client->append_response_data(_header_buffer);
-	_client->set_res_status(DONE);
+	setResStatus(DONE);
 }
 
 void	Response::deleteAllFolderFiles()
 {
-	std::string path = getRoot() + _client->get_request().getPath();
+	std::string path = getRequestPathFile();
 	DIR *dir;
 	struct dirent *ent;
 	std::string filePath;
@@ -63,7 +65,6 @@ void	Response::deleteAllFolderFiles()
 		while ((ent = readdir(dir)) != NULL)
 		{
 			filePath = path + ent->d_name;
-			std::cout << "filePath: " << filePath << std::endl;
 			if (remove(filePath.c_str()) != 0)
 				errorPages(500);
 		}
@@ -76,7 +77,7 @@ void	Response::deleteAllFolderFiles()
 
 void	Response::deleteFile()
 {
-	std::string filePath = getRoot() + _client->get_request().getPath();
+	std::string filePath = getRequestPathFile();
 
 	if (remove(filePath.c_str()) != 0)
 		errorPages(500);
@@ -85,27 +86,13 @@ void	Response::deleteFile()
 		t_responseHeader responseHeader;
 		responseHeader.statusCode = 204;
 		responseHeader.statusMessage = Utils::getStatusMessage(204);
-		responseHeader.headers["Content-Length"] = "0";
-		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+		responseHeader.m_headers["Content-Length"] = "0";
+		responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-		_client->set_res_status(ON_PROCESS);
+		setResStatus(ON_PROCESS);
 	}
 }
 
-void Response::resetResponse()
-{
-	_header_buffer = "";
-	_buffer[0] = '\0';
-	_have_cgi = false;
-	_client->set_res_status(NOT_STARTED);
-	if (_location)
-	{
-		delete _location;
-		_location = NULL;
-	}
-	if (_file.is_open())
-		_file.close();
-}
 
 void Response::autoIndex()
 {
@@ -114,7 +101,7 @@ void Response::autoIndex()
 	std::string strHeader, path, body, tmp;
 	t_responseHeader responseHeader;
 
-	path = getRoot() + _client->get_request().getPath();
+	path = getRequestPathFile();
 	body = "<html><head><title>Index of " + _client->get_request().getPath() + "</title></head><body><h1>Index of " + _client->get_request().getPath() + "</h1><hr><pre>";
 	if ((dir = opendir(path.c_str())) != NULL)
 	{
@@ -133,12 +120,34 @@ void Response::autoIndex()
 	}
 	responseHeader.statusCode = 200;
 	responseHeader.statusMessage = Utils::getStatusMessage(200);
-	responseHeader.headers["Content-Type"] = "text/html";
-	responseHeader.headers["Content-Length"] = Utils::toString(body.length());
-	responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+	responseHeader.m_headers["Content-Type"] = "text/html";
+	responseHeader.m_headers["Content-Length"] = Utils::toString(body.length());
+	responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 
 	strHeader = Utils::ResponseHeaderToString(responseHeader);
 	_client->append_response_data(strHeader);
 	_client->append_response_data(body);
-	_client->set_res_status(DONE);
+	setResStatus(DONE);
+}
+
+
+std::string		Response::startCgi(std::string script_path)
+{
+
+	std::map<std::string, std::string> cgi_infos = _location->cgi_infos;
+	std::string extension = Utils::getExtensionFile(script_path);
+	std::string cgi_path = "";
+	for (std::map<std::string, std::string>::iterator it = cgi_infos.begin(); it != cgi_infos.end(); it++)
+	{
+		if (it->first == extension)
+			cgi_path = it->second;
+	}
+
+	if (cgi_path == "" || !Utils::fileExists(cgi_path) || Utils::isDirectory(cgi_path)  ||  !Utils::isExecutable(cgi_path))
+	{
+		_have_cgi = false;
+		return "-1";
+	}
+
+	return _client->get_cgi().start_cgi(cgi_path, script_path);
 }

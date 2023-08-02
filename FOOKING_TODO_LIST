@@ -1,0 +1,18 @@
+LEADER: {
+	- limit body config
+},
+7OFFAR: {
+
+}
+SECURITYTY:
+{
+	- cookies
+	- session
+	
+}
+
+ALL:{
+
+}
+
+fsanitize
