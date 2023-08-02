@@ -22,13 +22,15 @@ std::string	Utils::ResponseHeaderToString(const t_responseHeader &responseHeader
 
 	ss << "HTTP/1.1 " << responseHeader.statusCode << " " << responseHeader.statusMessage << "\r\n";
 
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = responseHeader.headers.begin(); it != responseHeader.headers.end(); ++it)
-	{
-		ss << it->first << ": " << it->second << "\r\n";
-	}
+	std::map<std::string, std::string>::const_iterator m_it;
+	for (m_it = responseHeader.m_headers.begin(); m_it != responseHeader.m_headers.end(); ++m_it)
+		ss << m_it->first << ": " << m_it->second << "\r\n";
+
+	std::vector<Header>::const_iterator v_it;
+	for (v_it = responseHeader.v_headers.begin(); v_it != responseHeader.v_headers.end(); ++v_it)
+		ss << v_it->key << ": " << v_it->value << "\r\n";
+
 	ss << "\r\n";
- 
 	return ss.str();
 }
 
