@@ -263,7 +263,7 @@ void Server::handle_incoming_request(long client_socket)
 	// {
 	// 	std::cout << GREEN << "inside iiiiiiiii " << RESET << "\n";
 	// 	exit(0);
-	// }
+	// }ƒ
 	// ++i;
 	
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
@@ -279,7 +279,11 @@ void Server::handle_incoming_request(long client_socket)
 	}
 	else
 	{
-		get_client(client_socket)->append_request_data(received_data, bytes_read);
+		if (client_socket != prev_socket)
+		{
+			std::cout << "this is first request!!!" << std::endl;
+			get_client(client_socket)->append_request_data(received_data, bytes_read);
+		}
 		feed_request(std::string(received_data), client_socket);
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
 		{
