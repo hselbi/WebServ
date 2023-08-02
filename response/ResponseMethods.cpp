@@ -3,42 +3,40 @@
 
 void Response::Method_GET()
 {
-    std::string filePath = getRoot() + _client->get_request().getPath();
+    std::string filePath = getRequestPathFile();
     std::string index = "";
 
     if (Utils::fileExists(filePath))
     {
-        std::cout << "File found"  << filePath << std::endl;
-
         if (Utils::isDirectory(filePath))
         {
             if (filePath[filePath.length() - 1] != '/')
-            {
-                std::cout << "REDIRECT TO: " << _client->get_request().getPath() + "/" << std::endl;
                 return setRediration(_client->get_request().getPath() + "/");
-            }
             else
             {
                 if ((index = isDirHasIndexFiles()) != "")
                 {
                     // TODO: Add python also to this condition  (if file extension is .py)
-                    if (_location && _location->cgi_infos.size() > 0 && (index.find(".php") != std::string::npos || index.find(".py") != std::string::npos))
+                    if (_location && _location->cgi_infos.size() > 0)
                     {
                         _have_cgi = true;
-                        _cgi_file = _client->get_cgi().start_cgi(index);
-                        if (_cgi_file == -1)
+                        if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)
                         {
-                            std::cout << "CGI ERROR" << std::endl;
-                            errorPages(500);
-                            return;
+                            _cgi_file_path = startCgi(index);
+                            if (_cgi_file_path == "-1")
+                                 return errorPages(500);
+                            _client->get_cgi().set_cgi_status(1);
                         }
-                        readCgiFile();
+                        if (_client->get_cgi().get_cgi_status() == 1)
+                        {
+                            if (_client->get_cgi().get_ready_to_read_from_cgi() == 0)
+                                _client->get_cgi().set_ready_to_read_from_cgi(waitpid(_client->get_cgi().get_pid(), 0, WNOHANG));
+                            else
+                                readCgiFile();
+                        }
                     }
                     else
-                    {
-                        std::cout << "Have index file "  << filePath<< std::endl;
                         readFileByPath(index);
-                    }
                 }
                 else
                 {
@@ -53,20 +51,24 @@ void Response::Method_GET()
         else
         {
             // TODO: Add python also to this condition  (if file extension is .py)
-            if (_location && _location->cgi_infos.size() > 0 && (filePath.find(".php") != std::string::npos || filePath.find(".py") != std::string::npos))
+            if (_location && _location->cgi_infos.size() > 0)
             {
-                std::cout << "Have CGI" << std::endl;
                 _have_cgi = true;
-                _cgi_file = _client->get_cgi().start_cgi(filePath);
-                std::cout << _cgi_file << std::endl;
-
-                if (_cgi_file == -1)
+                if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)
                 {
-                    std::cout << "CGI ERROR" << std::endl;
-                    errorPages(500);
-                    return;
+                    _cgi_file_path = startCgi(filePath);
+                    if (_cgi_file_path == "-1")
+                        return errorPages(500);
+                    _client->get_cgi().set_cgi_status(1);
                 }
-                readCgiFile();
+
+                if (_client->get_cgi().get_cgi_status() == 1)
+                {
+                    if (_client->get_cgi().get_ready_to_read_from_cgi() == 0)
+                        _client->get_cgi().set_ready_to_read_from_cgi(waitpid(_client->get_cgi().get_pid(), 0, WNOHANG));
+                    else
+                        readCgiFile();
+                }
             }
             else
                 readFileByPath(filePath);
@@ -74,66 +76,65 @@ void Response::Method_GET()
     }
     else
     {
-        std::cout << "File not found: "  << filePath << std::endl;
         errorPages(404);
         return;
     }
 }
 
-void    Response::Method_POST()
-{
+// void    Response::Method_POST()
+// {
 
-    // check if the request is formed
-    // std::string _response;
-    // int _code;
-    // std::string _type;
+//     // check if the request is formed
+//     // std::string _response;
+//     // int _code;
+//     // std::string _type;
 
-    std::cout << YELLOW << "POST method\n" << std::endl;;
+//     std::cout << YELLOW << "POST method\n" << std::endl;;
     
-    size_t i = 0;
-    size_t j = _response.size() - 2;
+//     size_t i = 0;
+//     size_t j = _response.size() - 2;
 
-    while (_response.find("\r\n\r\n", i) != std::string::npos || _response.find("\r\n", i) == i)
-    {
-        std::string str = _response.substr(i, _response.find("\r\n", i) - i);
-        if (str.find("Status: ") == 0)
-            _code = std::atoi(str.substr(8, 3).c_str());
-        else if (str.find("Content-Type: ") == 0)
-            _type = str.substr(14, str.size());
-        i += str.size() + 2;
-    }
-    while (_response.find("\r\n", j) == j)
-        j -= 2;
+//     while (_response.find("\r\n\r\n", i) != std::string::npos || _response.find("\r\n", i) == i)
+//     {
+//         std::string str = _response.substr(i, _response.find("\r\n", i) - i);
+//         if (str.find("Status: ") == 0)
+//             _code = std::atoi(str.substr(8, 3).c_str());
+//         else if (str.find("Content-Type: ") == 0)
+//             _type = str.substr(14, str.size());
+//         i += str.size() + 2;
+//     }
+//     while (_response.find("\r\n", j) == j)
+//         j -= 2;
     
-    _response = _response.substr(i, j - i);
+//     _response = _response.substr(i, j - i);
 
-    std::cout << "RESPONSE: " << _response << std::endl;
+//     std::cout << "RESPONSE: " << _response << std::endl;
 
-    // there's no content-type header
-    if (_response.find("Content-Type: ") == std::string::npos)
-    {
-        std::cout << "NO CONTENT-TYPE" << std::endl;
-        errorPages(400);
-        return;
-    }
+//     // there's no content-type header
+//     if (_response.find("Content-Type: ") == std::string::npos)
+//     {
+//         std::cout << "NO CONTENT-TYPE" << std::endl;
+//         errorPages(400);
+//         return;
+//     }
 
-    // 204 No Content
-    if (_response.find("Content-Length: 0") != std::string::npos)
-    {
-        std::cout << "NO CONTENT-LENGTH" << std::endl;
-        errorPages(204);
-        return;
-    }
+//     // 204 No Content
+//     if (_response.find("Content-Length: 0") != std::string::npos)
+//     {
+//         std::cout << "NO CONTENT-LENGTH" << std::endl;
+//         errorPages(204);
+//         return;
+//     }
 
-    // 500 Internal Server Error
-    if (_response.find("Status: 500") != std::string::npos)
-    {
-        std::cout << "500 Internal Server Error" << std::endl;
-        errorPages(500);
-        return;
-    }    
+//     // 500 Internal Server Error
+//     if (_response.find("Status: 500") != std::string::npos)
+//     {
+//         std::cout << "500 Internal Server Error" << std::endl;
+//         errorPages(500);
+//         return;
+//     }    
     
-}
+// }
 
 // void    Response::Method_POST()
 // {
@@ -212,7 +213,7 @@ void    Response::Method_POST()
 
 void Response::Method_DELETE()
 {
-    std::string filePath = getRoot() + _client->get_request().getPath();
+    std::string filePath = getRequestPathFile();
     std::string index = "";
     if (Utils::fileExists(filePath))
     {
@@ -221,7 +222,7 @@ void Response::Method_DELETE()
             if (filePath[filePath.length() - 1] != '/')
                 return errorPages(409);
             else
-                 deleteAllFolderFiles();
+                deleteAllFolderFiles();
         }
         else
             deleteFile();
@@ -231,78 +232,74 @@ void Response::Method_DELETE()
 }
 
 
-// void Response::Method_POST()
-// {
-//     std::string filePath = getRoot() + _client->get_request().getPath();
-//     std::string index = "";
+void Response::Method_POST()
+{
+    std::string filePath = getRequestPathFile();
+    std::string index = "";
 
-//     if (Utils::fileExists(filePath))
-//     {
-//         std::cout << "File found"  << filePath << std::endl;
+    if (Utils::fileExists(filePath))
+    {
+        if (Utils::isDirectory(filePath))
+        {
+            if (filePath[filePath.length() - 1] != '/')
+                return  errorPages(400);
+            else
+            {
+                if ((index = isDirHasIndexFiles()) != "")
+                {
+                    if (_location && _location->cgi_infos.size() > 0)
+                    {
+                        _have_cgi = true;
+                        if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)
+                        {
+                            _cgi_file_path = startCgi(index);
+                            if (_cgi_file_path == "-1")
+                                 return errorPages(500);
+                            _client->get_cgi().set_cgi_status(1);
+                        }
+                        if (_client->get_cgi().get_cgi_status() == 1)
+                        {
+                            if (_client->get_cgi().get_ready_to_read_from_cgi() == 0)
+                                _client->get_cgi().set_ready_to_read_from_cgi(waitpid(_client->get_cgi().get_pid(), 0, WNOHANG));
+                            else
+                                readCgiFile();
+                        }
+                    }
+                    else
+                        errorPages(403);
+                }
+                else
+                    errorPages(403);
+            }
+        }
+        else
+        {
+            if (_location && _location->cgi_infos.size() > 0)
+            {
+                _have_cgi = true;
+                if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)
+                {
+                    _cgi_file_path = startCgi(filePath);
+                    if (_cgi_file_path == "-1")
+                        return errorPages(500);
+                    _client->get_cgi().set_cgi_status(1);
+                }
 
-//         if (Utils::isDirectory(filePath))
-//         {
-//             if (filePath[filePath.length() - 1] != '/')
-//             {
-//                 std::cout << "REDIRECT TO: " << _client->get_request().getPath() + "/" << std::endl;
-//                 return setRediration(_client->get_request().getPath() + "/");
-//             }
-//             else
-//             {
-//                 if ((index = isDirHasIndexFiles()) != "")
-//                 {
-//                     // TODO: Add python also to this condition  (if file extension is .py)
-//                     if (_location && _location->cgi_infos.size() > 0 && (index.find(".php") != std::string::npos || index.find(".py") != std::string::npos))
-//                     {
-//                         std::cout << "Have CGI" << std::endl;
-//                         _have_cgi = true;
-//                         std::cout << "Start CGI" << std::endl;
-//                         _cgi_file = _client->get_cgi().start_cgi(index);
-//                         std::cout << _cgi_file << std::endl;
-//                         if (_cgi_file == -1)
-//                         {
-//                             std::cout << "CGI ERROR" << std::endl;
-//                             errorPages(500);
-//                             return;
-//                         }
-//                         readCgiFile();
-//                     }
-//                     else
-//                     {
-//                         std::cout << "Have index file "  << filePath<< std::endl;
-//                         readFileByPath(index);
-//                     }
-//                 }
-//                 else 
-//                     return errorPages(403);
-//             }
-//         }
-//         else
-//         {
-//             // TODO: Add python also to this condition  (if file extension is .py)
-//             if (_location && _location->cgi_infos.size() > 0 && (filePath.find(".php") != std::string::npos || filePath.find(".py") != std::string::npos))
-//             {
-//                 std::cout << "Have CGI" << std::endl;
-//                 _have_cgi = true;
-//                 _cgi_file = _client->get_cgi().start_cgi(filePath);
-//                 std::cout << _cgi_file << std::endl;
-
-//                 if (_cgi_file == -1)
-//                 {
-//                     std::cout << "CGI ERROR" << std::endl;
-//                     errorPages(500);
-//                     return;
-//                 }
-//                 readCgiFile();
-//             }
-//             else
-//                 readFileByPath(filePath);
-//         }
-//     }
-//     else
-//     {
-//         std::cout << "File not found: "  << filePath << std::endl;
-//         errorPages(404);
-//         return;
-//     }
-// }
+                if (_client->get_cgi().get_cgi_status() == 1)
+                {
+                    if (_client->get_cgi().get_ready_to_read_from_cgi() == 0)
+                        _client->get_cgi().set_ready_to_read_from_cgi(waitpid(_client->get_cgi().get_pid(), 0, WNOHANG));
+                    else
+                        readCgiFile();
+                }
+            }
+            else
+                errorPages(403);
+        }
+    }
+    else
+    {
+        errorPages(404);
+        return;
+    }
+}

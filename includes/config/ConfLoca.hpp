@@ -37,6 +37,7 @@ class ConfLoca
         ConfLoca(const ConfLoca &copy);
         ConfLoca &operator=(const ConfLoca &copy);
         static MethodType strtoMethod(std::string str);
+        static std::string MethodToStr(MethodType method);
         void print_loca_info();
 
 };

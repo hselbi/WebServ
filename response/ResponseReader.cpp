@@ -6,7 +6,7 @@ void Response::readFile()
 {
     t_responseHeader responseHeader;
     std::streampos fileSize;
-    std::string filePath = getRoot() + _client->get_request().getPath();
+    std::string filePath = getRequestPathFile();
 
     _file.open(filePath.c_str(), std::ios::binary);
     _file.seekg(0, std::ios::end);
@@ -15,12 +15,12 @@ void Response::readFile()
 
     responseHeader.statusCode = 200;
     responseHeader.statusMessage = Utils::getStatusMessage(200);
-    responseHeader.headers["Content-Type"] = getContentType(filePath);
-    responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-    responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+    responseHeader.m_headers["Content-Type"] = getContentType(filePath);
+    responseHeader.m_headers["Content-Length"] = Utils::toString(fileSize);
+    responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
-    _client->set_res_status(ON_PROCESS);
+    setResStatus(ON_PROCESS);
 }
 
 void Response::readFileByPath(std::string filePath)
@@ -35,56 +35,104 @@ void Response::readFileByPath(std::string filePath)
 
     responseHeader.statusCode = 200;
     responseHeader.statusMessage = Utils::getStatusMessage(200);
-    responseHeader.headers["Content-Type"] = getContentType(filePath);
-    responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
-    responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+    responseHeader.m_headers["Content-Type"] = getContentType(filePath);
+    responseHeader.m_headers["Content-Length"] = Utils::toString(fileSize);
+    responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
-    _client->set_res_status(ON_PROCESS);
+    setResStatus(ON_PROCESS);
+}
+
+bool Response::parseCgiHeader(std::string header, int contentLength, int delimiterLength)
+{
+    t_responseHeader responseHeader;
+    std::vector<Header> headers;
+    std::vector<Header>::iterator it;
+    std::string key;
+    std::string value;
+    size_t pos = 0;
+
+    while ((pos = header.find(":")) != std::string::npos)
+    {
+        key = header.substr(0, pos);
+        header.erase(0, pos + 1);
+        pos = header.find(delimiterLength == 4 ? "\r\n" : "\n");
+        value = header.substr(0, pos);
+        header.erase(0, pos + 2);
+        headers.push_back({key, value});
+    }
+
+    it = headers.begin();
+    responseHeader.statusCode = -1;
+    while (it != headers.end())
+    {
+        if (it->key == "Status")
+        {
+            int statusCode = std::stoi(it->value.substr(0, 4));
+            if (statusCode < 100 || statusCode >= 500)
+            {
+                (statusCode == 502) ? errorPages(502) : errorPages(500);
+                return false;
+            }
+            responseHeader.statusCode = statusCode;
+            responseHeader.statusMessage = it->value.substr(4, it->value.length() - 4);
+        }
+        else
+            responseHeader.v_headers.push_back({it->key, it->value});
+        it++;
+    }
+
+    _file.open(_cgi_file_path.c_str(), std::ios::binary);
+    if (responseHeader.statusCode == -1)
+    {
+        responseHeader.statusCode = 200;
+        responseHeader.statusMessage = Utils::getStatusMessage(200);
+    }
+    responseHeader.v_headers.push_back({"Content-Length", Utils::toString(contentLength)});
+    responseHeader.v_headers.push_back({"Server", _client->get_server_block().getServerName()});
+    _header_buffer = Utils::ResponseHeaderToString(responseHeader);
+
+    return true;
 }
 
 void Response::readCgiFile()
 {
-    t_responseHeader responseHeader;
-    off_t fileSize;
-    ssize_t bytesRead;
-    char *found;
-    char buffer[10000];
-    int endHeaderPos = 0;
 
-    fileSize = lseek(_cgi_file, 0, SEEK_END);
-    if (fileSize == (off_t)-1)
+    std::ifstream ifile;
+    std::ofstream ofile;
+    std::string content = "";
+    std::string cgi_header = "";
+    size_t delimiterLength;
+    size_t pos;
+
+    ifile.open(_cgi_file_path.c_str(), std::ios::binary);
+    if (!ifile)
     {
-        std::cerr << "Failed to seek to the end of file!" << std::endl;
-        close(_cgi_file);
-        _client->set_res_status(DONE);
-        return errorPages(400);
+        std::cerr << "Failed to open the file!" << std::endl;
+        return errorPages(500);
+    }
+    else
+    {
+        std::ostringstream ss;
+        ss << ifile.rdbuf();
+        content = ss.str();
+        ifile.close();
     }
 
-    if (lseek(_cgi_file, 0, SEEK_SET) == (off_t)-1)
-    {
-        std::cerr << "Failed to seek to the beginning of file!" << std::endl;
-        close(_cgi_file);
-        _client->set_res_status(DONE);
-        return errorPages(400);
-    }
+    if ((pos = content.find("\r\n\r\n")) != std::string::npos)
+        delimiterLength = 4;
+    else if ((pos = content.find("\n\n")) != std::string::npos)
+        delimiterLength = 2;
 
-    while ((bytesRead = read(_cgi_file, buffer, sizeof(buffer) - 1)) > 0)
+    if (pos != std::string::npos)
     {
-        buffer[bytesRead] = '\0';
-        found = strstr(buffer, "\r\n\r\n");
-        if (found)
-        {
-            endHeaderPos = found - buffer;
-            break;
-        }
+        cgi_header = content.substr(0, pos + delimiterLength);
+        content = content.erase(0, pos + delimiterLength);
     }
-    lseek(_cgi_file, endHeaderPos, SEEK_SET);
-    responseHeader.statusCode = 200;
-    responseHeader.statusMessage = Utils::getStatusMessage(200);
-    responseHeader.headers["Content-Type"] = "text/html";
-    responseHeader.headers["Content-Length"] = Utils::toString(fileSize - endHeaderPos);
-    responseHeader.headers["Server"] = _client->get_server_block().getServerName();
-    _header_buffer = Utils::ResponseHeaderToString(responseHeader);
-    _client->set_res_status(ON_PROCESS);
+    ofile.open(_cgi_file_path.c_str(), std::ios::binary);
+    ofile << content;
+    ofile.close();
+
+    if (parseCgiHeader(cgi_header, content.length(), delimiterLength))
+        setResStatus(ON_PROCESS);
 }

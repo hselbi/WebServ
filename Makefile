@@ -19,12 +19,13 @@ OBJS			= $(SRCS:.cpp=.o)
 
 CXX				= clang++
 CWWFLAGS		= -Wall -Werror -Wextra -std=c++98
-CFAFLAGS		= -std=c++98 -g -fsanitize=address
+CFAFLAGS		= -std=c++98  -g3 -fsanitize=address
 
 all:			$(NAME)
 
+
 $(NAME):		$(OBJS)
-				$(CXX) $(CFAFLAGS) -o $(NAME) $(OBJS)
+				$(CXX) $(CWWFLAGS) $(CFAFLAGS) -o $(NAME) $(OBJS)
 
 clean:
 				rm -f $(OBJS)

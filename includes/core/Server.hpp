@@ -33,7 +33,7 @@
 #define DEFAULT_CONFIG_FILE "../assets/server.conf"
 #define SERVER_BLOCK_COUNT 1
 // 4096 kb = 4 mb = 4096 * 1024 bytes = 4194304 bytes
-#define BUFFER_SIZE 4194304 // 4 mb
+#define BUFFER_SIZE 64000 //
 
 struct Client;
 
@@ -82,6 +82,8 @@ struct Server
 
 	bool checkReq(const std::string &str);
 	void		processChunk(long socket);
+
+	void disconnect_connection(int client_socket);
 
 private:
 	Config _config;
