@@ -37,4 +37,12 @@ if ($_SESSION["count"] > 4) {
 else
     echo "count = " . $_SESSION["count"] . "<br>";
 
+
+echo "<br>=================================<br>";
+echo "<br>=================================<br>";
+echo "<br>=================================<br>";
+
+echo "<pre>";
+    var_dump($_SERVER);
+echo "</pre>";
 ?>
