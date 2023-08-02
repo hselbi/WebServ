@@ -366,7 +366,7 @@ long Server::monitor_clients()
 	struct timeval timeout;
 	long ready_count = 0;
 	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
+	timeout.tv_usec = 1;
 
 	FD_ZERO(&_read_set);
 	FD_ZERO(&_write_set);
