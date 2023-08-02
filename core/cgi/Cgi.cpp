@@ -32,15 +32,11 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	{
 		return "-1";
 	}
-
 	set_body(_client->get_request().getBody());
-
 	_start_time = time(NULL);
 
 	if ((_pid = fork()) == -1)
-	{
 		return "-1";
-	}
 
 	if (_pid == 0)
 	{

@@ -117,7 +117,6 @@ void Response::Method_POST()
             {
                 if ((index = isDirHasIndexFiles()) != "")
                 {
-                    // TODO: Add python also to this condition  (if file extension is .py)
                     if (_location && _location->cgi_infos.size() > 0)
                     {
                         _have_cgi = true;
@@ -145,7 +144,6 @@ void Response::Method_POST()
         }
         else
         {
-            // TODO: Add python also to this condition  (if file extension is .py)
             if (_location && _location->cgi_infos.size() > 0)
             {
                 _have_cgi = true;

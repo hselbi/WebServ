@@ -18,3 +18,5 @@ print("Content-Type: text/html\n")
 print("<html><body>")
 print("<h1>Cookie Set!</h1>")
 print("</body></html>")
+
+
