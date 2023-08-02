@@ -1,7 +1,7 @@
 <?php
 // // Process the input data
 // var_dump($_GET);
-phpinfo();
+// phpinfo();
 // echo "Hello World";
 // echo "Hello World";
 // echo "Hello World";
