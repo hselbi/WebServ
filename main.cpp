@@ -10,7 +10,7 @@
 int main(int ac, char *av[])
 {
 	Server server;
-
+	signal(SIGPIPE, SIG_IGN);
 	std::string config = (ac == 1) ? "./config/conf/test.config" : av[1];
 	try
 	{
