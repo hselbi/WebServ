@@ -68,6 +68,8 @@ void Cgi::init_env_vars()
 {
 	std::string root = _client->get_response().getRoot();
 	std::string path = _cgi_script;
+	_env_vars["REMOTE_ADDR"] =  _client->get_request().getHeaders()["Host"];
+	_env_vars["REMOTE_HOST"] = _client->get_server_block().getServerName();
 	_env_vars["SERVER_SOFTWARE"] = "MortalKOMBAT/1.0";
 	_env_vars["SERVER_NAME"] = _client->get_server_block().getServerName();
 	_env_vars["SERVER_PORT"] = std::to_string(_client->get_server_block().getPort());
