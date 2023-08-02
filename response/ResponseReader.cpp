@@ -50,6 +50,7 @@ bool Response::parseCgiHeader(std::string header, int contentLength, int delimit
     std::vector<Header>::iterator it;
     std::string key;
     std::string value;
+    t_header header_element;
     size_t pos = 0;
 
     while ((pos = header.find(":")) != std::string::npos)
@@ -59,7 +60,7 @@ bool Response::parseCgiHeader(std::string header, int contentLength, int delimit
         pos = header.find(delimiterLength == 4 ? "\r\n" : "\n");
         value = header.substr(0, pos);
         header.erase(0, pos + 2);
-        headers.push_back({key, value});
+        headers.push_back(setHeaderElement(key, value));
     }
 
     it = headers.begin();
@@ -78,7 +79,7 @@ bool Response::parseCgiHeader(std::string header, int contentLength, int delimit
             responseHeader.statusMessage = it->value.substr(4, it->value.length() - 4);
         }
         else
-            responseHeader.v_headers.push_back({it->key, it->value});
+            responseHeader.v_headers.push_back(setHeaderElement(it->key, it->value));
         it++;
     }
 
@@ -88,8 +89,9 @@ bool Response::parseCgiHeader(std::string header, int contentLength, int delimit
         responseHeader.statusCode = 200;
         responseHeader.statusMessage = Utils::getStatusMessage(200);
     }
-    responseHeader.v_headers.push_back({"Content-Length", Utils::toString(contentLength)});
-    responseHeader.v_headers.push_back({"Server", _client->get_server_block().getServerName()});
+    
+    responseHeader.v_headers.push_back(setHeaderElement("Content-Length", Utils::toString(contentLength)));
+    responseHeader.v_headers.push_back(setHeaderElement("Server", _client->get_server_block().getServerName()));
     _header_buffer = Utils::ResponseHeaderToString(responseHeader);
 
     return true;
@@ -104,7 +106,7 @@ void Response::readCgiFile()
     std::string cgi_header = "";
     size_t delimiterLength;
     size_t pos;
-
+    
     ifile.open(_cgi_file_path.c_str(), std::ios::binary);
     if (!ifile)
     {
@@ -135,4 +137,15 @@ void Response::readCgiFile()
 
     if (parseCgiHeader(cgi_header, content.length(), delimiterLength))
         setResStatus(ON_PROCESS);
+}
+
+
+
+t_header Response::setHeaderElement(std::string key, std::string value)
+{
+    t_header header_element;
+
+    header_element.key = key;
+    header_element.value = value;
+    return header_element;
 }
