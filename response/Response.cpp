@@ -29,7 +29,9 @@ void Response::processing()
 
 	if (_client->get_res_status() == NOT_STARTED)
 	{
-		if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
+		if (_client->get_request().getCodeRet() == 400)
+			errorPages(400);
+		else if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
 	else if (_client->get_res_status() == ON_PROCESS)
