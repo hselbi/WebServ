@@ -6,12 +6,9 @@ size_t Cgi::_counter = 0;
 
 Cgi::~Cgi() {}
 
-std::string Cgi::start_cgi(std::string script_path)
+std::string Cgi::start_cgi(std::string binary, std::string script_path)
 {
-	// std::cout << RED << "START CGI: " << script_path << RESET << std::endl;
-	// set_cgi_bin("/usr/bin/php-cgi");
-	set_cgi_bin("/Users/adouib/Desktop/WebServ/config/cgi_binary/php-cgi");
-	// std::cout << "Script path: " << script_path << std::endl;
+	set_cgi_bin(binary);
 	set_cgi_script(script_path);
 	init_env_vars();
 	return exec_cgi();
@@ -35,15 +32,11 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	{
 		return "-1";
 	}
-
 	set_body(_client->get_request().getBody());
-
 	_start_time = time(NULL);
 
 	if ((_pid = fork()) == -1)
-	{
 		return "-1";
-	}
 
 	if (_pid == 0)
 	{
@@ -75,6 +68,8 @@ void Cgi::init_env_vars()
 {
 	std::string root = _client->get_response().getRoot();
 	std::string path = _cgi_script;
+	_env_vars["REMOTE_ADDR"] =  _client->get_request().getHeaders()["Host"];
+	_env_vars["REMOTE_HOST"] = _client->get_server_block().getServerName();
 	_env_vars["SERVER_SOFTWARE"] = "MortalKOMBAT/1.0";
 	_env_vars["SERVER_NAME"] = _client->get_server_block().getServerName();
 	_env_vars["SERVER_PORT"] = std::to_string(_client->get_server_block().getPort());
@@ -88,18 +83,13 @@ void Cgi::init_env_vars()
 	_env_vars["QUERY_STRING"] = _client->get_request().getQuery();
 	_env_vars["PATH_INFO"] = path;
 	_env_vars["PATH_TRANSLATED"] = path;
+	_env_vars["REDIRECT_STATUS"] = "200";
 	if (_client->get_request().getHeaders()["Cookie"] != "")
-		_env_vars["COOKIES"] = _client->get_request().getHeaders()["Cookie"];
+		_env_vars["HTTP_COOKIE"] = _client->get_request().getHeaders()["Cookie"];
 	if (_client->get_request().getMethod() == "POST")
 	{
 		_env_vars["CONTENT_TYPE"] = _client->get_request().getHeaders()["Content-Type"];
 		_env_vars["CONTENT_LENGTH"] = _client->get_request().getHeaders()["Content-Length"];
-	}
-
-	size_t dot_pos = path.rfind(".");
-	if ((dot_pos != std::string::npos) && path.substr(dot_pos) == ".php")
-	{
-		_env_vars["REDIRECT_STATUS"] = "200";
 	}
 
 	_envp = new char *[_env_vars.size() + 1];

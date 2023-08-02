@@ -5,6 +5,9 @@ Response::Response()
 {
 	_location = NULL;
 	_have_cgi = false;
+	_header_buffer = "";
+	_buffer[0] = '\0';
+	_cgi_file_path = "";
 }
 
 Response::~Response()
@@ -26,15 +29,11 @@ void Response::processing()
 
 	if (_client->get_res_status() == NOT_STARTED)
 	{
-		// ! TODO: CALL MULTIPLE TIMES IN THE SAME REQUEST IN CASE OF CGI
-   			// std::cout << GREEN << "NOT_STARTED" << RESET << std::endl;
 		if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
-
 	}
 	else if (_client->get_res_status() == ON_PROCESS)
 	{
-		// std::cout << YELLOW << "ON_PROCESS" << RESET << std::endl;
 		if (_header_buffer.length() > 0)
 		{
 			if (_header_buffer.length() >= buffer_size)

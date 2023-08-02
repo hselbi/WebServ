@@ -173,8 +173,8 @@ bool Response::isServerHaveRedirection()
 	{
 		responseHeader.statusCode = redirectStatus;
 		responseHeader.statusMessage = Utils::getStatusMessage(redirectStatus);
-		responseHeader.headers["Location"] = _client->get_server_block().getRedirectUrl();
-		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+		responseHeader.m_headers["Location"] = _client->get_server_block().getRedirectUrl();
+		responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 		_client->append_response_data(_header_buffer);
@@ -185,9 +185,9 @@ bool Response::isServerHaveRedirection()
 	{
 		responseHeader.statusCode = redirectStatus;
 		responseHeader.statusMessage = Utils::getStatusMessage(redirectStatus);
-		responseHeader.headers["Content-Type"] = "application/octet-stream";
-		responseHeader.headers["Content-Length"] = "0";
-		responseHeader.headers["Server"] = _client->get_server_block().getServerName();
+		responseHeader.m_headers["Content-Type"] = "application/octet-stream";
+		responseHeader.m_headers["Content-Length"] = "0";
+		responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 		_client->append_response_data(_header_buffer);
@@ -205,6 +205,7 @@ bool Response::isMethodAllowedInLocation()
 	if (_location)
 	{
 		allow_methods = _location->allow_methods;
+
 		if (std::find(allow_methods.begin(), allow_methods.end(), _location->strtoMethod(_client->get_request().getMethod())) != allow_methods.end())
 			return true;
 		else

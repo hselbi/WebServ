@@ -20,7 +20,7 @@ class Response {
 
 		void				processing();
 		void				setClient(Client &client);
-		std::string				getRoot();
+		std::string			getRoot();
 		bool get_cgi_status();
 		void set_cgi_status(bool status);
 
@@ -38,6 +38,7 @@ class Response {
 		bool				_have_cgi;
 
 		std::string				getContentType(const std::string& filePath);
+		std::string				startCgi(std::string script_path);
 		std::string				getErrorPagePath(int statusCode);
 		std::string				isDirHasIndexFiles();
 		std::string				getRequestPathFile();
@@ -52,6 +53,7 @@ class Response {
 		void					Method_POST();
 		void					Method_DELETE();
 		void					setRediration(std::string location);
+		bool					parseCgiHeader(std::string header, int contentLength, int delimiterLength);
 		bool					checkRequestIsFormed();
 		bool					isServerHaveRedirection();
 		bool					getMatchedLocation();
@@ -60,5 +62,4 @@ class Response {
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
 		void					setResStatus(int status);
-		std::map<std::string, std::string> parseCgiHeader(std::string header);
 };

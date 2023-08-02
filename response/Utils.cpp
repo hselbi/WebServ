@@ -22,13 +22,15 @@ std::string	Utils::ResponseHeaderToString(const t_responseHeader &responseHeader
 
 	ss << "HTTP/1.1 " << responseHeader.statusCode << " " << responseHeader.statusMessage << "\r\n";
 
-	std::map<std::string, std::string>::const_iterator it;
-	for (it = responseHeader.headers.begin(); it != responseHeader.headers.end(); ++it)
-	{
-		ss << it->first << ": " << it->second << "\r\n";
-	}
+	std::map<std::string, std::string>::const_iterator m_it;
+	for (m_it = responseHeader.m_headers.begin(); m_it != responseHeader.m_headers.end(); ++m_it)
+		ss << m_it->first << ": " << m_it->second << "\r\n";
+
+	std::vector<Header>::const_iterator v_it;
+	for (v_it = responseHeader.v_headers.begin(); v_it != responseHeader.v_headers.end(); ++v_it)
+		ss << v_it->key << ": " << v_it->value << "\r\n";
+
 	ss << "\r\n";
- 
 	return ss.str();
 }
 
@@ -52,12 +54,20 @@ bool Utils::isDirectory(const std::string& path)
     return false;
 }
 
+
 bool Utils::fileExists(const std::string& path)
 {
 	std::ifstream file(path.c_str());
     return file.good();
 }
 
+bool Utils::isExecutable(const std::string& path)
+{
+	struct stat st;
+	if (stat(path.c_str(), &st) == 0)
+		return (st.st_mode & S_IXUSR) != 0;
+	return false;
+}
 
 std::string Utils::getStatusMessage(int statusCode)
 {
@@ -101,4 +111,12 @@ std::string Utils::getStatusMessage(int statusCode)
 		case 505: return "HTTP Version not supported";
 		default: return "";
 	}
+}
+
+std::string Utils::getExtensionFile(const std::string &path)
+{
+	size_t pos = path.find_last_of(".");
+	if (pos != std::string::npos)
+		return path.substr(pos + 1);
+	return "";
 }

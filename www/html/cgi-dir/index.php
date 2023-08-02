@@ -1,18 +1,48 @@
-<!DOCTYPE html>
-<html>
-<body>
-
 <?php
-$cookie_name = "user";
-$cookie_value = "John Doe";
-if(isset($_COOKIE[$cookie_name])) {
-    echo "Cookie named '" . $cookie_name . "' is already  set!";
-} else {
-	setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/cgi"); // 86400 = 1 day
-    echo "Cookie '" . $cookie_name . "' is set!<br>";
-    // echo "Value is: " . $_COOKIE[$cookie_name];
-}
-?>
+// // Process the input data
+// var_dump($_GET);
 
-</body>
-</html>
+// echo "<br>=================================<br>";
+
+// phpinfo();
+
+// echo "Hello World";
+// echo "Hello World";
+// echo "Hello World";
+// echo "Hello World";
+// echo "Hello World";
+// echo "\0";
+// echo "es";
+
+session_start();
+
+if (!isset($_SESSION["count"])) {
+    echo "count = 0 <br>";
+    $_SESSION["count"] = 0;
+}
+
+if (isset($_SESSION['username'])) {
+    echo "Hello " . $_SESSION['username'] . "<br>";
+    $_SESSION["count"]++;
+} else {
+    echo "Hello guest <br>";
+    $_SESSION['username'] = "zmahmoud";
+}
+
+
+if ($_SESSION["count"] > 4) {
+    session_destroy();
+    echo "Session destroyed <br>";
+}
+else
+    echo "count = " . $_SESSION["count"] . "<br>";
+
+
+echo "<br>=================================<br>";
+echo "<br>=================================<br>";
+echo "<br>=================================<br>";
+
+echo "<pre>";
+    var_dump($_SERVER);
+echo "</pre>";
+?>

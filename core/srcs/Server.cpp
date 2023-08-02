@@ -335,9 +335,10 @@ void Server::create_server_socket()
 	if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) == -1) // socket, level, level options
 		throw_error("setsockopt SO_REUSEADDR failed");
 
-	int nosigpipe = 1;
-	if (setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == -1) // socket, level, level options
-		throw_error("setsockopt SO_NOSIGPIPE failed");
+	// !! TODO: check if this is needed because not working on linux
+	// int nosigpipe = 1;
+	// if (setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == -1) // socket, level, level options
+	// 	throw_error("setsockopt SO_NOSIGPIPE failed");
 
 	struct timeval timeout;
 	timeout.tv_sec = 3; // Timeout value in seconds
