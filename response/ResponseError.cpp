@@ -23,8 +23,8 @@ void	Response::errorPages(int statusCode)
 
 	responseHeader.statusCode = statusCode;
 	responseHeader.statusMessage = Utils::getStatusMessage(statusCode);
-	responseHeader.headers["Content-Type"] = getContentType(filePath);
-	responseHeader.headers["Content-Length"] = Utils::toString(fileSize);
+	responseHeader.m_headers["Content-Type"] = getContentType(filePath);
+	responseHeader.m_headers["Content-Length"] = Utils::toString(fileSize);
 	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
 
 	setResStatus(ON_PROCESS);
