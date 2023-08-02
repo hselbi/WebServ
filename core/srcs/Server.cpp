@@ -445,7 +445,9 @@ void Server::handle_incoming_request(long client_socket)
 			std::cout << numb << std::endl;
 
 			std::cout << PURPLE << "2===> " << (str.substr(cr)).size() << "/" << str.size() << RESET << std::endl;
+
 			
+
 			std::cout << BLUE << hextodec(numb) << RESET << std::endl;
 			size_t len = hextodec(numb);
 			size_t i = 0;
