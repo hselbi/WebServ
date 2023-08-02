@@ -116,7 +116,7 @@ bool Request::isFinished()
 //     return false;
 // }
 
-int								checkEnd(const std::string& str, const std::string& end)
+int								checkEnds(const std::string& str, const std::string& end)
 {
 	size_t	i = str.size();
 	size_t	j = end.size();
@@ -131,7 +131,7 @@ int								checkEnd(const std::string& str, const std::string& end)
 	return (0);
 }
 
-bool checkReq(const std::string &str)
+bool checkRequ(const std::string &str)
 {
     size_t	i = str.find("\r\n\r\n");
 	if (i != std::string::npos)
@@ -140,7 +140,7 @@ bool checkReq(const std::string &str)
 		{
 			if (str.find("Transfer-Encoding: chunked") != std::string::npos)
 			{
-				if (checkEnd(str, "0\r\n\r\n") == 0)
+				if (checkEnds(str, "0\r\n\r\n") == 0)
 					return (0);
 				else
 					return (1);
@@ -193,10 +193,10 @@ int Request::parseReq(const std::string &str)
 {
 
     // * check if chunked or not
-    // if (checkReq(str))
-    //     std::cout << "True" << std::endl;
-    // else
-    //     std::cout << "false" << std::endl;
+    if (checkRequ(str))
+        std::cout << "True" << std::endl;
+    else
+        std::cout << "false" << std::endl;
         
     // std::cout << "here" << std::endl;
 
