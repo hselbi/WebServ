@@ -376,8 +376,6 @@ std::string FileExtension()
     return "";
 }
 
-
-
 /*
 
 ! size_read is ===> bytes_read <=== for US
