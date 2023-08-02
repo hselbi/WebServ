@@ -9,7 +9,8 @@
 #include <map>
 #include <vector>
 #include <dirent.h>
-
+#include <sys/types.h>
+#include <sys/stat.h>
 
 typedef struct ResponseHeader {
     int statusCode;
@@ -25,9 +26,11 @@ class Utils
 		static std::string getWebservRootPath();
 		static std::string getStatusMessage(int statusCode);
 		static std::string ResponseHeaderToString(const t_responseHeader &responseHeader);
+		static std::string getExtensionFile(const std::string &path);
 		static bool isValidURI(const std::string& uri);
 		static bool isDirectory(const std::string& path);
 		static bool fileExists(const std::string& path);
+		static bool isExecutable(const std::string& path);
 };
 
 #endif

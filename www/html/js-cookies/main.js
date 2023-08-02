@@ -1,11 +1,10 @@
-setCookie("test", "test", 1);
 function setCookie(cname, cvalue, exdays) {
     const d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     let expires = "expires=" + d.toUTCString();
     document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
-console.log(getCookie("test"));
+
 function getCookie(cname) {
     let name = cname + "=";
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -20,4 +19,13 @@ function getCookie(cname) {
         }
     }
     return "";
+}
+
+if (getCookie("test") == "test") {
+    document.getElementById("cookie").innerHTML = "Cookie is set";
+}
+else {
+    document.getElementById("cookie").innerHTML = "Cookie is not set";
+    setCookie("test", "test", 1);
+
 }

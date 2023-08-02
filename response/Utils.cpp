@@ -52,12 +52,20 @@ bool Utils::isDirectory(const std::string& path)
     return false;
 }
 
+
 bool Utils::fileExists(const std::string& path)
 {
 	std::ifstream file(path.c_str());
     return file.good();
 }
 
+bool Utils::isExecutable(const std::string& path)
+{
+	struct stat st;
+	if (stat(path.c_str(), &st) == 0)
+		return (st.st_mode & S_IXUSR) != 0;
+	return false;
+}
 
 std::string Utils::getStatusMessage(int statusCode)
 {
@@ -101,4 +109,12 @@ std::string Utils::getStatusMessage(int statusCode)
 		case 505: return "HTTP Version not supported";
 		default: return "";
 	}
+}
+
+std::string Utils::getExtensionFile(const std::string &path)
+{
+	size_t pos = path.find_last_of(".");
+	if (pos != std::string::npos)
+		return path.substr(pos + 1);
+	return "";
 }

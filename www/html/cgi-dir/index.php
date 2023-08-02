@@ -1,20 +1,17 @@
-<!DOCTYPE html>
 <?php
-$cookie_name = "user";
-$cookie_value = "John Doe";
-setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/"); // 86400 = 1 day
-?>
-<html>
-<body>
+// // Process the input data
+// var_dump($_GET);
+phpinfo();
+// echo "Hello World";
+// echo "Hello World";
+// echo "Hello World";
+// echo "Hello World";
+// echo "Hello World";
+// echo "\0";
+// echo "es";
 
-<?php
-// if(!isset($_COOKIE[$cookie_name])) {
-//     echo "Cookie named '" . $cookie_name . "' is not set!";
-// } else {
-//     echo "Cookie '" . $cookie_name . "' is set!<br>";
-//     echo "Value is: " . $_COOKIE[$cookie_name];
-// }
-?>
+// session_start();
 
-</body>
-</html>
+// $_SESSION['username'] = "zmahmoud";
+
+?>

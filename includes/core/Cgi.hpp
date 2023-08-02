@@ -36,7 +36,7 @@ struct Cgi
 	typedef std::map<std::string, std::string> env_vars_t;
 	Cgi();
 	~Cgi();
-	std::string start_cgi(std::string script_path);
+	std::string start_cgi(std::string binary, std::string script_path);
 	std::string exec_cgi();
 
 	void init_env_vars();
