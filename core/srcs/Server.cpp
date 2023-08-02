@@ -82,7 +82,7 @@ void Server::feed_request(std::string request, long client_socket) // feed reque
 	// std::cout << request << std::endl;
 
 	get_client(client_socket)->get_request().parseReq(request);
-	// std::cout << get_client(client_socket)->get_request() << std::endl;
+	std::cout << get_client(client_socket)->get_request() << std::endl;
 
 
 }
@@ -446,7 +446,7 @@ void Server::handle_incoming_request(long client_socket)
 
 			std::cout << PURPLE << "2===> " << (str.substr(cr)).size() << "/" << str.size() << RESET << std::endl;
 
-			
+
 
 			std::cout << BLUE << hextodec(numb) << RESET << std::endl;
 			size_t len = hextodec(numb);
@@ -454,6 +454,7 @@ void Server::handle_incoming_request(long client_socket)
 			std::string _body;
 			while (len)
 			{
+				
 				_body += str[i];
 				len--;
 				i++;
