@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 
 # define RES_BUFFER_SIZE 64000
-# define TIMEOUT_CGI 6
 
 struct Client;
 
