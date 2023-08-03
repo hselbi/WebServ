@@ -67,7 +67,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
 	}
 
 	std::cout << YELLOW << "> config file parsing finish\n" << RESET;
-	check_server_syntax(result);
+	// check_server_syntax(result); ! TODO : Check this 
 	return result;
 }
 
