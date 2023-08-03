@@ -252,7 +252,8 @@ void Server::handle_incoming_request(long client_socket)
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
 
-	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1)
+	memset(received_data, 0, BUFFER_SIZE);
+	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, MSG_DONTWAIT)) == -1)
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
 		drop_client(client_socket);

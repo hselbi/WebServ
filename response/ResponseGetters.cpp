@@ -103,7 +103,8 @@ bool	Response::getMatchedLocation()
 
 	if (index != -1)
 	{
-		_location = new ConfLoca(locations[index]);
+		if (_location == NULL)
+			_location = new ConfLoca(locations[index]);
 		if (isMethodAllowedInLocation())
 		{
 			// std::cout << "Allowed method in location" << std::endl;
