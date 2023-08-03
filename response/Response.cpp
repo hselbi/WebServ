@@ -36,7 +36,6 @@ void Response::processing()
 	}
 	else if (_client->get_res_status() == ON_PROCESS)
 	{
-		std::cout << "Response is on process" << std::endl;
 		if (_header_buffer.length() > 0)
 		{
 			if (_header_buffer.length() >= buffer_size)
