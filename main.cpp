@@ -9,9 +9,8 @@
 
 int main(int ac, char *av[])
 {
-	// TODO: to remplace
-	signal(SIGPIPE, SIG_IGN);
 	Server server;
+	signal(SIGPIPE, SIG_IGN);
 	std::string config = (ac == 1) ? "./config/conf/test.config" : av[1];
 	try
 	{
@@ -28,9 +27,9 @@ int main(int ac, char *av[])
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
-		server.cleanup_by_closing_all_sockets(); 
+		server.cleanup_by_closing_all_sockets();
 	}
-	
+
 	return (0);
 }
 

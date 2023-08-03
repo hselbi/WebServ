@@ -188,9 +188,20 @@ void Request::chunkedProcess(const std::string &str)
     // std::cout << PURPLE << req << std::endl;
 }
 
+unsigned int hextodeci( const std::string &hex ) throw() {
+ 
+    unsigned int dec;
+    std::stringstream ss;
+
+    ss << std::hex << hex;
+    ss >> dec;
+
+    return dec;
+}
 
 int Request::parseReq(const std::string &str)
 {
+	// std::cout << "here parser!!" << std::endl;
 
     // * check if chunked or not
     // if (checkRequ(str))
@@ -204,7 +215,7 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
-    defaultReq();
+    resetReq();
     reqLine(lineNext(str, i));
     /*
     *   check if line is not equal to "\r\n" or "" or 400
@@ -221,9 +232,35 @@ int Request::parseReq(const std::string &str)
 		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
 	}
     setLanguage();
+	// std::cout << "===>" << i << "/" << str.size() << std::endl;
     if (i != std::string::npos)
     {
-        setBody(str.substr(i, std::string::npos));
+        if (m_headers["Transfer-Encoding"] == "chunked")
+        {
+            // 2001 - 194 - 5 - 
+            // get body
+            std::string bd = str.substr(i);
+            // get pos of \r\n
+            size_t cr = bd.find("\r\n");
+            // std::cout << "===> " << cr << std::endl; 
+            // get hex
+            std::string numb = bd.substr(0, cr);
+            // get size of body 
+            chunked_size = hextodeci(numb);
+            // std::cput
+            // get the rest of body
+            std::string _body = bd.substr(cr + 2, chunked_size);
+            body_size = _body.size();
+            // std::cout << "size of str >> " << str.size() << "\npos of i >> " << i << "\npos of cr >> " << cr << "\nsize of chunked " << chunked_size  << "\nsize of body  >> " << body_size << std::endl;
+            rest_chunk = chunked_size - body_size;
+            // std::cout << "ends in >> " << rest_chunk << std::endl;
+            // std::cout << chunked_size << "/" << body_size << std::endl;
+            setBody(_body);
+        }
+        else
+        {
+            setBody(str.substr(i));
+        }
     }
     setQuery();
 
@@ -243,7 +280,7 @@ std::vector<std::string>		split(const std::string& str, char c)
 	return tokens;
 }
 
-// comparison, 
+// comparison,
 bool langsComparition (const std::pair<std::string, float> first, const std::pair<std::string, float> second)
 {
   return ( first.second < second.second );
@@ -338,7 +375,7 @@ int Request::reqLine(const std::string &line)
     i = line.find_first_of('\n');
     str = line.substr(0, i);
     i = line.find_first_of(' ');
-    
+
     if (i == std::string::npos)
     {
         m_code_ret = 400;
@@ -419,7 +456,7 @@ int Request::methodChecker()
 std::string Request::lineNext(const std::string &str, size_t &i)
 {
     std::string line;
-    
+
     size_t  j;
     if (i == std::string::npos)
         return "";
@@ -436,7 +473,7 @@ std::string Request::lineNext(const std::string &str, size_t &i)
         i = j;
     else
         i = j + 1;
-    
+
     return line;
 }
 
