@@ -8,6 +8,7 @@ Cgi::~Cgi() {}
 
 std::string Cgi::start_cgi(std::string binary, std::string script_path)
 {
+
 	set_cgi_bin(binary);
 	set_cgi_script(script_path);
 	init_env_vars();
@@ -32,9 +33,12 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	{
 		return "-1";
 	}
-	set_body(_client->get_request().getBody());
-	_start_time = time(NULL);
-
+	if (_client->get_request().getMethod() == "POST")
+	{
+		// std::cout << RED << _client->get_request().getBody() << RESET << std::endl;
+		set_body(_client->get_request().getBody());
+	}
+	
 	if ((_pid = fork()) == -1)
 		return "-1";
 
@@ -60,6 +64,7 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	}
 
 	fclose(_cgi_output_file);
+
 	return tmp_filename;
 }
 
@@ -68,7 +73,9 @@ void Cgi::init_env_vars()
 {
 	std::string root = _client->get_response().getRoot();
 	std::string path = _cgi_script;
-	_env_vars["REMOTE_ADDR"] =  _client->get_request().getHeaders()["Host"];
+	std::map<std::string, std::string> req_headers = _client->get_request().getHeaders();
+
+	_env_vars["REMOTE_ADDR"] =  req_headers["Host"];
 	_env_vars["REMOTE_HOST"] = _client->get_server_block().getServerName();
 	_env_vars["SERVER_SOFTWARE"] = "MortalKOMBAT/1.0";
 	_env_vars["SERVER_NAME"] = _client->get_server_block().getServerName();
@@ -84,13 +91,26 @@ void Cgi::init_env_vars()
 	_env_vars["PATH_INFO"] = path;
 	_env_vars["PATH_TRANSLATED"] = path;
 	_env_vars["REDIRECT_STATUS"] = "200";
-	if (_client->get_request().getHeaders()["Cookie"] != "")
-		_env_vars["HTTP_COOKIE"] = _client->get_request().getHeaders()["Cookie"];
+	_env_vars["HTTP_HOST"] = req_headers["Host"];
+	_env_vars["HTTP_REFERER"] = req_headers["Referer"];
+	_env_vars["HTTP_USER_AGENT"] = req_headers["User-Agent"];
+	_env_vars["HTTP_ACCEPT"] = req_headers["Accept"];
+	_env_vars["HTTP_ACCEPT_LANGUAGE"] = req_headers["Accept-Language"];
+	_env_vars["HTTP_ACCEPT_ENCODING"] = req_headers["Accept-Encoding"];
+	_env_vars["HTTP_ACCEPT_CHARSET"] = req_headers["Accept-Charset"];
+	_env_vars["HTTP_KEEP_ALIVE"] = req_headers["Keep-Alive"];
+	_env_vars["HTTP_CONNECTION"] = req_headers["Connection"];
+	_env_vars["HTTP_CACHE_CONTROL"] = req_headers["Cache-Control"];
+	
+
+	if (req_headers["Cookie"] != "")
+		_env_vars["HTTP_COOKIE"] = req_headers["Cookie"];
 	if (_client->get_request().getMethod() == "POST")
 	{
-		_env_vars["CONTENT_TYPE"] = _client->get_request().getHeaders()["Content-Type"];
-		_env_vars["CONTENT_LENGTH"] = _client->get_request().getHeaders()["Content-Length"];
+		_env_vars["CONTENT_TYPE"] = req_headers["Content-Type"];
+		_env_vars["CONTENT_LENGTH"] = req_headers["Content-Length"];
 	}
+
 
 	_envp = new char *[_env_vars.size() + 1];
 	int i = 0;
