@@ -26,6 +26,8 @@ Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_
 }
 
 void Request::resetReq(){
+	body_size = 0;
+	chunked_size = 0;
 	m_method = "";
 	m_body = "";
 	m_code_ret = 200;

@@ -188,6 +188,16 @@ void Request::chunkedProcess(const std::string &str)
     // std::cout << PURPLE << req << std::endl;
 }
 
+unsigned int hextodeci( const std::string &hex ) throw() {
+ 
+    unsigned int dec;
+    std::stringstream ss;
+
+    ss << std::hex << hex;
+    ss >> dec;
+
+    return dec;
+}
 
 int Request::parseReq(const std::string &str)
 {
@@ -225,8 +235,27 @@ int Request::parseReq(const std::string &str)
 	// std::cout << "===>" << i << std::endl;
     if (i != std::string::npos)
     {
-		// std::cout << str << std::endl;
-        setBody(str.substr(i));
+        std::cout << m_headers["Transfer-Encoding"] << std::endl;
+        if (m_headers["Transfer-Encoding"] == "chunked")
+        {
+            // get body
+            std::string bd = str.substr(i);
+            // get pos of \r\n
+            size_t cr = bd.find("\r\n");
+            // get hex
+            std::string numb = bd.substr(0, cr);
+            // get size of body 
+            chunked_size = hextodeci(numb);
+            // get the rest of body
+            std::string _body = bd.substr(cr + 2);
+            body_size = _body.size();
+            std::cout << chunked_size << "/" << body_size << std::endl;
+            setBody(_body);
+        }
+        else
+        {
+            setBody(str.substr(i));
+        }
     }
     setQuery();
 
