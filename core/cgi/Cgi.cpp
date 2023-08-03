@@ -8,6 +8,7 @@ Cgi::~Cgi() {}
 
 std::string Cgi::start_cgi(std::string binary, std::string script_path)
 {
+
 	set_cgi_bin(binary);
 	set_cgi_script(script_path);
 	init_env_vars();
@@ -32,9 +33,12 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	{
 		return "-1";
 	}
-	set_body(_client->get_request().getBody());
-	_start_time = time(NULL);
-
+	if (_client->get_request().getMethod() == "POST")
+	{
+		// std::cout << RED << _client->get_request().getBody() << RESET << std::endl;
+		set_body(_client->get_request().getBody());
+	}
+	
 	if ((_pid = fork()) == -1)
 		return "-1";
 
@@ -60,6 +64,7 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	}
 
 	fclose(_cgi_output_file);
+
 	return tmp_filename;
 }
 

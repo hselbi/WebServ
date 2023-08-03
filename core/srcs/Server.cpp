@@ -258,6 +258,8 @@ void Server::handle_incoming_request(long client_socket)
 	long bytes_read;
 
 	memset(received_data, 0, BUFFER_SIZE);
+	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, MSG_DONTWAIT)) == -1)
+	memset(received_data, 0, BUFFER_SIZE);
 
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, MSG_DONTWAIT)) == -1)
 	{

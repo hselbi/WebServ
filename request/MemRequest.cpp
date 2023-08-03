@@ -143,6 +143,8 @@ int Request::parseReq(const std::string &str)
 	}
     setLanguage();
 	// std::cout << "===>" << i << std::endl;
+
+
     if (i != std::string::npos)
     {
 		// std::cout << str << std::endl;
@@ -150,6 +152,7 @@ int Request::parseReq(const std::string &str)
     }
     setQuery();
     // file.close();
+
 
     return m_code_ret;
 }

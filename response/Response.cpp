@@ -25,6 +25,7 @@ void Response::setClient(Client &client)
 
 void Response::processing()
 {
+
 	int buffer_size = RES_BUFFER_SIZE;
 
 	if (_client->get_res_status() == NOT_STARTED)
@@ -78,7 +79,6 @@ void Response::setResStatus(int status)
 		if (_have_cgi)
 		{
 			_client->get_cgi().reset();
-			std::cout << "remove cgi file: " << _cgi_file_path << std::endl;
 			remove(_cgi_file_path.c_str());
 		}
 		if (_location)
@@ -94,6 +94,7 @@ void Response::setResStatus(int status)
 		_buffer[0] = '\0';
 		_client->get_request().resetReq();
 		_client->set_res_status(DONE);
+		
 	}
 	else if (status == ON_PROCESS)
 	{
