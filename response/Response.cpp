@@ -36,7 +36,6 @@ void Response::processing()
 	}
 	else if (_client->get_res_status() == ON_PROCESS)
 	{
-		std::cout << "Response is on process" << std::endl;
 		if (_header_buffer.length() > 0)
 		{
 			if (_header_buffer.length() >= buffer_size)
@@ -79,6 +78,7 @@ void Response::setResStatus(int status)
 		if (_have_cgi)
 		{
 			_client->get_cgi().reset();
+			std::cout << "remove cgi file: " << _cgi_file_path << std::endl;
 			remove(_cgi_file_path.c_str());
 		}
 		if (_location)
