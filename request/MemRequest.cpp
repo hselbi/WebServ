@@ -232,7 +232,7 @@ int Request::parseReq(const std::string &str)
 		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
 	}
     setLanguage();
-	// std::cout << "===>" << i << std::endl;
+	std::cout << "===>" << i << std::endl;
     if (i != std::string::npos)
     {
         std::cout << m_headers["Transfer-Encoding"] << std::endl;
@@ -242,10 +242,12 @@ int Request::parseReq(const std::string &str)
             std::string bd = str.substr(i);
             // get pos of \r\n
             size_t cr = bd.find("\r\n");
+            std::cout << "===> " << cr << std::endl; 
             // get hex
             std::string numb = bd.substr(0, cr);
             // get size of body 
             chunked_size = hextodeci(numb);
+            // std::cput
             // get the rest of body
             std::string _body = bd.substr(cr + 2);
             body_size = _body.size();

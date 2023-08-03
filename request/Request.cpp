@@ -176,10 +176,23 @@ void	Request::setCodeRet(int code) {
 	m_code_ret = code;
 }
 
+void Request::set_size_body(size_t size)
+{
+	this->body_size = size;
+}
+
 std::string	Request::getHost() const {
 	return m_host;
 }
 
+size_t	Request::getChunkedSize() const
+{
+	return chunked_size;
+}
+
+size_t Request::getBodySize() const {
+	return body_size;
+}
 
 void	Request::setBody(const std::string& str)
 {
@@ -210,7 +223,6 @@ void Request::setQuery()
 		m_path = m_path.substr(0, i);
 	}
 }
-
 
 int Request::setPort()
 {

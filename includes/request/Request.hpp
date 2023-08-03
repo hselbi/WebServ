@@ -45,12 +45,14 @@ public:
     void setQuery();
     int setPort();
 
-    int get_req_status();
 	void set_req_status(int status);
+    void    set_size_body(size_t size);  
 
     static std::vector<std::string>    initMethods();
 
+
     /* getters  */
+    int get_req_status();
     std::string		getMethod() const;
     std::string		getBody() const;
     int				getCodeRet() const;
@@ -63,8 +65,10 @@ public:
     std::map<std::string, std::string>	getHeaders() const;
     std::map<std::string, std::string>	getEnvCgi() const;
     std::list<std::pair<std::string, float> >	getLanguage() const;
+    
 
-
+    size_t     getBodySize() const;
+    size_t      getChunkedSize() const;
     /* member functions */
 
     void resetReq();
