@@ -249,7 +249,7 @@ int Request::parseReq(const std::string &str)
             chunked_size = hextodeci(numb);
             // std::cput
             // get the rest of body
-            std::string _body = bd.substr(cr + 2, chunked_size);
+            std::string _body = bd.substr(cr + 2, chunked_size + 1);
             body_size = _body.size();
             // std::cout << "size of str >> " << str.size() << "\npos of i >> " << i << "\npos of cr >> " << cr << "\nsize of chunked " << chunked_size  << "\nsize of body  >> " << body_size << std::endl;
             rest_chunk = chunked_size - body_size;

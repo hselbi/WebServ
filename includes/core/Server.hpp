@@ -105,6 +105,7 @@ private:
 	size_t body_length;
 	long prev_socket;
 	bool	body_ending;
+	size_t request_index;
 
 };
 
