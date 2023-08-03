@@ -120,3 +120,4 @@ std::string Utils::getExtensionFile(const std::string &path)
 		return path.substr(pos + 1);
 	return "";
 }
+
