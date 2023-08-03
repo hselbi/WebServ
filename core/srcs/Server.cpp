@@ -252,21 +252,198 @@ void Server::match_client_request_to_server_block(long client_socket)
 		}
 	}
 }
-// int i = 0;
+
+
+/*
+& **************************************** HAFID ***********************************************
+*/
+
+/*
+!	======================= From Hafid ===================================
+*/
+
+int     checkEnd(const std::string& str, const std::string& end)
+{
+	size_t	i = str.size();
+	size_t	j = end.size();
+
+	while (j > 0)
+	{
+		i--;
+		j--;
+		if (i < 0 || str[i] != end[j])
+			return (1);
+	}
+	return (0);
+}
+
+void		Server::processChunk(long socket)
+{
+	std::cout << BLUE << _requests[socket].size() << RESET<< std::endl;
+	std::string	head = _requests[socket].substr(0, _requests[socket].find("\r\n\r\n"));
+	std::cout << "Head ==> " << BLUE << head.size() << RESET<< std::endl;
+	
+	std::string	chunks = _requests[socket].substr(_requests[socket].find("\r\n"), _requests[socket].size() - 1);
+	std::cout << "Chunks ==> " << BLUE << chunks.size() << RESET<< std::endl;
+	std::string	subchunk = chunks.substr(0, 100);
+	std::string	body = "";
+	int			chunksize = strtol(subchunk.c_str(), NULL, 16);
+	size_t		i = 0;
+	std::cout << "==> $$$" << chunksize << "<===" <<std::endl; 
+
+	while (chunksize)
+	{
+		i = chunks.find("\r\n", i) + 2;
+		body += chunks.substr(i, chunksize);
+		i += chunksize + 2;
+		subchunk = chunks.substr(i, 100);
+		chunksize = strtol(subchunk.c_str(), NULL, 16);
+	}
+
+	_requests[socket] = head + "\r\n\r\n" + body + "\r\n\r\n";
+}
+
+bool Server::checkReq(const std::string &str)
+{
+    size_t	i = str.find("\r\n\r\n");
+    // std::cout << "===> " << RED << str << RESET << std::endl;
+	if (i != std::string::npos)
+	{
+		if (str.find("Content-Length: ") == std::string::npos)
+		{
+			std::cout << "------->" << std::endl;
+			if (str.find("Transfer-Encoding: chunked") != std::string::npos)
+			{
+				if (checkEnd(str, "0\r\n\r\n") == 0)
+				{
+					// std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5" << std::endl;
+					return (0);
+				}
+				else
+					return (1);
+			}
+			else
+				return (0);
+		}
+
+		body_length = std::atoi(str.substr(str.find("Content-Length: ") + 16, 10).c_str());
+		std::cout << body_length << std::endl;
+		if (str.size() >= body_length + i + 4)
+		{
+			std::cout << RED << "hafid!!!!====> false" << RESET << std::endl;
+			return (0);
+		}
+		else
+		{
+
+			std::cout << GREEN << "hafid!!!!====> true" << RESET<< std::endl;
+			return (1);
+		}
+	}
+
+	return (1);
+}
+
+bool isComplete(const std::string &str)
+{
+	if (str.find("Transfer-Encoding: chunked") != std::string::npos)
+	{
+		if (checkEnd(str, "0\r\n\r\n") == 0)
+		{
+			return (0);
+		}
+		else
+			return (1);
+	}
+	else
+		return (0);
+}
+unsigned int hextodec( const std::string &hex ) throw() {
+ 
+    unsigned int dec;
+    std::stringstream ss;
+
+    ss << std::hex << hex;
+    ss >> dec;
+
+    return dec;
+ 
+}
+std::string checkingRecv(const std::string &str)
+{
+	std::string head;
+	// head until \r\n\r\n
+	size_t end = str.find("0\r\n\r\n");
+	size_t crlf = str.find("\r\n\r\n");
+	size_t cr = str.find("\r\n");
+	if (end != std::string::npos)
+		std::cout << "==>>" << end << "<<===" <<std::endl;
+	else if(crlf != std::string::npos)
+	{
+		std::cout << "==>>" << crlf << std::endl;
+		head = str.substr(0, crlf);
+	}
+	else if (cr != std::string::npos)
+	{
+		// size_t hex = str.find("\r\n");
+		std::string numb = str.substr(0, cr);
+		std::cout << "rest!!!==> " << hextodec(numb) << std::endl;
+	}
+	else{
+		std::cout << str << std::endl;
+	}
+	
+
+	// from 
+	return str;
+}
+
+/*
+!	======================= From Hafid ===================================
+*/
+
+std::string FileExtension(std::string path)
+{
+    // std::string path = RequestHeaders["Content-Type"];
+    if (path.find("text/css") != std::string::npos)
+        return ".css";
+    if (path.find("text/csv") != std::string::npos)
+        return ".csv";
+    if (path.find("image/gif") != std::string::npos)
+        return "gif";
+    if (path.find("text/htm") != std::string::npos)
+        return ".html";
+    if (path.find("text/html") != std::string::npos)
+        return ".html";
+    if (path.find("video/mp4") != std::string::npos)
+        return ".mp4";
+    if (path.find("image/x-icon") != std::string::npos)
+        return ".ico";
+    if (path.find("image/jpeg") != std::string::npos)
+        return ".jpeg";
+    if (path.find("image/jpg") != std::string::npos)
+        return ".jpeg";
+    if (path.find("application/javascript") != std::string::npos)
+        return ".js";
+    if (path.find("application/json") != std::string::npos)
+        return ".json";
+    if (path.find("image/png") != std::string::npos)
+        return ".png";
+    if (path.find("application/pdf") != std::string::npos)
+        return ".pdf";
+    if (path.find("image/svg+xml") != std::string::npos)
+        return ".svg";
+    if (path.find("text/plain") != std::string::npos)
+        return ".txt";
+    return "";
+}
+
+
 void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
-
-	// std::cout << YELLOW << "inside recv" << RESET << "\n";
-	// if (i == 1)
-	// {
-	// 	std::cout << GREEN << "inside iiiiiiiii " << RESET << "\n";
-	// 	exit(0);
-	// }ƒ
-	// ++i;
-	
-	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1) // !! receiving data from a client may not arrive all at once, it can be delivered in chaunks or packets
+	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1)
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
 		drop_client(client_socket);
@@ -279,35 +456,93 @@ void Server::handle_incoming_request(long client_socket)
 	}
 	else
 	{
-		std::cout << "===> " << bytes_read << std::endl;
+		std::ofstream file;
+		//can't enable exception now because of gcc bug that raises ios_base::failure with useless message
+		//file.exceptions(file.exceptions() | std::ios::failbit);
+		file.open("bodyRequest" + FileExtension(get_client(client_socket)->get_request().getHeaders()["Content-Type"]), std::ios::out | std::ios::app | std::ios_base::binary);
+		file << std::string(received_data);
+		// file << "****";
+
 		if (client_socket != prev_socket)
 		{
-			std::cout << "this is first request!!!" << std::endl;
-			feed_request(std::string(received_data), client_socket);
-			// get_client(client_socket)->append_request_data(received_data, bytes_read);
+			// std::cout << "this is first time!" << std::endl;
 			prev_socket = client_socket;
+			std::string searchStr = "\r\n0";
+			feed_request(std::string(received_data), client_socket);
+			std::string _b = get_client(client_socket)->get_request().getBody();
+			std::cout << RED << "size ===> " << _b.size() << "<=== " << std::endl;
+			size_t closest = 0;
+			size_t pos = _b.find(searchStr);
+			while (pos != std::string::npos) {
+				if (closest < pos && pos < _b.size())
+					closest = pos;
+				std::cout << "Found at position: " << pos << std::endl;
+				pos = _b.find(searchStr, pos + searchStr.length());
+			}
+			std::cout << PURPLE << closest << RESET <<std::endl;
+			std::string r_body = _b.substr(0, closest + 29);
+			std::cout << (int)r_body[closest + 30] << std::endl;
 		}
-		else {
-
-			std::cout << "this next chunked ==> " << std::endl;
-			std::string str = std::string(received_data);
-			size_t cr = str.find('\r\n');
-			std::cout << RED << cr << RESET << std::endl;
-			std::string numb = str.substr(0, cr);
-			std::cout << numb << std::endl;
-
-			std::cout << 
-
-		}
-		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket)) // Check if the entire request has been received
+		else
 		{
-			match_client_request_to_server_block(client_socket);
 
-			FD_CLR(client_socket, &_read_set_pool);
-			FD_SET(client_socket, &_write_set_pool);
+			// std::cout << "this is not first time!" << std::endl;
+			std::string str = std::string(received_data);
+			// std::cout << YELLOW << str << RESET << std::endl;
+			size_t cr = str.find("\r\n");
+			std::cout << RED << "cr ==> " << cr << RESET << std::endl;
+			std::string numb = str.substr(0, cr);
+			// std::cout << "numb ==> "<<numb << std::endl;
+			// std::cout << PURPLE << "size after cutting ===> " << (str.substr(cr)).size() << " ===> size of str " << str.size() << RESET << std::endl;
+			std::cout << BLUE << "hex to dec ==> "<< hextodec(numb) << RESET << std::endl;
+			size_t len = hextodec(numb);
+			size_t i = 0;
+			// std::string _body;
+			// file << _body;
+			// std::cout << GREEN << "size of body ===> " << _body.size() << " size of str ===> " << str.size() << RESET << std::endl;
+			
+
+		}
+		
+
+		// std::cout << "===$$$> " <<bytes_read << std::endl;
+		// get_client(client_socket)->append_request_data(received_data, bytes_read);
+		// std::string afterReq = checkingRecv(std::string(received_data));
+		// _requests[client_socket] += afterReq;
+		
+
+		// if (checkReq(_requests[client_socket]))
+		// 	std::cout << GREEN << "==> chunked" << RESET << std::endl;
+		// else
+		// 	std::cout << RED << "==> Not chunked" << RESET << std::endl;
+		// std::cout << "===>" <<_requests[client_socket].size()<<"/"<<len_request << std::endl;
+		// if (_requests[client_socket].find("Transfer-Encoding: chunked") != std::string::npos && _requests[client_socket].find("Transfer-Encoding: chunked") < _requests[client_socket].find("\r\n\r\n"))
+		// 	processChunk(client_socket);
+		// std::cout << "final results ==> " << _requests[client_socket].size() << std::endl;
+		
+		
+		
+		/*======================> this hafid <====================*/
+		// !! remove this, only for testing
+		if (!isComplete(_requests[client_socket]))
+		{
+			if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
+			{
+				std::cout << "hafid" << std::endl;
+				match_client_request_to_server_block(client_socket);
+				FD_CLR(client_socket, &_read_set_pool);
+				FD_SET(client_socket, &_write_set_pool);
+			}
 		}
 	}
 }
+
+
+
+/*
+& **************************************** HAFID ***********************************************
+*/
+
 
 void Server::accept_new_connection(long server_socket)
 {
@@ -375,7 +610,7 @@ void Server::create_server_socket()
 	struct timeval timeout;
 	timeout.tv_sec = 3; // Timeout value in seconds
 	timeout.tv_usec = 0;
-	if (setsockopt(server_socket, SOL_SOCKET, SO_RCVTIM:EO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
+	if (setsockopt(server_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
 		throw_error("setsockopt SO_RCVTIMEO failed");
 
 	if (setsockopt(server_socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) == -1) // socket, level, level options

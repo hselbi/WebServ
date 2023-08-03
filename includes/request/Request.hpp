@@ -27,6 +27,9 @@ private:
 	    int _req_status;
         int m_code_ret;
         int m_port;
+        size_t chunked_size;
+        size_t body_size;
+
 public:
     Request();
     Request(const std::string &str);
