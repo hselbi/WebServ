@@ -1,6 +1,6 @@
 #include "../../includes/core/Server.hpp"
 
-Server::Server() : _biggest_socket(0), _server_count(1), prev_socket(0) {}
+Server::Server() : _biggest_socket(0), _server_count(1), prev_socket(0), body_ending(false) {}
 
 Server::~Server()
 {
@@ -64,6 +64,7 @@ Client *Server::create_client()
 
 void Server::drop_client(long client_socket)
 {
+	get_client(client_socket)->set_res_status(NOT_STARTED);
 	FD_CLR(client_socket, &_read_set);
 	FD_CLR(client_socket, &_read_set_pool);
 	FD_CLR(client_socket, &_write_set);
@@ -74,7 +75,10 @@ void Server::drop_client(long client_socket)
 	get_client(client_socket)->get_request_body().clear();
 	get_client(client_socket)->get_request_body_length() = 0;
 	close(client_socket);
+	if (get_client(client_socket))
+		delete get_client(client_socket);
 	_clients.erase(client_socket);
+	std::cout << "Closed client socket " << client_socket << "\n";
 }
 
 void Server::feed_request(std::string request, long client_socket) // feed request to the Request class
@@ -82,7 +86,7 @@ void Server::feed_request(std::string request, long client_socket) // feed reque
 	// std::cout << request << std::endl;
 
 	get_client(client_socket)->get_request().parseReq(request);
-	std::cout << get_client(client_socket)->get_request() << std::endl;
+	// std::cout << get_client(client_socket)->get_request() << std::endl;
 
 
 }
@@ -90,11 +94,9 @@ void Server::feed_request(std::string request, long client_socket) // feed reque
 
 bool Server::isReqFinished(int client_socket)
 {
-	// !  check methods that dont have body 
+	// !  check methods that dont have body
 	// !  check if the request is "Transfer-Encoding: chunked", and other stuff
-	
-    if (get_client(client_socket)->get_request().getCodeRet() == 400)
-		return true;
+
     if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
     {
         if (get_client(client_socket)->get_request().getHeaders()["Content-Length"] == "0")
@@ -125,18 +127,15 @@ std::string generate_response()
 
 void Server::send_response(long client_socket)
 {
+	// std::cout << "Sending response to client socket " << client_socket << "\n";
+	// std::cout << "Response: " << get_client(client_socket)->get_response_data() << "\n";
 	long bytes_sent;
 	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), 0)) == -1)
 	{
 		std::cerr << "Error: send() failed on client socket " << client_socket << "\n";
-		drop_client(client_socket);
+		drop_client(client_socket); // Connection: close
 		return;
 	}
-	// else if (bytes_sent == 0)
-	// {
-	// 	std::cout << "send bytes send 0 " <<  "\n";
-	// 	return;
-	// }
 	else if (bytes_sent < get_client(client_socket)->get_response_data().length()) // if send returns less than the number of bytes requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data.
 	{
 		std::cout << "send bytes send < response length "
@@ -154,34 +153,25 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 	get_client(client_socket)->get_response().processing();
 }
 
+
+void Server::disconnect_connection(int client_socket)
+{
+	if (get_client(client_socket) == NULL) // !!!!!!!!! after send failed
+		return;
+	if (get_client(client_socket)->get_res_status() == DONE )
+	{
+		drop_client(client_socket); // Connection: close
+	}
+}
+
+
 void Server::handle_outgoing_response(long client_socket) // ! send response to client
 {
-
 	build_response(get_client(client_socket)->get_request(), client_socket);
+
 	send_response(client_socket);
-	if (get_client(client_socket) == NULL)
-		return;
-	if (get_client(client_socket)->get_res_status() == DONE)
-	{
-		if (is_connection_close(get_client(client_socket)->get_request_data()))
-		{
-			// std::cout << "Connection: close" << std::endl;
-			drop_client(client_socket); // Connection: close
-		}
-		else // Connection: keep-alive
-		{
-			// std::cout << "Connection: keep-alive" << std::endl;
-			FD_CLR(client_socket, &_write_set_pool);
-			FD_SET(client_socket, &_read_set_pool);
 
-			get_client(client_socket)->reset_request_data();
-			get_client(client_socket)->reset_response_data();
-			get_client(client_socket)->set_res_status(NOT_STARTED);
-
-			get_client(client_socket)->get_request().resetReq();
-			// TODO: reset response
-		}
-	}
+	disconnect_connection(client_socket);
 }
 
 // !! GET /index.html HTTP/1.1 | POST /form HTTP/1.1
@@ -199,6 +189,8 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 
 	std::string http_method = get_http_method(request);
 
+	if (get_client(client_socket)->get_request().getCodeRet() == 400)
+		return true;
 	if (http_method == "POST") // !! not finished - need to check if the request is "Transfer-Encoding: chunked", and other stuff
 	{
 
@@ -263,8 +255,13 @@ void Server::match_client_request_to_server_block(long client_socket)
 
 
 /*
+& **************************************** HAFID ***********************************************
+*/
+
+/*
 !	======================= From Hafid ===================================
 */
+
 int     checkEnd(const std::string& str, const std::string& end)
 {
 	size_t	i = str.size();
@@ -353,7 +350,6 @@ bool isComplete(const std::string &str)
 	{
 		if (checkEnd(str, "0\r\n\r\n") == 0)
 		{
-			std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5" << std::endl;
 			return (0);
 		}
 		else
@@ -402,18 +398,51 @@ std::string checkingRecv(const std::string &str)
 	return str;
 }
 
-
 /*
 !	======================= From Hafid ===================================
 */
 
+std::string FileExtension(std::string path)
+{
+    // std::string path = RequestHeaders["Content-Type"];
+    if (path.find("text/css") != std::string::npos)
+        return ".css";
+    if (path.find("text/csv") != std::string::npos)
+        return ".csv";
+    if (path.find("image/gif") != std::string::npos)
+        return "gif";
+    if (path.find("text/htm") != std::string::npos)
+        return ".html";
+    if (path.find("text/html") != std::string::npos)
+        return ".html";
+    if (path.find("video/mp4") != std::string::npos)
+        return ".mp4";
+    if (path.find("image/x-icon") != std::string::npos)
+        return ".ico";
+    if (path.find("image/jpeg") != std::string::npos)
+        return ".jpeg";
+    if (path.find("image/jpg") != std::string::npos)
+        return ".jpeg";
+    if (path.find("application/javascript") != std::string::npos)
+        return ".js";
+    if (path.find("application/json") != std::string::npos)
+        return ".json";
+    if (path.find("image/png") != std::string::npos)
+        return ".png";
+    if (path.find("application/pdf") != std::string::npos)
+        return ".pdf";
+    if (path.find("image/svg+xml") != std::string::npos)
+        return ".svg";
+    if (path.find("text/plain") != std::string::npos)
+        return ".txt";
+    return "";
+}
 
 
 void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
 	long bytes_read;
-	std::cout << client_socket << std::endl;
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, 0)) == -1)
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
@@ -427,61 +456,82 @@ void Server::handle_incoming_request(long client_socket)
 	}
 	else
 	{
+		std::ofstream file;
+		//can't enable exception now because of gcc bug that raises ios_base::failure with useless message
+		//file.exceptions(file.exceptions() | std::ios::failbit);
+		file.open("bodyRequest" + FileExtension(get_client(client_socket)->get_request().getHeaders()["Content-Type"]), std::ios::out | std::ios::app | std::ios_base::binary);
 		if (client_socket != prev_socket)
 		{
-			std::cout << "this is first time!" << std::endl;
+			body_ending = false;
 			prev_socket = client_socket;
 			feed_request(std::string(received_data), client_socket);
-			
+			std::string _b = get_client(client_socket)->get_request().getBody();
+			file << _b;
 		}
 		else
 		{
-			std::cout << "this is not first time!" << std::endl;
-			std::string str = std::string(received_data);
-			// std::cout << YELLOW << "1===> " << str.size() << RESET << std::endl;
-			size_t cr = str.find("\r\n");
-			std::cout << RED << cr<< RESET << std::endl;
-			std::string numb = str.substr(0, cr);
-			std::cout << numb << std::endl;
 
-			std::cout << PURPLE << "2===> " << (str.substr(cr)).size() << "/" << str.size() << RESET << std::endl;
-
-
-
-			std::cout << BLUE << hextodec(numb) << RESET << std::endl;
-			size_t len = hextodec(numb);
-			size_t i = 0;
+			std::string next_req = std::string(received_data);
+			std::string searchStr = "\r\n";
+			size_t cr = next_req.find(searchStr);
 			std::string _body;
-			while (len)
+			size_t closest = 0;
+			if (cr != std::string::npos)
 			{
-				
-				_body += str[i];
-				len--;
-				i++;
+				size_t prev = 0;
+				size_t size_req = next_req.size() - 1;
+				size_t pos = next_req.find(searchStr);
+				size_t rest =  get_client(client_socket)->get_request().getChunkStops();
+				if (!body_ending)
+				{
+					if (rest < size_req)
+					{
+						size_t end = next_req.find("0\r\n");
+						if (end)
+							file << next_req.substr(0, rest);
+						else{
+							file << next_req.substr(0, rest);
+							file << next_req.substr(rest + 2);
+						}
+					}else{
+
+						file << next_req.substr(0, size_req);
+					}
+				}
+				while (pos != std::string::npos) {
+					if (body_ending)
+						break;
+					prev = pos;
+					pos = next_req.find(searchStr, pos + searchStr.length());
+					if ((pos - prev) < 10)
+					{
+						std::string numb = next_req.substr(prev + 2, pos - (prev + 2));
+						size_t chunked_size = hextodec(numb);
+						get_client(client_socket)->get_request().set_rest_chunk(chunked_size);
+						if (!chunked_size)
+							body_ending = true;
+					}
+
+				}
 			}
+			else
+			{
+				size_t size_req = next_req.size() - 1;
+				size_t rest_chunk = get_client(client_socket)->get_request().getChunkStops();
+				if (rest_chunk > size_req)
+				{
+					size_t new_rest = rest_chunk - size_req;
+					get_client(client_socket)->get_request().set_rest_chunk(new_rest);
 
-			std::cout << GREEN << "3===> " << _body.size() << "/" << str.size() << RESET << std::endl;
-			
-
+				}
+				else{
+					size_t new_rest = rest_chunk;
+					get_client(client_socket)->get_request().set_rest_chunk(new_rest);
+				}
+				if (!body_ending)
+					file << next_req.substr(0, size_req);
+			}
 		}
-		
-
-		// std::cout << "===$$$> " <<bytes_read << std::endl;
-		// get_client(client_socket)->append_request_data(received_data, bytes_read);
-		// std::string afterReq = checkingRecv(std::string(received_data));
-		// _requests[client_socket] += afterReq;
-		
-
-		// if (checkReq(_requests[client_socket]))
-		// 	std::cout << GREEN << "==> chunked" << RESET << std::endl;
-		// else
-		// 	std::cout << RED << "==> Not chunked" << RESET << std::endl;
-		// std::cout << "===>" <<_requests[client_socket].size()<<"/"<<len_request << std::endl;
-		// if (_requests[client_socket].find("Transfer-Encoding: chunked") != std::string::npos && _requests[client_socket].find("Transfer-Encoding: chunked") < _requests[client_socket].find("\r\n\r\n"))
-		// 	processChunk(client_socket);
-		// std::cout << "final results ==> " << _requests[client_socket].size() << std::endl;
-		
-		
 		
 		/*======================> this hafid <====================*/
 		// !! remove this, only for testing
@@ -497,6 +547,12 @@ void Server::handle_incoming_request(long client_socket)
 		}
 	}
 }
+
+
+
+/*
+& **************************************** HAFID ***********************************************
+*/
 
 
 void Server::accept_new_connection(long server_socket)
@@ -538,12 +594,11 @@ void Server::bind_socket(long server_socket_id, std::string host, int port)
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
 	_server_addr.sin_family = AF_INET;
 	_server_addr.sin_port = htons(port);
+	// _server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (host == "localhost")
 		host = "127.0.0.1";
 	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0) // !! host.c_str() should be valid ip address,
 		throw_error("inet_aton failed, invalid ip address format");
-
-	// _server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1)
 		throw_error("server socket binding failed");
 }
@@ -558,6 +613,7 @@ void Server::create_server_socket()
 	if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) == -1) // socket, level, level options
 		throw_error("setsockopt SO_REUSEADDR failed");
 
+	// !! TODO: check if this is needed because not working on linux
 	// int nosigpipe = 1;
 	// if (setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == -1) // socket, level, level options
 	// 	throw_error("setsockopt SO_NOSIGPIPE failed");
@@ -588,7 +644,7 @@ long Server::monitor_clients()
 {
 	struct timeval timeout;
 	long ready_count = 0;
-	timeout.tv_sec = 1;
+	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
 	FD_ZERO(&_read_set);
@@ -613,20 +669,18 @@ void Server::start_server()
 			{
 				if (FD_ISSET(socket, &_server_socket_pool)) // ready to read
 				{
-					// ! new connection
 					accept_new_connection(socket);
 				}
 				else
 				{
-					// ! incoming request
 					handle_incoming_request(socket);
 				}
 			}
 			else if (FD_ISSET(socket, &_write_set)) // ready to write
 			{
-				// ! outgoing response
 				handle_outgoing_response(socket); // !! send response to client
 			}
+
 		}
 	}
 }

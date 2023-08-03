@@ -1,7 +1,7 @@
 #include "../includes/request/Request.hpp"
 #include "../includes/includes.hpp"
 
-// done some if request its already is done 
+// done some if request its already is done
 
 
 
@@ -26,6 +26,9 @@ Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_
 }
 
 void Request::resetReq(){
+	body_size = 0;
+	chunked_size = 0;
+	rest_chunk = 0;
 	m_method = "";
 	m_body = "";
 	m_code_ret = 200;
@@ -44,7 +47,7 @@ void Request::resetReq(){
 Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
 	// std::cout << "Request constructor" << std::endl;
-	defaultReq();
+	resetReq();
 	m_env_cgi.clear();
 
 	std::string line;
@@ -116,6 +119,7 @@ void Request::defaultReq()
 	m_headers["Authorization"] = "";
 	m_headers["Transfer-Encoding"] = "";
 	m_headers["Content-Disposition"] = "";
+	m_headers["Cookie"] = "";
 
 }
 
@@ -173,20 +177,43 @@ void	Request::setCodeRet(int code) {
 	m_code_ret = code;
 }
 
+void Request::set_size_body(size_t size)
+{
+	this->body_size = size;
+}
+
+
+void	Request::set_rest_chunk(size_t stops)
+{
+	rest_chunk = stops;
+}
 std::string	Request::getHost() const {
 	return m_host;
 }
 
+size_t	Request::getChunkedSize() const
+{
+	return chunked_size;
+}
+
+size_t Request::getChunkStops() const {
+	return rest_chunk;
+}
+
+size_t Request::getBodySize() const {
+	return body_size;
+}
 
 void	Request::setBody(const std::string& str)
 {
+	// std::cout << str << "bodyy ==> "<< this->m_body << std::endl;
 	if (str.size() == 0)
 		return ;
 	char	strip[] = {'\n', '\r'};
 
 	this->m_body.assign(str);
 	for (int i = 0; i < 4; i++)
-		if (this->m_body.size() > 0 && this->m_body[this->m_body.size() - 1] == strip[i % 2])
+		if (this->m_body.size() > 0)
 		{
 			if (m_body.size())
 				m_body.resize(m_body.size() - 1);
@@ -207,7 +234,6 @@ void Request::setQuery()
 	}
 }
 
-
 int Request::setPort()
 {
 	size_t i;
@@ -223,7 +249,7 @@ int Request::setPort()
 	return m_port;
 }
 
-#include <map>
+
 
 std::ostream&		operator<<(std::ostream& os, const Request& re)
 {
@@ -293,3 +319,4 @@ int Request::get_req_status() { return _req_status; }
 
 
 // ! there's chencked it's shouldn't be length
+// ! need to

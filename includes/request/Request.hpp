@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../includes.hpp"
-// enum 
+#include <map>
+// enum
 enum requestFlag {
     REQUEST_NOT_COMPLETED,
     REQUEST_COMPLETED,
@@ -17,6 +18,7 @@ private:
         std::string m_query;
         std::string m_raw;
         std::string m_host;
+		std::string m_cookie;
         std::map<std::string, std::string> m_body_query;
         std::map<std::string, std::string> m_headers;
         std::map<std::string, std::string> m_env_cgi;
@@ -26,13 +28,17 @@ private:
 	    int _req_status;
         int m_code_ret;
         int m_port;
+        size_t chunked_size;
+        size_t rest_chunk;
+        size_t body_size;
+
 public:
     Request();
     Request(const std::string &str);
     ~Request();
     Request &operator=(const Request &other);
     Request(const Request &other);
-    
+
     /* setters */
     void setMethod(const std::string &method);
     void setBody(const std::string &body);
@@ -41,12 +47,15 @@ public:
     void setQuery();
     int setPort();
 
-    int get_req_status();
 	void set_req_status(int status);
+    void    set_size_body(size_t size);
+    void    set_rest_chunk(size_t stops);
 
     static std::vector<std::string>    initMethods();
 
+
     /* getters  */
+    int get_req_status();
     std::string		getMethod() const;
     std::string		getBody() const;
     int				getCodeRet() const;
@@ -59,8 +68,11 @@ public:
     std::map<std::string, std::string>	getHeaders() const;
     std::map<std::string, std::string>	getEnvCgi() const;
     std::list<std::pair<std::string, float> >	getLanguage() const;
+    
 
-
+    size_t     getBodySize() const;
+    size_t      getChunkedSize() const;
+    size_t      getChunkStops() const;
     /* member functions */
 
     void resetReq();
@@ -95,7 +107,7 @@ public:
     bool isFinished(const std::string &str);
     bool isFinished();
     bool isFinished(std::string &str, size_t &i);
-    
+
 };
 
 std::string plunder(std::string &str, char c);
