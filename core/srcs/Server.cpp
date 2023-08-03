@@ -164,6 +164,11 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 {
 	build_response(get_client(client_socket)->get_request(), client_socket);
 
+	if (get_client(client_socket)->get_res_status() == NOT_STARTED)
+	{
+		std::cout << "Response not started yet\n";
+		return;
+	}
 	send_response(client_socket);
 
 	disconnect_connection(client_socket);
