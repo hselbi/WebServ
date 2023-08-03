@@ -460,8 +460,8 @@ void Server::handle_incoming_request(long client_socket)
 		//can't enable exception now because of gcc bug that raises ios_base::failure with useless message
 		//file.exceptions(file.exceptions() | std::ios::failbit);
 		file.open("bodyRequest" + FileExtension(get_client(client_socket)->get_request().getHeaders()["Content-Type"]), std::ios::out | std::ios::app | std::ios_base::binary);
-		file << std::string(received_data);
 		// file << "****";
+		file << std::string(received_data);
 
 		if (client_socket != prev_socket)
 		{
@@ -470,7 +470,8 @@ void Server::handle_incoming_request(long client_socket)
 			std::string searchStr = "\r\n0";
 			feed_request(std::string(received_data), client_socket);
 			std::string _b = get_client(client_socket)->get_request().getBody();
-			std::cout << RED << "size ===> " << _b.size() << "<=== " << std::endl;
+			std::cout << RED << "size ===> " <<  get_client(client_socket)->get_request().getBodySize() << "<=== " << std::endl;
+			std::cout << RED << "size ===> " <<  get_client(client_socket)->get_request().getChunkedSize() << "<=== " << std::endl;
 			size_t closest = 0;
 			size_t pos = _b.find(searchStr);
 			while (pos != std::string::npos) {
@@ -490,11 +491,11 @@ void Server::handle_incoming_request(long client_socket)
 			std::string str = std::string(received_data);
 			// std::cout << YELLOW << str << RESET << std::endl;
 			size_t cr = str.find("\r\n");
-			std::cout << RED << "cr ==> " << cr << RESET << std::endl;
+			// std::cout << RED << "cr ==> " << cr << RESET << std::endl;
 			std::string numb = str.substr(0, cr);
 			// std::cout << "numb ==> "<<numb << std::endl;
 			// std::cout << PURPLE << "size after cutting ===> " << (str.substr(cr)).size() << " ===> size of str " << str.size() << RESET << std::endl;
-			std::cout << BLUE << "hex to dec ==> "<< hextodec(numb) << RESET << std::endl;
+			// std::cout << BLUE << "hex to dec ==> "<< hextodec(numb) << RESET << std::endl;
 			size_t len = hextodec(numb);
 			size_t i = 0;
 			// std::string _body;
