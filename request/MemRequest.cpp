@@ -233,6 +233,9 @@ int Request::parseReq(const std::string &str)
 	}
     setLanguage();
 	// std::cout << "===>" << i << "/" << str.size() << std::endl;
+	// std::cout << "===>" << i << std::endl;
+
+
     if (i != std::string::npos)
     {
         if (m_headers["Transfer-Encoding"] == "chunked")
@@ -265,6 +268,7 @@ int Request::parseReq(const std::string &str)
     setQuery();
 
     // file.close();
+
 
     return m_code_ret;
 }

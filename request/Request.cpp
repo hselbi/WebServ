@@ -212,16 +212,9 @@ void	Request::setBody(const std::string& str)
 	char	strip[] = {'\n', '\r'};
 
 	this->m_body.assign(str);
-	for (int i = 0; i < 4; i++)
-		
-		if (this->m_body.size() > 0)
-		{
-			std::cout << "hafid body set" <<  m_body[m_body.size() - 1] << std::endl;
-			if (m_body.size())
-				m_body.resize(m_body.size() - 1);
-		}
-		else
-			break ;
+
+	if (m_body.find("\r\n\r\n") != std::string::npos)
+		m_body.resize(m_body.find("\r\n\r\n"));
 }
 
 void Request::setQuery()
