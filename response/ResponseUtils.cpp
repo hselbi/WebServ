@@ -16,11 +16,6 @@ bool Response::checkRequestIsFormed()
 		errorPages(400);
 		return false;
 	}
-	else if (!Utils::isValidURI(_client->get_request().getPath()))
-	{
-		errorPages(400);
-		return false;
-	}
 	else if (_client->get_request().getPath().length() > 2048)
 	{
 		errorPages(414);

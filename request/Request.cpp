@@ -138,7 +138,8 @@ std::string	Request::getVersion() const {
 }
 
 std::string	Request::getPath() const {
-	return m_path;
+	
+	return Utils::uriDecode(m_path);
 }
 
 std::string	Request::getQuery() const {

@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-# define RES_BUFFER_SIZE 2000
+# define RES_BUFFER_SIZE 10000
 
 struct Client;
 
@@ -21,6 +21,7 @@ class Response {
 		void				processing();
 		void				setClient(Client &client);
 		std::string			getRoot();
+		ConfLoca			*getLocation();
 		bool get_cgi_status();
 		void set_cgi_status(bool status);
 

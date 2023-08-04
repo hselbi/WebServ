@@ -83,12 +83,11 @@ void Cgi::init_env_vars()
 	_env_vars["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env_vars["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env_vars["REQUEST_METHOD"] = _client->get_request().getMethod();
-	_env_vars["REQUEST_URI"] = path;
+	_env_vars["REQUEST_URI"] = _client->get_request().getPath();
 	_env_vars["DOCUMENT_ROOT"] = root;
-	_env_vars["SCRIPT_NAME"] = path;
-	_env_vars["SCRIPT_FILENAME"] = _env_vars["SCRIPT_NAME"];
+	_env_vars["SCRIPT_NAME"] = _client->get_request().getPath();
+	_env_vars["SCRIPT_FILENAME"] = path;
 	_env_vars["QUERY_STRING"] = _client->get_request().getQuery();
-	_env_vars["PATH_INFO"] = path;
 	_env_vars["PATH_TRANSLATED"] = path;
 	_env_vars["REDIRECT_STATUS"] = "200";
 	_env_vars["HTTP_HOST"] = req_headers["Host"];
@@ -101,7 +100,7 @@ void Cgi::init_env_vars()
 	_env_vars["HTTP_KEEP_ALIVE"] = req_headers["Keep-Alive"];
 	_env_vars["HTTP_CONNECTION"] = req_headers["Connection"];
 	_env_vars["HTTP_CACHE_CONTROL"] = req_headers["Cache-Control"];
-	
+
 
 	if (req_headers["Cookie"] != "")
 		_env_vars["HTTP_COOKIE"] = req_headers["Cookie"];

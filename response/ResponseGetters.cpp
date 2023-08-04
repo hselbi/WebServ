@@ -89,7 +89,6 @@ bool	Response::getMatchedLocation()
 	// TODO: Verify this function (!! High Priority)
 	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
 	std::string requestPath = _client->get_request().getPath();
-	// std::cout << "Request path: " << requestPath << std::endl;
 	size_t max_length = 0;
 	int		index = -1;
 	for (int i = 0; i < locations.size(); i++)
@@ -123,14 +122,10 @@ std::string Response::getRequestPathFile()
 {
 	std::string path = _client->get_request().getPath();
 	std::string root = getRoot();
-
 	if (_location && path.find(_location->path) == 0)
 		path =  (_location->path != "/") ? path.substr(_location->path.length()) : path;
 	else
 		path = "/";
-
-	// std::cout << BLUE << "++path: [" << path << "]   |  root: [" << root;
-	// std::cout << "] --> [" << Utils::getWebservRootPath()  + root + path << "]" << RESET << std::endl;
 	return  Utils::getWebservRootPath()  + root + path;
 }
 
@@ -217,4 +212,10 @@ bool Response::isMethodAllowedInLocation()
 		}
 	}
 	return false;
+}
+
+
+ConfLoca * Response::getLocation()
+{
+	return _location;
 }
