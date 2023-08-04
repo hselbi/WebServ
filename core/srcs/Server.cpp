@@ -134,7 +134,7 @@ void Server::send_response(long client_socket)
 	else if (bytes_sent < get_client(client_socket)->get_response_data().length()) // if send returns less than the number of bytes requested, we should use select() to determine when the socket is ready to accept new data, and then call send() with the remaining data.
 	{
 		std::cout << "send bytes send < response length "
-				  << "\n";
+				   << bytes_sent  << " | " << get_client(client_socket)->get_response_data().length() << "\n";
 		get_client(client_socket)->get_response_data().erase(0, bytes_sent);
 	}
 	else

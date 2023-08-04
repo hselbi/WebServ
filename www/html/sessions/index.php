@@ -1,7 +1,6 @@
+<?php session_start(); ?>
 
-<?php session_start();?>
-
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,14 +29,14 @@
                 <table>
                     <tr>
                         <td><label for="session_name">Session Name</label></td>
-                        <td><input type="text" name="session_name" id="session_name"></td>
+                        <td><input type="text" name="session_name" ></td>
                     </tr>
                     <tr>
                         <td><label for="session_value">Session Value</label></td>
-                        <td><input type="text" name="session_value" id="session_value"></td>
+                        <td><input type="text" name="session_value" ></td>
                     </tr>
                     <tr>
-                        <td colspan="2"><button type="submit" name="submit_create_session"  style="width:100%">Create Session</button></td>
+                        <td colspan="2"><button type="submit" value="submit" name="submit_create_session"  style="width:100%">Create Session</button></td>
                     </tr>
                 </table>
         </form>
@@ -50,11 +49,11 @@
                 <table>
                     <tr>
                         <td><label for="session_name">Session Name</label></td>
-                        <td><input type="text" name="session_name" id="session_name"></td>
+                        <td><input type="text" name="session_name" ></td>
                     </tr>
                     <tr>
-                        <td ><button type="submit" name="submit_destroy_session_by_name"  style="width:100%">Destroy </button></td>
-                        <td ><button type="submit" name="submit_destroy_all_sessions"  style="width:100%">Destroy All </button></td>
+                        <td ><button type="submit" value="submit" name="submit_destroy_session_by_name"  style="width:100%">Destroy </button></td>
+                        <td ><button type="submit" value="submit" name="submit_destroy_all_sessions"  style="width:100%">Destroy All </button></td>
                     </tr>
                 </table>
         </form>

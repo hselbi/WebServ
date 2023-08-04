@@ -21,6 +21,7 @@ class Response {
 		void				processing();
 		void				setClient(Client &client);
 		std::string			getRoot();
+		ConfLoca			*getLocation();
 		bool get_cgi_status();
 		void set_cgi_status(bool status);
 

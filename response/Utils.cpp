@@ -34,14 +34,22 @@ std::string	Utils::ResponseHeaderToString(const t_responseHeader &responseHeader
 	return ss.str();
 }
 
-bool	Utils::isValidURI(const std::string& uri) {
-    
-	std::string validChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~/?#[]@!$&'()*+,;=";
-	for (size_t i = 0; i < uri.length(); i++) {
-		if (validChar.find(uri[i]) == std::string::npos)
-			return false;
-	}
-    return true;
+std::string Utils::uriDecode(const std::string &uri) {
+	std::string result;
+    for (size_t i = 0; i < uri.length(); ++i) {
+        if (uri[i] == '%') {
+            if (i + 2 < uri.length()) {
+                std::istringstream iss(uri.substr(i + 1, 2));
+                int hexValue;
+                iss >> std::hex >> hexValue;
+                result += static_cast<char>(hexValue);
+                i += 2;
+            }
+        } else {
+            result += uri[i];
+        }
+    }
+    return result;
 }
 
 bool Utils::isDirectory(const std::string& path)
@@ -121,3 +129,12 @@ std::string Utils::getExtensionFile(const std::string &path)
 	return "";
 }
 
+bool	Utils::isValidURI(const std::string& uri) {
+    
+	std::string validChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~/?#[]@!$&'()*+,;=%";
+	for (size_t i = 0; i < uri.length(); i++) {
+		if (validChar.find(uri[i]) == std::string::npos)
+			return false;
+	}
+    return true;
+}

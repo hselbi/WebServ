@@ -170,6 +170,10 @@ void	Request::setMethod(const std::string &method) {
 	m_method = method;
 }
 
+void	Request::setPath(const std::string &path) {
+	m_path = path;
+}
+
 void	Request::setCodeRet(int code) {
 	m_code_ret = code;
 }
