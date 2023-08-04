@@ -1,6 +1,0 @@
-
-<?php
-
-echo "Hello World!";
-echo "\0";
-echo "Yes";

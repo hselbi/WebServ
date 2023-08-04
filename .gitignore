@@ -2,3 +2,5 @@
 webserv
 **/*.o
 **/*.out
+.vscode/settings.json
+www/html/static/1gb_video.mp4

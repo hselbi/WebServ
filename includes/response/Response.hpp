@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-# define RES_BUFFER_SIZE 10000
+# define RES_BUFFER_SIZE 2000
 
 struct Client;
 
