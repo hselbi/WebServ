@@ -26,6 +26,7 @@ bool Response::checkRequestIsFormed()
 		errorPages(414);
 		return false;
 	}
+	_client->get_request().setPath(Utils::uriDecode(_client->get_request().getPath()));
 	return true;
 }
 

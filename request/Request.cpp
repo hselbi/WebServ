@@ -138,8 +138,7 @@ std::string	Request::getVersion() const {
 }
 
 std::string	Request::getPath() const {
-	
-	return Utils::uriDecode(m_path);
+	return m_path;
 }
 
 std::string	Request::getQuery() const {
@@ -169,6 +168,10 @@ int		Request::getPort() const
 
 void	Request::setMethod(const std::string &method) {
 	m_method = method;
+}
+
+void	Request::setPath(const std::string &path) {
+	m_path = path;
 }
 
 void	Request::setCodeRet(int code) {

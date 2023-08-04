@@ -36,6 +36,7 @@ public:
     /* setters */
     void setMethod(const std::string &method);
     void setBody(const std::string &body);
+    void setPath(const std::string &path);
     void setCodeRet(int code);
     void setLanguage();
     void setQuery();
