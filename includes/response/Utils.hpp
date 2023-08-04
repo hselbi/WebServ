@@ -38,6 +38,7 @@ class Utils
 		static bool isDirectory(const std::string& path);
 		static bool fileExists(const std::string& path);
 		static bool isExecutable(const std::string& path);
+		static bool	isValidURI(const std::string& uri);
 };
 
 #endif

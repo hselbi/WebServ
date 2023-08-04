@@ -37,11 +37,11 @@
     </form> 
 
     <?php
-        if (isset($_GET['image_url'])) {
+        if (isset($_GET['image_url']) && $_GET['image_url'] != "") {
             echo "<img src='" . $_GET['image_url'] . "' alt='image' style='width:100%'>";
         }
         else 
-            echo "<h4>No image url received</h4>";
+            echo "<h4>No image url received, enter a valid url.</h4>";
         ?>
 
 </body>
