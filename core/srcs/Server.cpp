@@ -459,15 +459,17 @@ void Server::handle_incoming_request(long client_socket)
 	{
 
 		request_index += 1;
+		// std::cout << RED << request_index<< RESET << std::endl;
+		// std::cout << std::string(received_data).size() << std::endl;
 		std::ofstream file;
-		file.open("bodyRequest1.txt", std::ios::out | std::ios::app | std::ios_base::binary);
+		file.open("bodyRequest10mb.txt", std::ios::out | std::ios::app | std::ios_base::binary);
 		if (client_socket != prev_socket)
 		{
 			body_ending = false;
 			prev_socket = client_socket;
 			feed_request(std::string(received_data), client_socket);
 			std::string _b = get_client(client_socket)->get_request().getBody();
-			file << _b;
+			file << _b.substr(0, _b.size() - 6);
 		}
 		else
 		{
@@ -478,15 +480,8 @@ void Server::handle_incoming_request(long client_socket)
 			size_t closest = 0;
 			size_t chunked_size = 0;
 			std::string numb;
-			file << request_index;
 			if (cr != std::string::npos)
 			{
-				if (request_index == 230)
-				{
-					std::cout << next_req << std::endl;
-					std::cout << "==> " << next_req.substr(0, next_req.find("\r\n")-1);
-					std::cout << "==> " << next_req.substr(next_req.find("\r\n")+9, next_req.size()) << std::endl;
-				}
 				size_t prev = 0;
 				size_t size_req = next_req.size() - 2;
 				size_t pos = next_req.find(searchStr);
@@ -505,31 +500,24 @@ void Server::handle_incoming_request(long client_socket)
 				}
 				if (!body_ending)
 				{
-					// std::cout << RED << "1==> "<< request_index<< RESET << std::endl;
-					// file << "******************* " << rest<< " ";
-					// file << rest ;
+					// std::cout << GREEN << "im here in" << body_ending << RESET << std::endl;
 					if (rest < size_req)
 					{
-						// file << "begin 1 ******************* " << request_index << " ";
-						// std::cout << request_index << std::endl;
 						size_t end = next_req.find("0\r\n");
 						
 						if (end)
 						{
-							// * done
 							size_t mid1 = end - (numb.size() + 1);
 							file << next_req.substr(0, mid1);
 							size_t mid2 = end + numb.size() - 2;
-							size_t cr2 = next_req.find("\r", mid2);
-							// std::cout << YELLOW << next_req.substr(mid2, size_req) << std::endl<< std::endl; 
-							// std::cout << "hafid ==> " << cr2 << std::endl;
-
+							size_t cr2 = next_req.find("\r\n", mid2);
 							if (cr2 != std::string::npos)
 							{
-								file << next_req.substr(mid2, cr2) << next_req.substr(cr2 + 2, size_req);
+								file << next_req.substr(mid2, cr2) << next_req.substr(cr2 + 4, size_req - cr2 - 6 );
 							}
 							else{
-								file << next_req.substr(mid2, size_req);
+								size_t cr3 = next_req.find("\r\n", mid2);
+								file << next_req.substr(mid2, size_req - mid2 - 4);
 							}
 						}
 						else{
@@ -537,71 +525,75 @@ void Server::handle_incoming_request(long client_socket)
 							file << next_req.substr(rest, size_req - numb.size());
 						}
 					}else{
-						// std::cout << RED << request_index<< RESET << std::endl;
-					// file << "begin 2 ******************* " << request_index<< " ";
+						// std::cout << YELLOW << request_index<< RESET << std::endl;
 						if (chunked_size)
 						{
-							std::string start =  next_req.substr(0, cr);
-							std::string end =  next_req.substr(cr + numb.size() + 4, size_req);
-							file << start << end;
-						}
+							size_t t = next_req.find("\r\n");
+							size_t t2 = next_req.find("0\r\n", t + 4);
+							std::string start =  next_req.substr(0, t);
+							std::string end;
+							// std::cout << t << " / " << t2 << std::endl;
+							if (t2 != std::string::npos)
+							{
 
+								// std::cout << PURPLE << request_index<< RESET << std::endl;
+								end =  next_req.substr(t + numb.size() + 4, size_req - t2 - 7);
+							}
+							else
+							{
+
+								// std::cout << GREEN << request_index<< RESET << std::endl;
+								// std::cout << BLUE <<t + numb.size() + 4 << " / "<< size_req - (t + numb.size() + 5) << " = "<< size_req << RESET << std::endl;
+								end =  next_req.substr(t + numb.size() + 4, size_req - (t + numb.size() + 5));
+							}
+
+							file << start;
+							file << end;
+						}
 					}
 				}
+				// else
+				// {
+				// std::cout << YELLOW << "chunked ===> " << chunked_size << std::endl;
+
+				// }
 				if (!chunked_size)
+				{
+
+
 					body_ending = true;
+				}
 			}
 			else
 			{
-				
-				// std::cout << RED << "2==> "<< request_index<< RESET << std::endl;
-				// std::cout << "there @@@ 1" << std::endl;
+				// std::cout << GREEN << "==>im here in " << body_ending << RESET << std::endl;
 				size_t size_req = next_req.size();
-				// std::cout << size_req << std::endl;
 				size_t rest_chunk = get_client(client_socket)->get_request().getChunkStops();
 				if (rest_chunk > size_req)
 				{
-
+					// std::cout<< RED << "hey ==> " << rest_chunk << RESET << std::endl;
 					size_t cr2 = next_req.find("\r\n");
-					// std::cout << cr2 << " ==== \nthere @@@ 2" << request_index << std::endl;
 					size_t new_rest = rest_chunk - size_req;
-					
 					get_client(client_socket)->get_request().set_rest_chunk(new_rest);
-
 				}
 				else{
-					// std::cout << "there @@@ 3" << std::endl;
-					// std::cout << "1@@ " << request_index << std::endl;
+					std::cout << "hey ==> " << rest_chunk << " / " << size_req << std::endl;
 					size_t new_rest = rest_chunk;
 					get_client(client_socket)->get_request().set_rest_chunk(new_rest);
 				}
-				// std::cout << "===> " << body_ending << std::endl;
 				if (!body_ending)
 				{
+					// std::cout << PURPLE << "##### im here " << RESET << std::endl;
 					std::string searchStr = "\r\n";
 					size_t cr = next_req.find(searchStr);
-					// std::cout << next_req.substr(0, 15) <<std::endl;
-					// file << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
-					// std::cout << RED << next_req.substr(0) << RESET <<std::endl;
-					size_t prev = 0;
-					// while (cr != std::string::npos) {
-					// // std::cout << "hey there!! 2" << std::endl;
-					// 	if (body_ending)
-					// 		break;
-					// 	prev = cr;
-					// 	cr = next_req.find(searchStr, cr + searchStr.length());
-					// 	std::cout << "Prev => " << prev << " | " << "Pos " << cr << std::endl;
-					// 	// if ((cr - prev) < 10)
-					// 	// {
-					// 	// 	// std::cout << "hey there!! 3" << std::endl;
-					// 	// 	numb = next_req.substr(prev + 2, cr - (prev + 2));
-					// 	// 	chunked_size = hextodec(numb);
-					// 	// 	get_client(client_socket)->get_request().set_rest_chunk(chunked_size);
-					// 	// }
-					// }
-					file << next_req.substr(0, size_req);
+					file << next_req.substr(0, size_req - 6);
+				}
+				else
+				{
+					
+					std::cout << "hafid!!!!" << body_ending << " this size: "<< size_req << " this is buffer: "<< bytes_read << std::endl;
+					file << next_req.substr(0, size_req - 6);
 					// std::exit(1);
-
 				}
 			}
 		}
