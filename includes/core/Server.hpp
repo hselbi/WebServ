@@ -84,6 +84,7 @@ struct Server
 	void		processChunk(long socket);
 
 	void disconnect_connection(int client_socket);
+	void 	chunkedPost(const char received_data[], long client_socket, size_t request_index);
 
 private:
 	Config _config;
@@ -106,6 +107,15 @@ private:
 	long prev_socket;
 	bool	body_ending;
 	size_t request_index;
+
+
+	/*
+	! new variables for hafid
+	*/
+	bool	before_hex; // CRLF before hexa
+	bool	after_hex; // CRLF after hexa
+	bool	lineFeed; // '\n' is exist
+	bool	carriageReturn; // '\r' is exit
 
 };
 
