@@ -647,11 +647,11 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 		std::cout << BOLDWHITE << request_index << RESET << std::endl;
 		size_t carr = containsCarriage(received_data);
 		if (carr)
+			std::cout << BOLDRED << request_index << RESET << std::endl;
 		{
 			// ghadi n7tajo f hna ... 
 			if (hasLineFeedAtPosition(received_data, carr + 1))
 			{
-				std::cout << BOLDRED << request_index << RESET << std::endl;
 				carriageReturn = true;
 				if (size_t crlf = (containsCRLF(received_data, carr + 2)))
 				{
