@@ -65,5 +65,7 @@ class Response {
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
 		void					setResStatus(int status);
+		bool					isLocationHaveRedirection();
+		bool					checkStatusCgi();
 
 };

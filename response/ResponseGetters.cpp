@@ -35,15 +35,15 @@ bool Response::getAutoIndex()
 
 std::string Response::getErrorPagePath(int statusCode)
 {
-    // TODO: check if can location have also error_pages
 	if (_location && _location->error_pages.find(statusCode) != _location->error_pages.end()
-		&& Utils::fileExists(_location->error_pages[statusCode]))
+		&& Utils::fileExists(getCorrectPath(_location->error_pages[statusCode])))
 	{
-		return _location->error_pages[statusCode];
+		return getCorrectPath(_location->error_pages[statusCode]);
 	}
+	
     std::map<int, std::string>  pages = _client->get_server_block().getErrorPages();
-    if (pages.find(statusCode) != pages.end() && Utils::fileExists(pages[statusCode]))
-		return pages[statusCode];
+    if (pages.find(statusCode) != pages.end() && Utils::fileExists(getCorrectPath(pages[statusCode])))
+		return getCorrectPath(pages[statusCode]);
 	else if (Utils::fileExists("./default_pages/" + Utils::toString(statusCode) + ".html"))
 		return "./default_pages/" + Utils::toString(statusCode) + ".html";
 	else
@@ -114,15 +114,15 @@ bool	Response::getMatchedLocation()
 			index = i;
 		}
 	}
-
 	if (index != -1)
 	{
 		if (_location == NULL)
 			_location = new ConfLoca(locations[index]);
-		if (isMethodAllowedInLocation())
-			return true;
-		else
+
+		if (isLocationHaveRedirection())
 			return false;
+		return isMethodAllowedInLocation();
+
 	}
 	errorPages(404);
 	return false;
