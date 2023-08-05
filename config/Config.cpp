@@ -67,7 +67,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
 	}
 
 	std::cout << YELLOW << "> config file parsing finish\n" << RESET;
-	// check_server_syntax(result); ! TODO : Check this 
+	// check_server_syntax(result); ! TODO : Check this
 	return result;
 }
 
@@ -180,7 +180,7 @@ int	checkHost(std::string host)
 		{
 			if (tmp[i].length() > 3)
 				return -1;
-			
+
 			for (unsigned long j = 0; j != tmp[i].length(); j++)
 			{
 				if (tmp[i][j] < '0' || tmp[i][j] > '9')
@@ -336,7 +336,7 @@ ConfLoca Config::parse_location(size_t *i)
 	{
 		// std::cout << "==> " << cur << std::endl;
 
-		// here is the problem 
+		// here is the problem
 
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
@@ -473,7 +473,7 @@ int Config::check_line_syntax(std::string line)
 		if (line.find_first_not_of(" \t\n") != std::string::npos)
 			return -2;
 	}
-	
+
 
     // line must be end with semicolon
 	size_t semicol;

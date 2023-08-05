@@ -26,7 +26,7 @@
 #include "../config/Config.hpp"
 #include "../config/ConfServer.hpp"
 
-#define QUEUE_LIMIT 1000
+#define QUEUE_LIMIT 100
 #define REQUEST_END "\r\n\r\n"
 #define REQUEST_DELIMETER "\r\n"
 
@@ -96,7 +96,7 @@ private:
 	fd_set _write_set_pool;
 	fd_set _read_set; // sets of file descriptors to monitor for read
 	fd_set _write_set;
-	struct sockaddr_in _server_addr, _client_addr;
+	struct sockaddr_in _server_addr;
 };
 
 //  http header = method + path + version + headers + body
