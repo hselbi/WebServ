@@ -1,4 +1,3 @@
-
 <html>
 <head>
     <meta charset="UTF-8">
@@ -35,10 +34,6 @@
                         <td><input type="text" name="cookie_value" ></td>
                     </tr>
                     <tr>
-                        <td><label for="cookie_path">Cookie Path</label></td>
-                        <td><input type="text" name="cookie_path" ></td>
-                    </tr>
-                    <tr>
                         <td colspan="2"><button type="submit" value="submit" name="submit_create_cookie"  style="width:100%">Create Cookie</button></td>
                     </tr>
                 </table>
@@ -53,10 +48,6 @@
                     <tr>
                         <td><label for="cookie_name">Cookie Name</label></td>
                         <td><input type="text" name="cookie_name" ></td>
-                    </tr>
-                    <tr>
-                        <td><label for="cookie_path">Cookie Path</label></td>
-                        <td><input type="text" name="cookie_path" ></td>
                     </tr>
                     <tr>
                         <td ><button type="submit" value="submit" name="submit_destroy_cookie_by_name"  style="width:100%">Destroy </button></td>

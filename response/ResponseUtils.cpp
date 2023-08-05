@@ -41,7 +41,7 @@ void Response::checkWhichRequestedMethod()
 		Method_POST();
 }
 
-void Response::setRediration(std::string location)
+void Response::sendRediraction(std::string location)
 {
 	t_responseHeader responseHeader;
 	responseHeader.statusCode = 301;
@@ -141,7 +141,7 @@ std::string		Response::startCgi(std::string script_path)
 	for (std::map<std::string, std::string>::iterator it = cgi_infos.begin(); it != cgi_infos.end(); it++)
 	{
 		if (it->first == extension)
-			cgi_path = it->second;
+			cgi_path = getCorrectPath(it->second);
 	}
 
 	if (cgi_path == "" || !Utils::fileExists(cgi_path) || Utils::isDirectory(cgi_path)  ||  !Utils::isExecutable(cgi_path))

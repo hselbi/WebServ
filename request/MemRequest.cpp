@@ -336,7 +336,7 @@ int Request::methodChecker()
         if (methods[i] == m_method)
             return m_code_ret;
     }
-    m_code_ret = 400;
+    m_code_ret = 406;
     std::cerr << "Error: Invalid method [" << m_method << "]" << std::endl;
     return m_code_ret;
 }

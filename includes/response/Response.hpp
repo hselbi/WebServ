@@ -17,6 +17,7 @@ class Response {
 		Response();
 		~Response();
 		Response(const Response &copy);
+		Response &operator=(const Response &copy);
 
 		void				processing();
 		void				setClient(Client &client);
@@ -44,7 +45,7 @@ class Response {
 		std::string				getErrorPagePath(int statusCode);
 		std::string				isDirHasIndexFiles();
 		std::string				getRequestPathFile();
-		std::string				tmp_getRequestPath();
+		std::string				getCorrectPath(const std::string &path);
 		void					readFile();
 		void					readCgiFile();
 		void					readFileByPath(std::string filePath);
@@ -54,7 +55,7 @@ class Response {
 		void					Method_GET();
 		void					Method_POST();
 		void					Method_DELETE();
-		void					setRediration(std::string location);
+		void					sendRediraction(std::string location);
 		bool					parseCgiHeader(std::string header, int contentLength, int delimiterLength);
 		bool					checkRequestIsFormed();
 		bool					isServerHaveRedirection();

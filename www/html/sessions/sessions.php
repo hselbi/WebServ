@@ -1,8 +1,5 @@
 <?php
 session_start();
-echo "<pre>";
-var_dump($_POST);
-echo "</pre>";
 if (isset($_POST['submit_create_session'])) {
 
     $_SESSION[$_POST['session_name']] = $_POST['session_value'];
@@ -19,6 +16,8 @@ else if (isset($_POST["submit_destroy_session_by_name"]))
     }
     else
         echo "<h2>Session not found</h2>";
+    echo "<a href='".$_SERVER['HTTP_REFERER']."'><button>Go Back</button></a>";
+
 }
 else if (isset($_POST["submit_destroy_all_sessions"]))
 {
