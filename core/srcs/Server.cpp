@@ -185,7 +185,7 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 
 	std::string http_method = get_client(client_socket)->get_request().getMethod();
 
-	if (get_client(client_socket)->get_request().getCodeRet() == 400)
+	if (get_client(client_socket)->get_request().getCodeRet() != 200)
 		return true;
 
 	if (http_method == "GET" || http_method == "DELETE")

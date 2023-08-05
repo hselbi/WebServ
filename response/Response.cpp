@@ -44,8 +44,8 @@ void Response::processing()
 
 	if (_client->get_res_status() == NOT_STARTED)
 	{
-		if (_client->get_request().getCodeRet() == 400)
-			errorPages(400);
+		if (_client->get_request().getCodeRet() != 200)
+			errorPages(_client->get_request().getCodeRet());
 		else if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
