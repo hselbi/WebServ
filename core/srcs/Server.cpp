@@ -12,6 +12,8 @@ void Server::load_config_file(const char *config_file)
 	_server_blocks = _config.parser(config_file);
 }
 
+std::vector<long> &Server::get_server_sockets() { return _server_sockets; }
+
 void Server::cleanup_by_closing_all_sockets()
 {
 	// close all client sockets
@@ -20,16 +22,11 @@ void Server::cleanup_by_closing_all_sockets()
 		drop_client(client->first);
 		delete client->second;
 	}
-	_clients.clear();
-	// close all server sockets
-	for (std::vector<long>::iterator server_socket = _server_sockets.begin(); server_socket != _server_sockets.end(); ++server_socket)
-	{
+	_clients.clear(); // clear the clients map
+	for (std::vector<long>::iterator server_socket = _server_sockets.begin(); server_socket != _server_sockets.end(); ++server_socket) // close all server sockets
 		close(*server_socket);
-	}
 
 }
-
-std::vector<long> &Server::get_server_sockets() { return _server_sockets; }
 
 void Server::throw_error(std::string error_message)
 {
@@ -72,13 +69,10 @@ void Server::drop_client(long client_socket)
 	FD_CLR(client_socket, &_write_set_pool);
 	get_client(client_socket)->reset_request_data();  // clear the request buffer for  next request
 	get_client(client_socket)->reset_response_data(); // clear the response buffer for  next response
-	get_client(client_socket)->reset_total_bytes_sent();
-	get_client(client_socket)->get_request_body().clear();
-	get_client(client_socket)->get_request_body_length() = 0;
-	close(client_socket);
 	if (get_client(client_socket))
 		delete get_client(client_socket);
 	_clients.erase(client_socket);
+	close(client_socket);
 	std::cout << "Closed client socket " << client_socket << "\n";
 }
 
@@ -182,10 +176,9 @@ std::string Server::get_http_method(std::string &request)
 
 bool Server::is_request_completed(std::string &request, long client_socket)
 {
-
 	std::string http_method = get_client(client_socket)->get_request().getMethod();
 
-	if (get_client(client_socket)->get_request().getCodeRet() == 400)
+	if (get_client(client_socket)->get_request().getCodeRet() != 200)
 		return true;
 
 	if (http_method == "GET" || http_method == "DELETE")

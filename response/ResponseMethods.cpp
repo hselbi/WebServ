@@ -6,6 +6,7 @@ void Response::Method_GET()
     std::string filePath = getRequestPathFile();
     std::string index = "";
 
+	std::cout << "filePath: " << filePath << std::endl;
     if (Utils::fileExists(filePath))
     {
         if (Utils::isDirectory(filePath))
