@@ -45,6 +45,7 @@ std::string Cgi::exec_cgi() // !! upload handiinng
 	if (_pid == 0)
 	{
 		close(write_to_cgi[1]);
+		// if (method == "POST")
 		dup2(write_to_cgi[0], 0);
 		dup2(fileno(_cgi_output_file), 1);
 		close(write_to_cgi[0]);

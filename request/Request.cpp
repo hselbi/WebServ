@@ -20,7 +20,7 @@ std::vector<std::string>		Request::initMethods()
 std::vector<std::string>	Request::methods = Request::initMethods();
 
 
-Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),  _req_status(REQUEST_NOT_COMPLETED)
+Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED)
 {
 	// std::cout << "Request Constructor" << std::endl;
 }
@@ -39,6 +39,7 @@ void Request::resetReq(){
 	m_language.clear();
 	defaultReq();
 	_req_status = REQUEST_NOT_COMPLETED;
+	_bodyFlag = REQUEST_BODY_NOT_STARTED;
 }
 
 Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
@@ -120,6 +121,13 @@ void Request::defaultReq()
 
 }
 
+int	Request::getBodyFlag() {
+	return _bodyFlag;
+}
+
+void Request::setBodyFlag(int flag) {
+	_bodyFlag = flag;
+}
 
 std::string	Request::getMethod() const {
 	return m_method;

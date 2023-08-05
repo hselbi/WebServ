@@ -6,6 +6,11 @@ enum requestFlag {
     REQUEST_NOT_COMPLETED,
     REQUEST_COMPLETED,
 };
+enum requestBodyFlag {
+    REQUEST_BODY_NOT_STARTED,
+    REQUEST_BODY_STARTED,
+    REQUEST_BODY_COMPLETED,
+} ;
 
 class Request
 {
@@ -26,6 +31,8 @@ private:
 	    int _req_status;
         int m_code_ret;
         int m_port;
+        int _bodyFlag;
+        std::fstream _tmp_file;
 public:
     Request();
     Request(const std::string &str);
@@ -93,7 +100,9 @@ public:
     bool isFinished(const std::string &str);
     bool isFinished();
     bool isFinished(std::string &str, size_t &i);
-
+    void setBodyFlag(int flag);
+    int getBodyFlag();
+    
 };
 
 std::string plunder(std::string &str, char c);

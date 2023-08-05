@@ -117,45 +117,67 @@ bool Request::isFinished()
 // }
 
 
+// void setBodyToFile
+
 int Request::parseReq(const std::string &str)
 {
-	// std::cout << "here parser!!" << std::endl;
-
     std::string key;
     std::string value;
     std::string line;
     size_t i(0);
-    resetReq();
-    reqLine(lineNext(str, i));
-    /*
-    *   check if line is not equal to "\r\n" or "" or 400
-    */
-    // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret != 400)
-    while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret != 400)
-	{
-		key = keyReader(line);
-		value = valueReader(line);
-        if (m_headers.count(key))
-            m_headers[key] = value;
-        check_headers(key, value);
-		// if (key.find("Secret") != std::string::npos)
-		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
-	}
-    setLanguage();
-	// std::cout << "===>" << i << std::endl;
-
-
-    if (i != std::string::npos)
+    
+    if (_bodyFlag == REQUEST_BODY_NOT_STARTED)
     {
-		// std::cout << str << std::endl;
-        setBody(str.substr(i));
-    }
-    setQuery();
-    // file.close();
+        resetReq();
+        reqLine(lineNext(str, i));
+        /*
+        *   check if line is not equal to "\r\n" or "" or 400
+        */
+        // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret == 200)
+        while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret == 200)
+        {
+            key = keyReader(line);
+            value = valueReader(line);
+            if (m_headers.count(key))
+                m_headers[key] = value;
+            check_headers(key, value);
+            // if (key.find("Secret") != std::string::npos)
+            // 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
+        }
+        setLanguage();
+        // std::cout << "===>" << i << std::endl;
 
+
+        if (i != std::string::npos)
+        {
+            // std::cout << str << std::endl;
+            std::cout << PURPLE << str << RESET << std::endl;
+            setBody(str.substr(i));
+
+        }
+        setQuery();
+        _bodyFlag = REQUEST_BODY_STARTED;
+    }
+    else
+    {
+        std::cout << RED << str << RESET << std::endl;
+        std::cout << GREEN << "==============================================" << RESET << std::endl;
+        std::cout << RED << getHeaders()["Content-Type"] << RESET << std::endl;
+        std::cout << GREEN << "==============================================" << RESET << std::endl;
+        // _tmp_file.open("/tmp/qwe.txt", std::ios::binary | std::ios::out);
+
+        // if (_tmp_file.is_open())
+        {
+            // _tmp_file << str;
+            // _tmp_file.close();
+            setBody(str);
+        }
+    }
 
     return m_code_ret;
 }
+
+
 
 std::vector<std::string>		split(const std::string& str, char c)
 {
