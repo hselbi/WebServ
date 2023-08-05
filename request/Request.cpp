@@ -196,7 +196,7 @@ size_t	Request::getChunkedSize() const
 	return chunked_size;
 }
 
-size_t Request::getChunkStops() const {
+size_t Request::getRestChunk() const {
 	return rest_chunk;
 }
 

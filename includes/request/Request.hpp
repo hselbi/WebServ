@@ -72,7 +72,7 @@ public:
 
     size_t     getBodySize() const;
     size_t      getChunkedSize() const;
-    size_t      getChunkStops() const;
+    size_t      getRestChunk() const;
     /* member functions */
 
     void resetReq();
