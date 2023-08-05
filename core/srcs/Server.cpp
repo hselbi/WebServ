@@ -26,7 +26,7 @@ void Server::cleanup_by_closing_all_sockets()
 	{
 		close(*server_socket);
 	}
-	
+
 }
 
 std::vector<long> &Server::get_server_sockets() { return _server_sockets; }
@@ -93,6 +93,7 @@ bool Server::isReqFinished(int client_socket)
 	// !  check methods that dont have body
 	// !  check if the request is "Transfer-Encoding: chunked", and other stuff
 
+	// if (get_client(client_socket)->get_request().getMethod() ==)
     if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
     {
         if (get_client(client_socket)->get_request().getHeaders()["Content-Length"] == "0")
@@ -126,7 +127,7 @@ void Server::send_response(long client_socket)
 	// std::cout << "Sending response to client socket " << client_socket << "\n";
 	// std::cout << "Response: " << get_client(client_socket)->get_response_data() << "\n";
 	long bytes_sent;
-	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), 0)) == -1)
+	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), MSG_DONTWAIT)) == -1)
 	{
 		std::cerr << "Error: send() failed on client socket " << client_socket << "\n";
 		drop_client(client_socket); // Connection: close
@@ -152,7 +153,7 @@ void Server::build_response(Request &request, long client_socket) // generate a 
 
 void Server::disconnect_connection(int client_socket)
 {
-	if (get_client(client_socket) == NULL) // !!!!!!!!! after send failed
+	if (get_client(client_socket) == NULL)
 		return;
 	if (get_client(client_socket)->get_res_status() == DONE )
 	{
@@ -161,7 +162,7 @@ void Server::disconnect_connection(int client_socket)
 }
 
 
-void Server::handle_outgoing_response(long client_socket) // ! send response to client
+void Server::handle_outgoing_response(long client_socket)
 {
 	build_response(get_client(client_socket)->get_request(), client_socket);
 
@@ -170,7 +171,6 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 	disconnect_connection(client_socket);
 }
 
-// !! GET /index.html HTTP/1.1 | POST /form HTTP/1.1
 std::string Server::get_http_method(std::string &request)
 {
 	std::string http_method;
@@ -183,55 +183,43 @@ std::string Server::get_http_method(std::string &request)
 bool Server::is_request_completed(std::string &request, long client_socket)
 {
 
-	std::string http_method = get_http_method(request);
+	std::string http_method = get_client(client_socket)->get_request().getMethod();
 
 	if (get_client(client_socket)->get_request().getCodeRet() == 400)
 		return true;
-	if (http_method == "POST") // !! not finished - need to check if the request is "Transfer-Encoding: chunked", and other stuff
+
+	if (http_method == "GET" || http_method == "DELETE")
+	{
+		if ((request.find(REQUEST_END) != std::string::npos) || get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
+			return true;
+	}
+	else if (http_method == "POST") // !! not finished - need to check if the request is "Transfer-Encoding: chunked", and other stuff
 	{
 
-		size_t end_of_headers_pos = request.find(REQUEST_END);
-		if (end_of_headers_pos != std::string::npos)
+		if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
 		{
-			size_t content_length_header_pos;
-			content_length_header_pos = request.find("Content-Length: ");
-			if (content_length_header_pos != std::string::npos)
+			if (get_client(client_socket)->get_request().getHeaders()["Content-Length"] == "0")
 			{
-				size_t end_of_content_length_header_pos = request.find(REQUEST_DELIMETER, content_length_header_pos);
-				if (_clients[client_socket]->get_request_body_length() == 0)
-				{
-					std::string s = request.substr(content_length_header_pos + 16, end_of_content_length_header_pos - content_length_header_pos - 16);
-					long i = 0;
-					std::istringstream(s) >> i;
-					_clients[client_socket]->set_request_body_length(i);
-					// _clients[client_socket]->set_request_body_length(std::stoi(request.substr(content_length_header_pos + 16, end_of_content_length_header_pos - content_length_header_pos - 16)));
-				}
-
-				size_t start_of_body_pos = end_of_headers_pos + 4; // 4 is the length of the \r\n\r\n
-
-				if (_clients[client_socket]->get_request_body_length() == (_clients[client_socket]->get_request_data().length() - start_of_body_pos))
-				{
-					_clients[client_socket]->get_request_body_length() = 0;
-					return true; // request done - all payload received
-				}
+				// 204 (No Content) or 304 (Not Modified)
+				return true;
 			}
-			else // erase the request body from the request data
+			if (std::stoi(get_client(client_socket)->get_request().getHeaders()["Content-Length"]) == get_client(client_socket)->get_request().getBody().size())
+				return true;
+		}
+		else  if (!get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"].empty())
+		{
+			if (get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"] == "chunked")
 			{
-				// request doesnt have Content-Length, request_body_length will be 0
-				size_t start_of_body_pos = end_of_headers_pos + 4;																			// 4 length of \r\n\r\n
-				_clients[client_socket]->get_request_data().erase(start_of_body_pos, _clients[client_socket]->get_request_data().length()); // erase the request body from the request data
-				return true;																												// request done - no payload
+				if (get_client(client_socket)->get_request().getBody().size() == 0)
+					return false;
+				if (get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 1] == '\n' && get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 2] == '\r')
+					return true;
 			}
 		}
 		else
 		{
 			return false; // not completed request
 		}
-	}
-	else
-	{
-		if ((request.find(REQUEST_END) != std::string::npos))
-			return true;
 	}
 
 	return false;
@@ -283,10 +271,10 @@ void Server::accept_new_connection(long server_socket)
 {
 	socklen_t client_len = sizeof(struct sockaddr_in);
 	long client_socket;
-	if ((client_socket = accept(server_socket, (struct sockaddr *)&_client_addr, &client_len)) == -1)
+	if ((client_socket = accept(server_socket, 0, &client_len)) == -1)
 		throw std::runtime_error("accept failed");
 
-	std::cout << PURPLE << "accepted new client " << client_socket << " on port " << _server_port[server_socket] << RESET << "\n";
+	std::cout << PURPLE << "Accepted new client " << client_socket << " on Port: " << _server_port[server_socket] << RESET << "\n";
 
 	_clients.insert(std::make_pair(client_socket, create_client()));
 
@@ -308,7 +296,7 @@ void Server::zero_socket_pool()
 
 void Server::listen_on_socket(long server_socket)
 {
-	if (listen(_server_sockets[server_socket], QUEUE_LIMIT) == -1) // SOMAXCONN // 1000 - queue limit for incoming connections before the OS starts rejecting and refusing connections
+	if (listen(_server_sockets[server_socket], QUEUE_LIMIT) == -1) // - queue limit for incoming connections before the OS starts rejecting and refusing connections -  maximum number of incoming connections that can be waiting in the queue for acceptance, while your server is currently handling other connections.
 		throw_error("server socket listening failed");
 }
 
@@ -316,7 +304,7 @@ void Server::bind_socket(long server_socket_id, std::string host, int port)
 {
 	std::vector<ConfServer>::iterator server_block = _server_blocks.begin();
 	memset(&_server_addr, 0, sizeof(struct sockaddr_in));
-	_server_addr.sin_family = AF_INET;
+	_server_addr.sin_family = AF_INET; // IPv4
 	_server_addr.sin_port = htons(port);
 	// _server_addr.sin_addr.s_addr = INADDR_ANY;
 	if (host == "localhost")
@@ -342,19 +330,19 @@ void Server::create_server_socket()
 	// if (setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == -1) // socket, level, level options
 	// 	throw_error("setsockopt SO_NOSIGPIPE failed");
 
-	struct timeval timeout;
-	timeout.tv_sec = 3; // Timeout value in seconds
-	timeout.tv_usec = 0;
-	if (setsockopt(server_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
-		throw_error("setsockopt SO_RCVTIMEO failed");
+	// struct timeval timeout;
+	// timeout.tv_sec = 3; // Timeout value in seconds
+	// timeout.tv_usec = 0;
+	// if (setsockopt(server_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
+	// 	throw_error("setsockopt SO_RCVTIMEO failed");
 
-	if (setsockopt(server_socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
-		throw_error("setsockopt SO_SNDTIMEO failed");
+	// if (setsockopt(server_socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) == -1) // socket, level, level options
+	// 	throw_error("setsockopt SO_SNDTIMEO failed");
 
 	int flags;
-	if ((flags = fcntl(server_socket, F_GETFL, 0)) == -1)
+	if ((flags = fcntl(server_socket, F_GETFL, 0)) == -1) // get file status flags,
 		throw_error("fcntl F_GETFL failed");
-	if (fcntl(server_socket, F_SETFL, flags | O_NONBLOCK) == -1)
+	if (fcntl(server_socket, F_SETFL, flags | O_NONBLOCK) == -1) // set file status flags, O_NONBLOCK - non-blocking mode
 		throw_error("fcntl F_SETFL failed");
 
 	_server_sockets.push_back(server_socket);
@@ -386,23 +374,23 @@ void Server::start_server()
 {
 	for (;;)
 	{
-		long ready_count = monitor_clients(); // monitor socket descriptors for activity
+		long ready_count = monitor_clients(); // monitor socket descriptors for activity, return number of ready clients
 		for (long socket = 0; (socket <= _biggest_socket) && ready_count > 0; ++socket)
 		{
 			if (FD_ISSET(socket, &_read_set))
 			{
 				if (FD_ISSET(socket, &_server_socket_pool)) // ready to read
 				{
-					accept_new_connection(socket);
+					accept_new_connection(socket); // accept new client
 				}
 				else
 				{
-					handle_incoming_request(socket);
+					handle_incoming_request(socket); // read request from client
 				}
 			}
 			else if (FD_ISSET(socket, &_write_set)) // ready to write
 			{
-				handle_outgoing_response(socket); // !! send response to client
+				handle_outgoing_response(socket); // construct response then send it to client
 			}
 
 		}
@@ -414,10 +402,10 @@ void Server::setup_server()
 	zero_socket_pool();
 	for (long i = 0; i < _server_blocks.size(); i++)
 	{
-		create_server_socket();
-		bind_socket(i, _server_blocks[i].getHost(), _server_blocks[i].getPort());
-		listen_on_socket(i);
-		_server_port.insert(std::make_pair(_server_sockets[i], _server_blocks[i].getPort()));
+		create_server_socket(); // create server socket
+		bind_socket(i, _server_blocks[i].getHost(), _server_blocks[i].getPort()); // bind server socket to host and port from config
+		listen_on_socket(i); // listen on server socket, ready to accept incoming connections
+		_server_port.insert(std::make_pair(_server_sockets[i], _server_blocks[i].getPort())); //
 		std::cout << "Server " << (i + 1) << " created, Host: " << _server_blocks[i].getHost() << ", listening on Port: " << _server_blocks[i].getPort() << std::endl;
 	}
 }

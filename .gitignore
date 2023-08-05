@@ -5,3 +5,6 @@ webserv
 **/*.DS_Store
 .vscode/settings.json
 www/html/static/1gb_video.mp4
+www/html/static/Educational-Video-2.mov
+www/html/static/myvideo
+www/html/static/myvideo_symlink
