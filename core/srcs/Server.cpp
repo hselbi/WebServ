@@ -44,77 +44,52 @@ bool Server::is_connection_close(std::string &request)
 	return false;
 }
 
-bool Server::isReqFinished(int client_socket)
+bool Server::is_request_completed(std::string &request, long client_socket)
 {
-	// !  check methods that dont have body
-	// !  check if the request is "Transfer-Encoding: chunked", and other stuff
+    std::string http_method = get_client(client_socket)->get_request().getMethod();
 
-	// if (get_client(client_socket)->get_request().getMethod() ==)
-    if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
+    if (get_client(client_socket)->get_request().getCodeRet() != 200)
+        return true;
+
+    if (http_method == "GET" || http_method == "DELETE")
     {
-        if (get_client(client_socket)->get_request().getHeaders()["Content-Length"] == "0")
-		{
-			// 204 (No Content) or 304 (Not Modified)
-            return true;
-		}
-        if (std::stoi(get_client(client_socket)->get_request().getHeaders()["Content-Length"]) == get_client(client_socket)->get_request().getBody().size())
+		// usually GET and DELETE requests size is less than 1000 bytes
+        if ((request.find(REQUEST_END) != std::string::npos))
             return true;
     }
-    if (!get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"].empty())
+    else if (http_method == "POST")
     {
-        if (get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"] == "chunked")
+        std::string content_length = get_client(client_socket)->get_request().getHeaders()["Content-Length"];
+        std::string transfer_encoding = get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"];
+
+        if (!content_length.empty())
         {
-            if (get_client(client_socket)->get_request().getBody().size() == 0)
-                return false;
-            if (get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 1] == '\n' && get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 2] == '\r')
+            if (content_length == "0")
+                return true;
+            int expected_length = std::stoi(content_length);
+			// std::cout << RED  << "content_length: " << content_length << RESET << std::endl;
+			std::cout << YELLOW << "get_client(client_socket)->get_request().getBody().size(): " << get_client(client_socket)->get_request().getBody().size() << RESET <<  std::endl;
+            // if (expected_length == get_client(client_socket)->get_request().getBody().size())
+                return true;
+             // !! check the flag
+
+        }
+        else if (!transfer_encoding.empty())
+        {
+            if (transfer_encoding == "chunked")
+            {
+                // !! check the flag
+            }
+        }
+        else
+        {
+            size_t end_of_headers_pos = request.find(REQUEST_END);
+            if (end_of_headers_pos != std::string::npos)
                 return true;
         }
     }
+
     return false;
-}
-
-bool Server::is_request_completed(std::string &request, long client_socket)
-{
-	std::string http_method = get_client(client_socket)->get_request().getMethod();
-
-	if (get_client(client_socket)->get_request().getCodeRet() != 200)
-		return true;
-
-	if (http_method == "GET" || http_method == "DELETE")
-	{
-		if ((request.find(REQUEST_END) != std::string::npos))
-			return true;
-	}
-	else if (http_method == "POST")
-	{
-
-		if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
-		{
-			if (get_client(client_socket)->get_request().getHeaders()["Content-Length"] == "0")
-			{
-				// 204 (No Content) or 304 (Not Modified)
-				return true;
-			}
-			if (std::stoi(get_client(client_socket)->get_request().getHeaders()["Content-Length"]) == get_client(client_socket)->get_request().getBody().size())
-				return true;
-		}
-		else  if (!get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"].empty())
-		{
-			if (get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"] == "chunked")
-			{
-				if (get_client(client_socket)->get_request().getBody().size() == 0)
-					return false;
-				if (get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 1] == '\n' && get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 2] == '\r')
-					return true;
-			}
-		}
-		else
-		{
-			return false; // not completed request
-		}
-	}
-
-	return false;
 }
 
 void Server::match_client_request_to_server_block(long client_socket)

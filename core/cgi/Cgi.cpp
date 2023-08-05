@@ -149,7 +149,6 @@ void Cgi::init_env_vars()
 	_argv[2] = NULL;
 }
 
-
 std::string Cgi::exec_cgi()
 {
 
@@ -161,7 +160,7 @@ std::string Cgi::exec_cgi()
 	FILE *read_body_from_file = NULL;
 	if (_client->get_request().getMethod() == "POST")
 	{
-		read_body_from_file = fopen("/tmp/lopez.txt", "r");
+		read_body_from_file = fopen("/tmp/48414679.txt", "r");
 		if (!read_body_from_file)
 			return "-1";
 	}
@@ -187,54 +186,6 @@ std::string Cgi::exec_cgi()
 		fclose(read_body_from_file);
 	return tmp_filename;
 }
-
-// std::string Cgi::exec_cgi()
-// {
-// 	int write_to_cgi[2];
-
-// 	std::string tmp_filename = "/tmp/cgi_output_" + std::to_string(time(NULL) + _counter++);
-// 	FILE *_cgi_output_file = fopen(tmp_filename.c_str(), "w+");
-
-// 	if (!_cgi_output_file)
-// 	{
-// 		return "-1";
-// 	}
-
-// 	if (pipe(write_to_cgi) == -1)
-// 	{
-// 		return "-1";
-// 	}
-// 	if (_client->get_request().getMethod() == "POST")
-// 	{
-// 		set_body("FOOOKYOU");
-// 	}
-
-// 	if ((_pid = fork()) == -1)
-// 		return "-1";
-
-// 	if (_pid == 0)
-// 	{
-// 		close(write_to_cgi[1]);
-// 		dup2(write_to_cgi[0], 0);
-// 		dup2(fileno(_cgi_output_file), 1);
-// 		close(write_to_cgi[0]);
-
-// 		char *newargv[] = {(char *)_cgi_bin.c_str(), (char *)_cgi_script.c_str(), NULL};
-// 		execve(_cgi_bin.c_str(), newargv, _envp);
-// 		exit(EXIT_FAILURE);
-// 	}
-// 	else
-// 	{
-// 		close(write_to_cgi[0]);
-// 		write(write_to_cgi[1], _body.c_str(), _body.length());
-// 		close(write_to_cgi[1]);
-// 		_ready_to_read_from_cgi = waitpid(_pid, &_status, WNOHANG); // if == 0, child process still running, if >-1 child process terminated
-// 	}
-
-// 	fclose(_cgi_output_file);
-
-// 	return tmp_filename;
-// }
 
 std::string Cgi::start_cgi(std::string binary, std::string script_path)
 {

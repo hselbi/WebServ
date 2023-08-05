@@ -6,4 +6,6 @@ while( $line = fgets( $f ) ) {
 }
 
 fclose( $f );
+
+var_dump( $_POST );
 ?>
