@@ -44,80 +44,7 @@ bool Request::isWhitespace(const std::string &str)
     return true;
 }
 
-// bool Request::isFinished(std::string &str, size_t &i)
-// {
-//     if (m_code_ret == 400)
-//         return true;
-//     if (!m_headers["Content-Length"].empty())
-//     {
-//         if (m_headers["Content-Length"] == "0")
-//             return true;
-//         if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-//             return true;
-//     }
-//     if (!m_headers["Transfer-Encoding"].empty())
-//     {
-//         if (m_headers["Transfer-Encoding"] == "chunked")
-//         {
-//             if (str.size() == 0)
-//                 return false;
-//             if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
 
-bool Request::isFinished()
-{
-    if (m_code_ret == 400)
-        return true;
-    if (!m_headers["Content-Length"].empty())
-    {
-        if (m_headers["Content-Length"] == "0")
-            return true;
-        if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-            return true;
-    }
-    if (!m_headers["Transfer-Encoding"].empty())
-    {
-        if (m_headers["Transfer-Encoding"] == "chunked")
-        {
-            if (m_body.size() == 0)
-                return false;
-            if (m_body[m_body.size() - 1] == '\n' && m_body[m_body.size() - 2] == '\r')
-                return true;
-        }
-    }
-    return false;
-}
-
-// bool Request::isFinished(const std::string &str)
-// {
-//     if (m_code_ret == 400)
-//         return true;
-//     if (!m_headers["Content-Length"].empty())
-//     {
-//         if (m_headers["Content-Length"] == "0")
-//             return true;
-//         if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-//             return true;
-//     }
-//     if (!m_headers["Transfer-Encoding"].empty())
-//     {
-//         if (m_headers["Transfer-Encoding"] == "chunked")
-//         {
-//             if (str.size() == 0)
-//                 return false;
-//             if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
-
-
-// void setBodyToFile
 
 int Request::parseReq(const std::string &str)
 {
@@ -151,8 +78,11 @@ int Request::parseReq(const std::string &str)
         if (i != std::string::npos)
         {
             // std::cout << str << std::endl;
-            std::cout << PURPLE << str << RESET << std::endl;
+            // std::cout << PURPLE << str.substr(i) << RESET << std::endl;
+            _tmp_file_name = "/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt";
+	        _tmp_file.open(_tmp_file_name, std::ios::out);
             setBody(str.substr(i));
+
 
         }
         setQuery();
@@ -160,18 +90,18 @@ int Request::parseReq(const std::string &str)
     }
     else
     {
-        std::cout << RED << str << RESET << std::endl;
-        std::cout << GREEN << "==============================================" << RESET << std::endl;
-        std::cout << RED << getHeaders()["Content-Type"] << RESET << std::endl;
-        std::cout << GREEN << "==============================================" << RESET << std::endl;
+        // std::cout << RED << str << RESET << std::endl;
+        // std::cout << GREEN << "==============================================" << RESET << std::endl;
+        // std::cout << RED << getHeaders()["Content-Type"] << RESET << std::endl;
+        // std::cout << GREEN << "==============================================" << RESET << std::endl;
         // _tmp_file.open("/tmp/qwe.txt", std::ios::binary | std::ios::out);
 
         // if (_tmp_file.is_open())
-        {
+        // {
             // _tmp_file << str;
             // _tmp_file.close();
             setBody(str);
-        }
+        // }
     }
 
     return m_code_ret;

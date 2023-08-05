@@ -20,14 +20,14 @@ std::vector<std::string>		Request::initMethods()
 std::vector<std::string>	Request::methods = Request::initMethods();
 
 
-Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED)
+Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),
+	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name("")
 {
 	// std::cout << "Request Constructor" << std::endl;
 }
 
 void Request::resetReq(){
 	m_method = "";
-	m_body = "";
 	m_code_ret = 200;
 	m_version = "";
 	m_path = "";
@@ -40,9 +40,11 @@ void Request::resetReq(){
 	defaultReq();
 	_req_status = REQUEST_NOT_COMPLETED;
 	_bodyFlag = REQUEST_BODY_NOT_STARTED;
+	_tmp_file_name = "";
+	_tmp_file.close();
 }
 
-Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
+Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
 	// std::cout << "Request constructor" << std::endl;
 	resetReq();
@@ -133,10 +135,6 @@ std::string	Request::getMethod() const {
 	return m_method;
 }
 
-std::string	Request::getBody() const {
-	return m_body;
-}
-
 int	Request::getCodeRet() const {
 	return m_code_ret;
 }
@@ -193,15 +191,14 @@ std::string	Request::getHost() const {
 
 void	Request::setBody(const std::string& str)
 {
-	// std::cout << str << "bodyy ==> "<< this->m_body << std::endl;
-	if (str.size() == 0)
+	std::string tmp = str;
+	if (tmp.size() == 0)
 		return ;
-	char	strip[] = {'\n', '\r'};
+	else if (tmp.size() > REQUEST_BUFFER_SIZE)
+		tmp = tmp.substr(0, REQUEST_BUFFER_SIZE);
 
-	this->m_body.assign(str);
-
-	// if (m_body.find("\r\n\r\n") != std::string::npos)
-	// 	m_body.resize(m_body.find("\r\n\r\n"));
+	if (_tmp_file.is_open())
+		_tmp_file << tmp;
 }
 
 void Request::setQuery()
@@ -263,7 +260,6 @@ Request &Request::operator=(const Request &other)
 		m_method = other.m_method;
 		m_path = other.m_path;
 		m_version = other.m_version;
-		m_body = other.m_body;
 		m_query = other.m_query;
 		m_raw = other.m_raw;
 		m_headers = other.m_headers;
@@ -283,7 +279,6 @@ Request::Request(const Request &other)
 		m_method = other.m_method;
 		m_path = other.m_path;
 		m_version = other.m_version;
-		m_body = other.m_body;
 		m_query = other.m_query;
 		m_raw = other.m_raw;
 		m_headers = other.m_headers;

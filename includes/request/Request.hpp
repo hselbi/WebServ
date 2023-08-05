@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../includes.hpp"
+#include <fstream>
+#define REQUEST_BUFFER_SIZE 2000
 // enum
 enum requestFlag {
     REQUEST_NOT_COMPLETED,
@@ -12,13 +14,13 @@ enum requestBodyFlag {
     REQUEST_BODY_COMPLETED,
 } ;
 
+
 class Request
 {
 private:
         std::string m_method;
         std::string m_path;
         std::string m_version;
-        std::string m_body;
         std::string m_query;
         std::string m_raw;
         std::string m_host;
@@ -33,6 +35,8 @@ private:
         int m_port;
         int _bodyFlag;
         std::fstream _tmp_file;
+        std::string _tmp_file_name;
+
 public:
     Request();
     Request(const std::string &str);
