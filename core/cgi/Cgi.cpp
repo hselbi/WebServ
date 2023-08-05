@@ -110,7 +110,6 @@ void Cgi::init_env_vars()
 		_env_vars["CONTENT_LENGTH"] = req_headers["Content-Length"];
 	}
 
-
 	_envp = new char *[_env_vars.size() + 1];
 	int i = 0;
 	for (env_vars_t::iterator it = _env_vars.begin(); it != _env_vars.end(); ++it, ++i)
@@ -133,6 +132,7 @@ void Cgi::setClient(Client &client) { _client = &client; }
 
 void Cgi::set_body(std::string payload)
 {
+	std::cout << RED << "Body: " << payload << RESET << std::endl;
 	_body = payload;
 }
 

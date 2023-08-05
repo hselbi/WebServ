@@ -192,8 +192,8 @@ void	Request::setBody(const std::string& str)
 
 	this->m_body.assign(str);
 
-	if (m_body.find("\r\n\r\n") != std::string::npos)
-		m_body.resize(m_body.find("\r\n\r\n"));
+	// if (m_body.find("\r\n\r\n") != std::string::npos)
+	// 	m_body.resize(m_body.find("\r\n\r\n"));
 }
 
 void Request::setQuery()

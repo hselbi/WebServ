@@ -1,7 +1,6 @@
 #include "../includes/response/Response.hpp"
 #include "../includes/core/Client.hpp"
 
-
 std::string Response::isDirHasIndexFiles()
 {
     std::string dirPath = getRequestPathFile();
@@ -16,8 +15,6 @@ std::string Response::isDirHasIndexFiles()
 
     return "";
 }
-
-
 
 bool Response::isServerHaveRedirection()
 {
@@ -52,7 +49,6 @@ bool Response::isServerHaveRedirection()
 	return false;
 }
 
-
 bool Response::isMethodAllowedInLocation()
 {
 	std::vector<MethodType> allow_methods;
@@ -64,7 +60,6 @@ bool Response::isMethodAllowedInLocation()
 			return true;
 		else
 		{
-			// std::cout << "Method not allowed in location" << std::endl;
 			errorPages(405);
 			return false;
 		}

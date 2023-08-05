@@ -102,7 +102,6 @@ std::string Response::getContentType(const std::string &filePath)
 
 bool	Response::getMatchedLocation()
 {
-	// TODO: Verify this function (!! High Priority)
 	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
 	std::string requestPath = _client->get_request().getPath();
 	size_t max_length = 0;
@@ -121,15 +120,10 @@ bool	Response::getMatchedLocation()
 		if (_location == NULL)
 			_location = new ConfLoca(locations[index]);
 		if (isMethodAllowedInLocation())
-		{
-			// std::cout << "Allowed method in location" << std::endl;
 			return true;
-		}
 		else
 			return false;
-
 	}
-	// std::cout << "No matched location" << std::endl;
 	errorPages(404);
 	return false;
 }
@@ -145,15 +139,5 @@ std::string Response::getRequestPathFile()
 	return  root + path;
 }
 
-
-
-
-ConfLoca * Response::getLocation()
-{
-	return _location;
-}
-
-bool Response::get_cgi_status()
-{
-	return _have_cgi;
-}
+ConfLoca * Response::getLocation() { return _location; }
+bool Response::get_cgi_status() { return _have_cgi; }

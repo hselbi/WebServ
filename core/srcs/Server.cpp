@@ -183,37 +183,42 @@ std::string Server::get_http_method(std::string &request)
 bool Server::is_request_completed(std::string &request, long client_socket)
 {
 
-	std::string http_method = get_client(client_socket)->get_request().getMethod();
+	std::string http_method = get_http_method(request);
 
-	if (get_client(client_socket)->get_request().getCodeRet() != 200)
-		return true;
-
-	if (http_method == "GET" || http_method == "DELETE")
-	{
-		if ((request.find(REQUEST_END) != std::string::npos) || get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
-			return true;
-	}
-	else if (http_method == "POST") // !! not finished - need to check if the request is "Transfer-Encoding: chunked", and other stuff
+	if (http_method == "POST") // !! not finished - need to check if the request is "Transfer-Encoding: chunked", and other stuff
 	{
 
-		if (!get_client(client_socket)->get_request().getHeaders()["Content-Length"].empty())
+		size_t end_of_headers_pos = request.find(REQUEST_END);
+		if (end_of_headers_pos != std::string::npos)
 		{
-			if (get_client(client_socket)->get_request().getHeaders()["Content-Length"] == "0")
+			size_t content_length_header_pos;
+			content_length_header_pos = request.find("Content-Length: ");
+			if (content_length_header_pos != std::string::npos)
 			{
-				// 204 (No Content) or 304 (Not Modified)
-				return true;
+				size_t end_of_content_length_header_pos = request.find(REQUEST_DELIMETER, content_length_header_pos);
+				if (_clients[client_socket]->get_request_body_length() == 0)
+				{
+					std::string s = request.substr(content_length_header_pos + 16, end_of_content_length_header_pos - content_length_header_pos - 16);
+					long i = 0;
+					std::istringstream(s) >> i;
+					_clients[client_socket]->set_request_body_length(i);
+					// _clients[client_socket]->set_request_body_length(std::stoi(request.substr(content_length_header_pos + 16, end_of_content_length_header_pos - content_length_header_pos - 16)));
+				}
+
+				size_t start_of_body_pos = end_of_headers_pos + 4; // 4 is the length of the \r\n\r\n
+
+				if (_clients[client_socket]->get_request_body_length() == (_clients[client_socket]->get_request_data().length() - start_of_body_pos))
+				{
+					_clients[client_socket]->get_request_body_length() = 0;
+					return true; // request done - all payload received
+				}
 			}
-			if (std::stoi(get_client(client_socket)->get_request().getHeaders()["Content-Length"]) == get_client(client_socket)->get_request().getBody().size())
-				return true;
-		}
-		else  if (!get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"].empty())
-		{
-			if (get_client(client_socket)->get_request().getHeaders()["Transfer-Encoding"] == "chunked")
+			else // erase the request body from the request data
 			{
-				if (get_client(client_socket)->get_request().getBody().size() == 0)
-					return false;
-				if (get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 1] == '\n' && get_client(client_socket)->get_request().getBody()[get_client(client_socket)->get_request().getBody().size() - 2] == '\r')
-					return true;
+				// request doesnt have Content-Length, request_body_length will be 0
+				size_t start_of_body_pos = end_of_headers_pos + 4;																			// 4 length of \r\n\r\n
+				_clients[client_socket]->get_request_data().erase(start_of_body_pos, _clients[client_socket]->get_request_data().length()); // erase the request body from the request data
+				return true;																												// request done - no payload
 			}
 		}
 		else
@@ -221,9 +226,15 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 			return false; // not completed request
 		}
 	}
+	else
+	{
+		if ((request.find(REQUEST_END) != std::string::npos))
+			return true;
+	}
 
 	return false;
 }
+
 
 void Server::match_client_request_to_server_block(long client_socket)
 {

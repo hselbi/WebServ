@@ -35,13 +35,11 @@ Response &Response::operator=(const Response &copy)
 	return *this;
 }
 
-
-
 void Response::processing()
 {
 
 	int buffer_size = RES_BUFFER_SIZE;
-
+	
 	if (_client->get_res_status() == NOT_STARTED)
 	{
 		if (_client->get_request().getCodeRet() != 200)
@@ -75,5 +73,3 @@ void Response::processing()
 			setResStatus(DONE);
 	}
 }
-
-
