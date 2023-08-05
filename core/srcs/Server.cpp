@@ -125,7 +125,7 @@ void Server::send_response(long client_socket)
 	// std::cout << "Sending response to client socket " << client_socket << "\n";
 	// std::cout << "Response: " << get_client(client_socket)->get_response_data() << "\n";
 	long bytes_sent;
-	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), 0)) == -1)
+	if ((bytes_sent = send(client_socket, get_client(client_socket)->get_response_data().c_str(), get_client(client_socket)->get_response_data().length(), MSG_DONTWAIT)) == -1)
 	{
 		std::cerr << "Error: send() failed on client socket " << client_socket << "\n";
 		drop_client(client_socket); // Connection: close

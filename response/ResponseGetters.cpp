@@ -219,3 +219,8 @@ ConfLoca * Response::getLocation()
 {
 	return _location;
 }
+
+bool Response::get_cgi_status()
+{
+	return _have_cgi;
+}

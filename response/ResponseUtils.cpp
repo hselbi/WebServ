@@ -41,7 +41,7 @@ void Response::checkWhichRequestedMethod()
 		Method_POST();
 }
 
-void Response::setRediration(std::string location)
+void Response::sendRediraction(std::string location)
 {
 	t_responseHeader responseHeader;
 	responseHeader.statusCode = 301;

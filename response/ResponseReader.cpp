@@ -141,11 +141,3 @@ void Response::readCgiFile()
 
 
 
-t_header Response::setHeaderElement(std::string key, std::string value)
-{
-    t_header header_element;
-
-    header_element.key = key;
-    header_element.value = value;
-    return header_element;
-}

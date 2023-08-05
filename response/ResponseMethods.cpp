@@ -11,7 +11,7 @@ void Response::Method_GET()
         if (Utils::isDirectory(filePath))
         {
             if (filePath[filePath.length() - 1] != '/')
-                return setRediration(_client->get_request().getPath() + "/");
+                return sendRediraction(_client->get_request().getPath() + "/");
             else
             {
                 if ((index = isDirHasIndexFiles()) != "")
