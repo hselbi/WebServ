@@ -153,7 +153,7 @@ int Cgi::get_pid()
 
 void Cgi::reset()
 {
-	clean_env_vars();
+	// clean_env_vars();
 	_cgi_bin.clear();
 	_cgi_script.clear();
 	_body.clear();

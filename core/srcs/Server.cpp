@@ -164,6 +164,11 @@ void Server::handle_outgoing_response(long client_socket) // ! send response to 
 {
 	build_response(get_client(client_socket)->get_request(), client_socket);
 
+	// if (get_client(client_socket)->get_res_status() == NOT_STARTED)
+	// {
+	// 	std::cout << "Response not started yet\n";
+	// 	return;
+	// }
 	send_response(client_socket);
 
 	disconnect_connection(client_socket);
@@ -254,6 +259,9 @@ void Server::handle_incoming_request(long client_socket)
 
 	memset(received_data, 0, BUFFER_SIZE);
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, MSG_DONTWAIT)) == -1)
+	memset(received_data, 0, BUFFER_SIZE);
+
+	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, MSG_DONTWAIT)) == -1)
 	{
 		std::cerr << "Error: recv() failed on client socket " << client_socket << " on server port " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
 		drop_client(client_socket);
@@ -266,6 +274,8 @@ void Server::handle_incoming_request(long client_socket)
 	}
 	else
 	{
+		std::cout << RED << "Request: " << received_data << RESET <<"\n";
+
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
 		// !! remove this, only for testing
 		feed_request(std::string(received_data), client_socket);
@@ -368,7 +378,7 @@ long Server::monitor_clients()
 	struct timeval timeout;
 	long ready_count = 0;
 	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
+	timeout.tv_usec = 1;
 
 	FD_ZERO(&_read_set);
 	FD_ZERO(&_write_set);
