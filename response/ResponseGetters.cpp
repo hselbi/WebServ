@@ -4,8 +4,24 @@
 std::string Response::getRoot()
 {
     if (_location && _location->root != "")
-        return _location->root;
-    return _client->get_server_block().getRoot() != "" ? _client->get_server_block().getRoot() : "www/html";
+		return getCorrectPath(_location->root);
+	else if (_client->get_server_block().getRoot() != "")
+		return getCorrectPath(_client->get_server_block().getRoot());
+	return Utils::getWebservRootPath() + "/www/html";
+}
+
+std::string Response::getCorrectPath(const std::string &path)
+{
+	std::string server_path = "[SERVER_PATH]";
+	size_t pos = path.find(server_path);
+	if (pos == std::string::npos)
+		return path;
+	else
+	{
+		std::string root = path;
+		root.replace(pos, server_path.length(), Utils::getWebservRootPath());
+		return root;
+	}
 }
 
 bool Response::getAutoIndex()
@@ -126,93 +142,10 @@ std::string Response::getRequestPathFile()
 		path =  (_location->path != "/") ? path.substr(_location->path.length()) : path;
 	else
 		path = "/";
-	return  Utils::getWebservRootPath()  + root + path;
-}
-
-std::string Response::tmp_getRequestPath()
-{
-	std::string path = _client->get_request().getPath();
-	std::string root = getRoot();
-	if (_location)
-	{
-		
-		return  path.replace(0, _location->path.length(), root);
-	}
-
-	// return path.replace(0, 1, root);
-	return "";
+	return  root + path;
 }
 
 
-std::string Response::isDirHasIndexFiles()
-{
-    std::string dirPath = getRequestPathFile();
-    std::vector<std::string> indexFiles = _client->get_server_block().getIndex();
-    for (size_t i = 0; i < indexFiles.size(); i++)
-    {
-        if (Utils::fileExists(dirPath + indexFiles[i]))
-            return dirPath + indexFiles[i];
-    }
-    if (Utils::fileExists(dirPath + "index.html"))
-        return dirPath + "index.html";
-
-    return "";
-}
-
-
-
-bool Response::isServerHaveRedirection()
-{
-	t_responseHeader	responseHeader;
-	int 				redirectStatus = _client->get_server_block().getRedirectStatus();
-	if (redirectStatus == 301 || redirectStatus == 302 || redirectStatus == 307)
-	{
-		responseHeader.statusCode = redirectStatus;
-		responseHeader.statusMessage = Utils::getStatusMessage(redirectStatus);
-		responseHeader.m_headers["Location"] = _client->get_server_block().getRedirectUrl();
-		responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
-
-		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-		_client->append_response_data(_header_buffer);
-		setResStatus(DONE);
-		return true;
-	}
-	else if (redirectStatus != -1)
-	{
-		responseHeader.statusCode = redirectStatus;
-		responseHeader.statusMessage = Utils::getStatusMessage(redirectStatus);
-		responseHeader.m_headers["Content-Type"] = "application/octet-stream";
-		responseHeader.m_headers["Content-Length"] = "0";
-		responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
-
-		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-		_client->append_response_data(_header_buffer);
-		setResStatus(DONE);
-		return true;
-	}
-
-	return false;
-}
-
-
-bool Response::isMethodAllowedInLocation()
-{
-	std::vector<MethodType> allow_methods;
-	if (_location)
-	{
-		allow_methods = _location->allow_methods;
-
-		if (std::find(allow_methods.begin(), allow_methods.end(), _location->strtoMethod(_client->get_request().getMethod())) != allow_methods.end())
-			return true;
-		else
-		{
-			// std::cout << "Method not allowed in location" << std::endl;
-			errorPages(405);
-			return false;
-		}
-	}
-	return false;
-}
 
 
 ConfLoca * Response::getLocation()

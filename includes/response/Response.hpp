@@ -45,7 +45,7 @@ class Response {
 		std::string				getErrorPagePath(int statusCode);
 		std::string				isDirHasIndexFiles();
 		std::string				getRequestPathFile();
-		std::string				tmp_getRequestPath();
+		std::string				getCorrectPath(const std::string &path);
 		void					readFile();
 		void					readCgiFile();
 		void					readFileByPath(std::string filePath);

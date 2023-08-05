@@ -32,10 +32,7 @@ void Response::setResStatus(int status)
 		
 	}
 	else if (status == ON_PROCESS)
-	{
-
 		_client->set_res_status(ON_PROCESS);
-	}
 }
 
 

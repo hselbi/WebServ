@@ -6,7 +6,7 @@ std::string Utils::getWebservRootPath() {
     char	buffer[bufferSize];
 
     if (getcwd(buffer, bufferSize) != NULL)
-        return std::string(buffer) + "/";
+        return std::string(buffer);
     return "";
 }
 
