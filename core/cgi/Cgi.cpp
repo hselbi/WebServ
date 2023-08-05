@@ -132,7 +132,6 @@ void Cgi::setClient(Client &client) { _client = &client; }
 
 void Cgi::set_body(std::string payload)
 {
-	std::cout << RED << "Body: " << payload << RESET << std::endl;
 	_body = payload;
 }
 

@@ -16,7 +16,6 @@ void Response::Method_GET()
             {
                 if ((index = isDirHasIndexFiles()) != "")
                 {
-                    // TODO: Add python also to this condition  (if file extension is .py)
                     if (checkStatusCgi() && (index.rfind(".php") != std::string::npos || index.rfind(".py") != std::string::npos))
                     {
                         _have_cgi = true;
@@ -50,7 +49,6 @@ void Response::Method_GET()
         }
         else
         {
-            // TODO: Add python also to this condition  (if file extension is .py)
             if (checkStatusCgi() && (filePath.rfind(".php") != std::string::npos || filePath.rfind(".py") != std::string::npos))
             {
                 _have_cgi = true;
