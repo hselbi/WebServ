@@ -68,7 +68,7 @@ bool Server::is_request_completed(std::string &request, long client_socket)
                 return true;
             int expected_length = std::stoi(content_length);
 			// std::cout << RED  << "content_length: " << content_length << RESET << std::endl;
-			std::cout << YELLOW << "get_client(client_socket)->get_request().getBody().size(): " << get_client(client_socket)->get_request().getBody().size() << RESET <<  std::endl;
+			// std::cout << YELLOW << "get_client(client_socket)->get_request().getBody().size(): " << get_client(client_socket)->get_request().getBody().size() << RESET <<  std::endl;
             // if (expected_length == get_client(client_socket)->get_request().getBody().size())
                 return true;
              // !! check the flag
