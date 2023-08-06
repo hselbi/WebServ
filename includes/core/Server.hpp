@@ -116,6 +116,7 @@ private:
 	bool	after_hex; // CRLF after hexa
 	bool	lineFeed; // '\n' is exist
 	bool	carriageReturn; // '\r' is exit
+	bool	getChunkSize; // get chunk size
 
 };
 
