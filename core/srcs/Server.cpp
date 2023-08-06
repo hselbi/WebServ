@@ -1,6 +1,6 @@
 #include "../../includes/core/Server.hpp"
 
-Server::Server() : _biggest_socket(0), _server_count(1), prev_socket(0), body_ending(false), request_index(0), before_hex(false), after_hex(false), lineFeed(false), carriageReturn(false) {}
+Server::Server() : _biggest_socket(0), _server_count(1), prev_socket(0), body_ending(false), request_index(0), before_hex(false), after_hex(false), lineFeed(false), carriageReturn(false), getChunkSize(false) {}
 
 Server::~Server()
 {
@@ -660,13 +660,15 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 						// std::cout << carr << " / " << crlf << std::endl;
 						const char* extractedSubstring = substr(received_data, carr + 2, crlf - carr - 2);
 						std::string hex = std::string(received_data).substr(carr + 2, crlf - carr - 2);
-						// std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
+						std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
 						long  hex_val = hextodec(std::string(extractedSubstring));
-						// std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
+						std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
 						get_client(client_socket)->get_request().set_rest_chunk(hex_val);
-						size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
+						size_t restChunk = get_client(client_socket)->get_request().getRestChunk();
+
 						carriageReturn = false;
-						// std::cout << rest_chunk << std::endl;
+						getChunkSize = true;
+						std::cout << restChunk << std::endl;
 					}
 					else if (crlf == std::string::npos)
 					{
@@ -689,13 +691,14 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 							// std::cout << RED << crlf << " / " << crlf_t << RESET  << std::endl;
 							const char* extractedSubstring = substr(received_data, crlf + 2, crlf_t - crlf - 2);
 							std::string hex = std::string(received_data).substr(crlf + 2, crlf_t - crlf - 2);
-							// std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
+							std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
 							long  hex_val = hextodec(std::string(extractedSubstring));
-							// std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
-							// get_client(client_socket)->get_request().set_rest_chunk(hex_val);
-							// size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
+							std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
+							get_client(client_socket)->get_request().set_rest_chunk(hex_val);
+							size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
 							carriageReturn = false;
-							// std::cout << rest_chunk << std::endl;
+							getChunkSize = true;
+							std::cout << rest_chunk << std::endl;
 						}
 						else if (crlf_t == std::string::npos)
 						{
@@ -717,7 +720,7 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 				}
 			}
 			else {
-				// std::cout << BOLDGREEN << request_index << RESET << std::endl;
+				std::cout << BOLDGREEN << request_index << RESET << std::endl;
 				size_t next_carr = containsCarriageNextLvl(received_data, carr + 1);
 				if (hasLineFeedAtPosition(received_data, next_carr + 1))
 				{
@@ -731,10 +734,11 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 							// std::string hex = std::string(received_data).substr(carr + 2, crlf - carr - 2);
 							// std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
 							long  hex_val = hextodec(std::string(extractedSubstring));
-							// std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
-							// get_client(client_socket)->get_request().set_rest_chunk(hex_val);
-							// size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
+							std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
+							get_client(client_socket)->get_request().set_rest_chunk(hex_val);
+							size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
 							carriageReturn = false;
+							getChunkSize = true;
 							// std::cout << rest_chunk << std::endl;
 						}
 						else if (next_crlf == std::string::npos)
@@ -817,6 +821,7 @@ void Server::handle_incoming_request(long client_socket)
 		}
 		else
 		{
+			// std::cout << RED << request_index<< RESET << std::endl;
 			chunkedPost(received_data, client_socket, request_index);
 		// 	// check if there's 
 		// 	size_t carriage;
