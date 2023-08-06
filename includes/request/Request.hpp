@@ -36,6 +36,7 @@ private:
         int _bodyFlag;
         std::fstream _tmp_file;
         std::string _tmp_file_name;
+        std::string _boundary;
 
 public:
     Request();
@@ -106,6 +107,7 @@ public:
     bool isFinished(std::string &str, size_t &i);
     void setBodyFlag(int flag);
     int getBodyFlag();
+    std::string getBodyFileName();
     
 };
 

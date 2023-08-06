@@ -64,15 +64,18 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 
         if (!content_length.empty())
         {
-            if (content_length == "0")
-                return true;
-            int expected_length = std::stoi(content_length);
-			// std::cout << RED  << "content_length: " << content_length << RESET << std::endl;
-			std::cout << YELLOW << "get_client(client_socket)->get_request().getBody().size(): " << get_client(client_socket)->get_request().getBody().size() << RESET <<  std::endl;
-            // if (expected_length == get_client(client_socket)->get_request().getBody().size())
-                return true;
-             // !! check the flag
+			// std::cout << get_client(client_socket)->get_request().getBodyFlag() << std::endl;
+            if (content_length == "0" || get_client(client_socket)->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
+                {
+					std::cout << "heree \n"; 
+					return true;
+				}
+			else
+			{
+					// std::cout << "heree 22222222222\n"; 
 
+			}
+			
         }
         else if (!transfer_encoding.empty())
         {
@@ -222,6 +225,7 @@ void Server::send_response(long client_socket)
 
 void Server::handle_outgoing_response(long client_socket)
 {
+
 	build_response(get_client(client_socket)->get_request(), client_socket);
 
 	send_response(client_socket);

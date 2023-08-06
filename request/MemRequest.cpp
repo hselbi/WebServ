@@ -52,7 +52,7 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
-    
+    std::cout << "parseReq" << std::endl;
     if (_bodyFlag == REQUEST_BODY_NOT_STARTED)
     {
         resetReq();
@@ -72,37 +72,32 @@ int Request::parseReq(const std::string &str)
             // 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
         }
         setLanguage();
-        // std::cout << "===>" << i << std::endl;
-
-
-        if (i != std::string::npos)
-        {
-            // std::cout << str << std::endl;
-            // std::cout << PURPLE << str.substr(i) << RESET << std::endl;
-            _tmp_file_name = "/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt";
-	        _tmp_file.open(_tmp_file_name, std::ios::out);
-            setBody(str.substr(i));
-
-
-        }
         setQuery();
-        _bodyFlag = REQUEST_BODY_STARTED;
+        // ! TODO: Add chunked transfer encoding to condition
+        if (getMethod() == "POST")
+        {
+            if (i != std::string::npos)
+            {
+                _tmp_file_name = "/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt";
+                _tmp_file.open(_tmp_file_name, std::ios::out);
+                setBody(str.substr(i));
+            }
+            int pos_boundary = m_headers["Content-Type"].find("boundary=");
+            if (pos_boundary != std::string::npos)
+            {
+                _boundary = m_headers["Content-Type"].substr(pos_boundary + 9) + "--";
+                if (_boundary != "" && str.substr(i).find(_boundary) != std::string::npos)
+                {
+                    _bodyFlag = REQUEST_BODY_COMPLETED;
+                    _tmp_file.close();
+                }
+                else
+                    _bodyFlag = REQUEST_BODY_STARTED;
+            }
+        }
     }
-    else
-    {
-        // std::cout << RED << str << RESET << std::endl;
-        // std::cout << GREEN << "==============================================" << RESET << std::endl;
-        // std::cout << RED << getHeaders()["Content-Type"] << RESET << std::endl;
-        // std::cout << GREEN << "==============================================" << RESET << std::endl;
-        // _tmp_file.open("/tmp/qwe.txt", std::ios::binary | std::ios::out);
-
-        // if (_tmp_file.is_open())
-        // {
-            // _tmp_file << str;
-            // _tmp_file.close();
-            setBody(str);
-        // }
-    }
+    else if (_bodyFlag == REQUEST_BODY_STARTED)
+        setBody(str);
 
     return m_code_ret;
 }

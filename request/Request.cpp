@@ -21,7 +21,7 @@ std::vector<std::string>	Request::methods = Request::initMethods();
 
 
 Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),
-	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name("")
+	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary("")
 {
 	// std::cout << "Request Constructor" << std::endl;
 }
@@ -41,6 +41,7 @@ void Request::resetReq(){
 	_req_status = REQUEST_NOT_COMPLETED;
 	_bodyFlag = REQUEST_BODY_NOT_STARTED;
 	_tmp_file_name = "";
+	_boundary = "";
 	_tmp_file.close();
 }
 
@@ -188,17 +189,26 @@ std::string	Request::getHost() const {
 	return m_host;
 }
 
+std::string	Request::getBodyFileName() {
+	return _tmp_file_name;
+}
 
 void	Request::setBody(const std::string& str)
 {
+	std::cout << "setBody" << std::endl;
 	std::string tmp = str;
 	if (tmp.size() == 0)
 		return ;
 	else if (tmp.size() > REQUEST_BUFFER_SIZE)
 		tmp = tmp.substr(0, REQUEST_BUFFER_SIZE);
-
 	if (_tmp_file.is_open())
 		_tmp_file << tmp;
+	
+	if (_boundary != "" && tmp.find(_boundary) != std::string::npos)
+	{
+		_bodyFlag = REQUEST_BODY_COMPLETED;
+		_tmp_file.close();
+	}
 }
 
 void Request::setQuery()
@@ -248,7 +258,6 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 		if (it->second != "")
 			os << YELLOW << it->first << RED << ": " << it->second << RESET << '\n';
 	}
-	os << '\n' << "Request body :\n" << GREEN << re.getBody() << '\n' << RESET;
 
 	return os;
 }
