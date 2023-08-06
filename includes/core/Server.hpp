@@ -85,6 +85,8 @@ struct Server
 
 	void disconnect_connection(int client_socket);
 	void 	chunkedPost(const char received_data[], long client_socket, size_t request_index);
+	void    recursiveFindHex(const char received_data[], long client_socket, size_t pos);
+
 
 private:
 	Config _config;
@@ -117,6 +119,7 @@ private:
 	bool	lineFeed; // '\n' is exist
 	bool	carriageReturn; // '\r' is exit
 	bool	getChunkSize; // get chunk size
+	std::string	_hexa; // hexa string
 
 };
 

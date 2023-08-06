@@ -594,10 +594,136 @@ const char* substr(const char* inputString, size_t startIndex, size_t length) {
     return substring;
 }
 
+void printWhitespaceSubstring(const char* input, size_t startPos, size_t length) {
+    size_t inputLength = strlen(input);
 
+    for (size_t i = startPos; i < startPos + length && i < inputLength; ++i) {
+        char currentChar = input[i];
+        if (std::isspace(currentChar))
+            std::cout << '_'; // Print underscore for whitespace
+        else
+            std::cout << currentChar;
+    }
+    std::cout << std::endl;
+}
 
+void    Server::recursiveFindHex(const char received_data[], long client_socket, size_t pos)
+{
+    if (getChunkSize)
+        return ;
+    if (before_hex)
+    {
+        size_t next_carr = containsCRLF(received_data, pos);
+        if (next_carr)
+        {
+			_hexa = substr(received_data, pos, next_carr - pos);
+			std::cout << "here's hexa!!!! ==>" << _hexa << std::endl;
+            // if (hasLineFeedAtPosition(received_data, pos))
+            // {
+				
+            //     // size_t next_crlf = containsCRLF(received_data, pos);
+            //     // if (next_carr == next_crlf)
+            //     // {
 
-void 	Server::chunkedPost(const char received_data[], long client_socket, size_t request_index)
+            //     //     // ! we found hexa
+            //     //     // ! check if the string has something
+            //     //         // ^ if yes, adding it to the string
+            //     //         // ^ if no, create it to the string
+            //     // }
+            //     // else
+            //     // {
+            //     //     // ! we didn't find hexa
+            //     //     before_hex = false;
+            //     //     after_hex = false;
+            //     //     lineFeed = false;
+            //     //     carriageReturn = false;
+            //     // }
+            // }
+            // else
+            // {
+            //     // ! we didn't find '\n' line feed
+            //     before_hex = false;
+            //     after_hex = false;
+            //     lineFeed = false;
+            //     carriageReturn = false;
+            // }
+        }
+        else
+        {
+			std::cout << "Hafidddd ======>" << std::endl;
+            // ! we didn't find '\r' carriage return
+            before_hex = false;
+            after_hex = false;
+            lineFeed = false;
+            carriageReturn = false;
+        }
+    }
+    else
+    {
+        size_t next_carr = containsCarriageNextLvl(received_data, pos + 1);
+        if (hasLineFeedAtPosition(received_data, next_carr + 1))
+        {
+
+            std::cout << BOLDCYAN << "second conditions!!!!"  << RESET << std::endl;
+            carriageReturn = true;
+            if (size_t next_crlf = (containsCRLF(received_data, next_carr + 2)))
+            {
+                if ((next_crlf - next_carr) < 10 && (next_crlf - next_carr) >= 3 && hasHexBetweenPositions(received_data, next_carr, next_crlf))
+                {
+                    const char* extractedSubstring = substr(received_data, next_carr + 2, next_crlf - next_carr - 2);
+                    long  hex_val = hextodec(std::string(extractedSubstring));
+                    get_client(client_socket)->get_request().set_rest_chunk(hex_val);
+                    size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
+                    carriageReturn = false;
+                    getChunkSize = true;
+                }
+				else {
+					
+					if (next_crlf == std::string::npos)
+					{
+						std::cout << "Hafid!!!! 1" << std::endl;
+						// std::cout 
+						// ~ we found the first '\r\n' 
+						// ~ now we need to check if there's a second one in the next request
+						lineFeed = false;
+						carriageReturn = false;
+						before_hex = true;
+						after_hex = false;
+
+					}
+					else {
+
+						std::cout << "Hafid!!!! 2" << std::endl;
+						// ! there's two 
+						size_t crlf_tt = (containsCRLF(received_data, next_crlf + 2));
+						if (crlf_tt < 6)
+						{
+							// ~ we found hexa
+							// ! save it in ~ a string ~ until we check the next request
+							_hexa = substr(received_data, next_crlf + 2, crlf_tt - next_crlf - 2);
+							std::cout << "here's hexa!!!! ==>" << _hexa << std::endl;
+							// _hexa = std::string(received_data).substr(next_crlf + 2, crlf_tt - n÷\ext_crlf - 2);
+						}
+						else{
+							// ! we didn't find hexa
+							lineFeed = false;
+							carriageReturn = false;
+							before_hex = false;
+							after_hex = false;
+						}
+					}
+				}
+            }
+        }
+        else
+        {
+			std::cout << BOLDYELLOW << "third conditions!!!!"  << RESET << std::endl;
+            recursiveFindHex(received_data, client_socket, next_carr + 1);
+        }
+    }
+}
+
+/*void 	Server::chunkedPost(const char received_data[], long client_socket, size_t request_index)
 {
 	
 	std::ofstream f;
@@ -644,14 +770,14 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 
 	if (containsMultipleCarriageReturns(received_data))
 	{
-		std::cout << BOLDWHITE << request_index << RESET << std::endl;
+		// std::cout << BOLDWHITE << request_index << RESET << std::endl;
 		size_t carr = containsCarriage(received_data);
 		if (carr)
 		{
 			// ghadi n7tajo f hna ... 
 			if (hasLineFeedAtPosition(received_data, carr + 1))
 			{
-				std::cout << BOLDRED << request_index << RESET << std::endl;
+				// std::cout << BOLDRED << request_index << RESET << std::endl;
 				carriageReturn = true;
 				if (size_t crlf = (containsCRLF(received_data, carr + 2)))
 				{
@@ -660,15 +786,15 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 						// std::cout << carr << " / " << crlf << std::endl;
 						const char* extractedSubstring = substr(received_data, carr + 2, crlf - carr - 2);
 						std::string hex = std::string(received_data).substr(carr + 2, crlf - carr - 2);
-						std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
+						// std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
 						long  hex_val = hextodec(std::string(extractedSubstring));
-						std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
+						// std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
 						get_client(client_socket)->get_request().set_rest_chunk(hex_val);
 						size_t restChunk = get_client(client_socket)->get_request().getRestChunk();
 
 						carriageReturn = false;
 						getChunkSize = true;
-						std::cout << restChunk << std::endl;
+						// std::cout << restChunk << std::endl;
 					}
 					else if (crlf == std::string::npos)
 					{
@@ -691,14 +817,14 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 							// std::cout << RED << crlf << " / " << crlf_t << RESET  << std::endl;
 							const char* extractedSubstring = substr(received_data, crlf + 2, crlf_t - crlf - 2);
 							std::string hex = std::string(received_data).substr(crlf + 2, crlf_t - crlf - 2);
-							std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
+							// std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
 							long  hex_val = hextodec(std::string(extractedSubstring));
-							std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
+							// std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
 							get_client(client_socket)->get_request().set_rest_chunk(hex_val);
 							size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
 							carriageReturn = false;
 							getChunkSize = true;
-							std::cout << rest_chunk << std::endl;
+							// std::cout << rest_chunk << std::endl;
 						}
 						else if (crlf_t == std::string::npos)
 						{
@@ -720,10 +846,11 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 				}
 			}
 			else {
-				std::cout << BOLDGREEN << request_index << RESET << std::endl;
+				// std::cout << BOLDGREEN << request_index << RESET << std::endl;
 				size_t next_carr = containsCarriageNextLvl(received_data, carr + 1);
 				if (hasLineFeedAtPosition(received_data, next_carr + 1))
 				{
+					std::cout << BOLDCYAN << "second conditions!!!!"  << RESET << std::endl;
 					carriageReturn = true;
 					if (size_t next_crlf = (containsCRLF(received_data, next_carr + 2)))
 					{
@@ -734,7 +861,7 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 							// std::string hex = std::string(received_data).substr(carr + 2, crlf - carr - 2);
 							// std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
 							long  hex_val = hextodec(std::string(extractedSubstring));
-							std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
+							// std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
 							get_client(client_socket)->get_request().set_rest_chunk(hex_val);
 							size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
 							carriageReturn = false;
@@ -757,15 +884,63 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 					}
 				}
 				else {
+					std::cout << BOLDRED << "first conditions!!!!"  << RESET << std::endl;
+
 					size_t n_carr = containsCarriageNextLvl(received_data, next_carr + 1);
-					// std::cout << PURPLE << "$$$$$$$$$$$$$$$$$$$$$$  "<< n_carr << "/" << BUFFER_SIZE << "  $$$$$$$$$$$$$$$$$$$$$$$$$" << RESET <<std::endl;
-					if (hasLineFeedAtPosition(received_data, next_carr + 1))
+
+					std::cout << PURPLE << "$$$$$$$$$$$$$$$$$$$$$$  " << std::endl;
+					printWhitespaceSubstring(received_data, next_carr, 500000);
+					std::cout << "/" << std::endl;
+					printWhitespaceSubstring(received_data, n_carr, 200000);
+					std::cout << "  $$$$$$$$$$$$$$$$$$$$$$$$$" << RESET <<std::endl;
+					if (hasLineFeedAtPosition(received_data, n_carr + 1))
 					{
-						// std::cout << "AGAAAAAAAAAAAIIIIIIINNNNNNNN" << std::endl;
+						std::cout << "AGAAAAAAAAAAAIIIIIIINNNNNNNN" << std::endl;
 					}
 					else{
 						// ! always here after all
-						// std::cout << "HAFIIIIIID U ARE STUPID " << std::endl;
+						std::cout << "HAFIIIIIID U ARE STUPID " << std::endl;
+						size_t next_carr = containsCarriageNextLvl(received_data, carr + 1);
+						if (hasLineFeedAtPosition(received_data, next_carr + 1))
+						{
+							std::cout << BOLDCYAN << "second conditions!!!!"  << RESET << std::endl;
+							carriageReturn = true;
+							if (size_t next_crlf = (containsCRLF(received_data, next_carr + 2)))
+							{
+								if ((next_crlf - next_carr) < 10 && (next_crlf - next_carr) > 4 && hasHexBetweenPositions(received_data, next_carr, next_crlf))
+								{
+									// std::cout << next_carr << " / " << next_crlf << std::endl;
+									const char* extractedSubstring = substr(received_data, next_carr + 2, next_crlf - next_carr - 2);
+									// std::string hex = std::string(received_data).substr(carr + 2, crlf - carr - 2);
+									// std::cout << "|"<< RED << extractedSubstring << RESET<< "|"<< std::endl;
+									long  hex_val = hextodec(std::string(extractedSubstring));
+									// std::cout << "|"<< GREEN << hex_val << RESET<< "|"<< std::endl;
+									get_client(client_socket)->get_request().set_rest_chunk(hex_val);
+									size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
+									carriageReturn = false;
+									getChunkSize = true;
+									// std::cout << rest_chunk << std::endl;
+								}
+								else if (next_crlf == std::string::npos)
+								{
+									lineFeed = true;
+									// ! here we need to check if there's 
+									// if (containsCarriage(received_data))
+
+									std::cout << "hafid@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
+
+								}
+								else {
+									size_t crlf_tt = (containsCRLF(received_data, next_crlf + 2));
+									std::cout << "Hafid <<<===============" << crlf_tt << " / " << next_crlf <<  std::endl;
+								}
+							}
+						}
+						else
+						{
+							std::cout << "HAFIIIIIID U ARE STUPID " << std::endl;
+						}
+						
 					}
 
 				}
@@ -773,17 +948,17 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 			}
 		}
 		else {
-			// std::cout << "==========> there's nothing more important than this!!!!!!!!!!!!"<< std::endl;
+			std::cout << "==========> there's nothing more important than this!!!!!!!!!!!!"<< std::endl;
 		}
 		
 	}
 	else {
-		std::cout << BOLDYELLOW << request_index << RESET << std::endl;
+		// std::cout << BOLDYELLOW << request_index << RESET << std::endl;
 	}
 	// f << received_data;
 
 }
-
+*/
 void Server::handle_incoming_request(long client_socket)
 {
 	char received_data[BUFFER_SIZE];
@@ -821,200 +996,101 @@ void Server::handle_incoming_request(long client_socket)
 		}
 		else
 		{
-			// std::cout << RED << request_index<< RESET << std::endl;
-			chunkedPost(received_data, client_socket, request_index);
-		// 	// check if there's 
-		// 	size_t carriage;
+			std::cout << RED << request_index<< RESET << std::endl;
+			std::cout << YELLOW << BUFFER_SIZE << RESET << std::endl;
+			size_t old_chunk = get_client(client_socket)->get_request().getRestChunk();
+			std::cout << "this is old chunked ===> " << BOLDYELLOW << old_chunk << RESET << std::endl;
+			if (old_chunk <= BUFFER_SIZE)
+			{
+				size_t rest = BUFFER_SIZE - old_chunk;
+				std::cout << BOLDGREEN << rest << std::endl;
+				if (rest == 1)
+				{
+					carriageReturn = true;
+				}
+				else if (rest == 2)
+				{
+					before_hex = true;
+				}
+				else if (rest == 0)
+				{
+					before_hex = false;
+					after_hex = false;
+					lineFeed = false;
+					carriageReturn = false;
+					get_client(client_socket)->get_request().set_rest_chunk(0);
+				}
+				else {
+					if (old_chunk)
+						get_client(client_socket)->get_request().set_rest_chunk(0);
+					// ! need to put the old_chunk in file
+					// ! after that get new chunk size
+					recursiveFindHex(received_data, client_socket, 0);
+					if (getChunkSize)
+					{
+						size_t new_chunk = get_client(client_socket)->get_request().getRestChunk() - rest;
+						get_client(client_socket)->get_request().set_rest_chunk(new_chunk);
+					}
+					else{
+						if (before_hex)
+						{
+							//  ! receive the rest of other the chunk
+							// ! find the '\r\n' and get the hexa
+							size_t t = containsCRLF(received_data, 0);
+							std::string hex = std::string(received_data).substr(0, t);
+							std::cout << "this is hexa ===> " << BOLDYELLOW << hex << RESET << std::endl;
+							long  hex_val = hextodec(hex);
+							get_client(client_socket)->get_request().set_rest_chunk(hex_val);
+							size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
+							carriageReturn = false;
+							getChunkSize = true;
+						}
+						else{
+							if (carriageReturn)
+							{
+								// ! receive the rest of other the chunk
+								// ! find the '\r\n' and get the hexa
+								size_t t = containsCRLF(received_data, 0);
+								std::string hex = std::string(received_data).substr(1, t);
+								std::cout << "this is hexa ===> " << BOLDYELLOW << hex << RESET << std::endl;
+								long  hex_val = hextodec(hex);
+								get_client(client_socket)->get_request().set_rest_chunk(hex_val);
+								size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
+								carriageReturn = false;
+								getChunkSize = true;
+							}
+							else{
+								// ! receive the rest of other the chunk
+								// ! find the '\r\n' and get the hexa
+								size_t t = containsCRLF(received_data, 0);
+								size_t t2 = containsCRLF(received_data, t + 2);
+								std::string hex = std::string(received_data).substr(t, t2);
+								std::cout << "this is hexa ===> " << BOLDYELLOW << hex << RESET << std::endl;
+								long  hex_val = hextodec(hex);
+								get_client(client_socket)->get_request().set_rest_chunk(hex_val);
+								size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
+								carriageReturn = false;
+								getChunkSize = true;
+							}
+							// std::cout << BOLDRED << "FAAAAIIIIIIILEEEED TO GET NEEEEWWW CHUNKEEED!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << RESET << std::endl;
+							// std::cout << "Before Hex : " << before_hex << std::endl;
+							// std::cout << "After Hex : " << after_hex << std::endl;
+							// std::cout << "Line Feed : " << lineFeed << std::endl;
+							// std::cout << "Carriage Return : " << carriageReturn << std::endl;
+							// std::exit(1);
+						}
+					}
 
-		// 	if ((carriage = containsMultipleCarriageReturns(received_data))) {
-		// 		carriageReturn = true;
-		// 		if (carriage > 1)
-		// 		{
-		// 			// * there's hex here
-		// 			//* to prove that
-		// 			size_t ret = checkForNewlineOrNull(received_data);
-		// 			if (ret == 1 && checkCRLF(received_data, 0))
-		// 			{
-		// 				// if there's '\n' and there's '\r\n'
-		// 				int pos_crlf = containsCRLF(received_data, 0);
-		// 				int next_pos_crlf = containsCRLF(received_data, pos_crlf+ 2);
-		// 				if (pos_crlf < BUFFER_SIZE && next_pos_crlf < BUFFER_SIZE)
-		// 				{
-		// 					if ((next_pos_crlf - pos_crlf) < 10)
-		// 					{
-		// 						before_hex = true;
-		// 						after_hex = true;
-		// 						if (pos_crlf + 3 != BUFFER_SIZE)
-		// 						{
-		// 							size_t hex_size = (BUFFER_SIZE - (pos_crlf + 3));
-		// 							if (hex_size > 0 && hex_size < 6)
-		// 							{
-		// 								// meaning that this is a hexa
-		// 							}
-		// 						}
-		// 						else {
-		// 							// from 0 --> pos_crlf  put it in file
-		// 						}
-		// 					}
-		// 					else {
-		// 						// too far from each other
-		// 					}
-		// 				}
-		// 			}
+				}
 
-		// 		}
-		// 		else{
-		// 			size_t ret;
-		// 			// ^ check if there's '\n' or check if there's '\0'
-		// 			if ((ret = checkForNewlineOrNull(received_data)))
-		// 			{
-		// 				if (ret == 1) // found '\n'
-		// 				{
-		// 					// position of '\n'
-		// 					int pos_crlf = containsCRLF(received_data, 0);
-		// 					if (pos_crlf != -1){
-		// 						before_hex = true;
-		// 						// check if CRLF in the end of buffer
-		// 						if (pos_crlf + 3 != BUFFER_SIZE)
-		// 						{
-		// 							size_t hex_size = (BUFFER_SIZE - (pos_crlf + 3));
-		// 							if (hex_size > 0 && hex_size < 6)
-		// 							{
-		// 								// meaning that this is a hexa
-		// 							}
-		// 						}
-		// 						else {
-		// 							// from 0 --> pos_crlf  put it in file
-		// 						}
-		// 					}
-		// 					else
-		// 						carriageReturn = false;
-							
-		// 				}
-		// 				else if (ret == 2) // \0
-		// 				{
-		// 					//  ~ i will come for u later
-		// 					int end_line = positionNULL(received_data);
-		// 					if (end_line == BUFFER_SIZE - 1)
-		// 					{
-		// 						// \0 is in the end of buffer
-		// 					}
-
-		// 				}
-		// 			}
-		// 		}
-		// 	} else {
-		// 		// '\r' is not present in the array
-		// 		// Put your code here for handling the absence of '\r'
-		// 		// ~ setup new value in size of chunked
-		// 		// ~ new_size = old_size - buffer_size
-		// 		// * put all the buffer inside of file
+			}
+			else
+			{
+				size_t new_chunk = old_chunk - BUFFER_SIZE;
+				get_client(client_socket)->get_request().set_rest_chunk(new_chunk);
+			}
+			std::cout << BOLDPURPLE << "this is new chunked ===> " << get_client(client_socket)->get_request().getRestChunk() << RESET << std::endl;
 		}
-			
-
-
-
-			// ! DO NOT TOUCH !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			
-			// std::string next_req = std::string(received_data);
-			// size_t size_req = next_req.size() - 3;
-
-			// // std::cout << next_req[next_req.size()]
-			// std::string CR = "\r";
-			// std::string FL = "\n";
-			// // in case of spliting CRFL 
-			// std::string ending_file = "\r\n0\r\n";
-			// size_t chunked_CR = next_req.find(CR);
-			// if (chunked_CR)
-			// {
-			// 	size_t chunked_FL = next_req.find(FL);
-			// 	if (chunked_CR - chunked_FL == 1)
-			// 	{
-			// 		// \r
-			// 		// \r\n
-			// 		// \r\n hexa
-			// 		fonction(buff)
-			// 	}
-
-			// }
-			
-			// size_t the_end = next_req.find(ending_file);
-			// bool body_ending = false;
-			// if (the_end != std::string::npos)
-			// 	body_ending = true;
-
-			
-			// // * check if there's CRLF 
-			// if (chunk_end != std::string::npos)
-			// {
-			// 	// ! find it 
-			// 	if (!body_ending)
-			// 	{
-			// 		// * this is not end of file 
-			// 		// njded size dyal chunked o n9ess dakchi li 7tit fih 
-			// 		size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
-			// 		std::cout << "==> " << rest_chunk << " / "<< size_req << std::endl; 
-			// 		size_t pos = next_req.find(CRLF, chunk_end + CRLF.size());
-			// 		std::string hex = next_req.substr(chunk_end + 2, pos - (chunk_end + 2));
-			// 		size_t chunked_size = hextodec(hex);
-			// 		get_client(client_socket)->get_request().set_rest_chunk(chunked_size);
-					
-					
-					
-			// 		// & ila kan sgher mn ba buffer size
-			// 		if (rest_chunk < size_req)
-			// 		{
-			// 			size_t sizeNew = size_req - rest_chunk;
-			// 			std::cout << "new size => "<< sizeNew << std::endl;
-			// 			// file << next_req.substr(0, rest_chunk) << next_req.substr(rest_chunk + 4 + hex.size());
-			// 			std::cout << request_index << " hadiii  sghiiiiiiiiiira!!!!! => " << std::endl;
-			// 			std::cout << RED << next_req.substr(0, rest_chunk) << std::endl << std::endl;
-			// 			std::cout << GREEN << next_req.find("\r\n") << RESET  << std::endl;
-			// 			// 1440
-			// 			std::cout << YELLOW << next_req.find(CRLF, rest_chunk) << RESET  << std::endl;
-			// 			std::cout << "----------------------------------------------------------------" << std::endl;
-			// 		}
-			// 		else
-			// 		{
-			// 			// file << "==========";
-			// 			std::cout << request_index << " ===> hadiii  kbiiiiiiiiiira!!!!!" << std::endl;
-			// 			std::cout << RED << next_req.substr(0, rest_chunk) << std::endl << std::endl;
-			// 			std::cout << GREEN << next_req.find(CRLF) << RESET  << std::endl;
-			// 			std::cout << YELLOW << next_req.find(CRLF, rest_chunk + CRLF.size()) << RESET  << std::endl;
-			// 			std::cout << "++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-
-			// 		}
-
-
-
-			// 		size_t new_size = size_req - rest_chunk;
-			// 	}
-			// 	else
-			// 	{
-			// 		// ^ this is for final stage (the ending file)
-			// 		// std::cout << RED << the_end <<" this is the ending "<< get_client(client_socket)->get_request().getRestChunk() << RESET << std::endl;
-			// 		// file << next_req.substr(0, the_end);
-			// 	}
-
-			// }
-			// else{
-
-			// 	// std::cout << YELLOW <<  next_req.find(CRLF) <<  RESET << std::endl;
-			// 	// ! NOT find it 
-			// 	// std::cout << "this is not having any of CRLF" << std::endl;
-			// 	// adding in new size of chunked
-			// 	size_t rest_chunk = get_client(client_socket)->get_request().getRestChunk();
-			// 	size_t chunked_size = rest_chunk - size_req;
-			// 	// std::cout << "===> "  << chunked_size << " / " << rest_chunk  << std::endl;
-			// 	get_client(client_socket)->get_request().set_rest_chunk(chunked_size);
-			// 	// 2001
-			// 	// file << next_req.substr(0, size_req - 3);		
-				
-			// }
-			// ! DO NOT TOUCH !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-		// }
-		
 		/*======================> this hafid <====================*/
 		// !! remove this, only for testing
 		if (!isComplete(_requests[client_socket]))
