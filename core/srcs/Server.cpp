@@ -717,7 +717,7 @@ void 	Server::chunkedPost(const char received_data[], long client_socket, size_t
 				}
 			}
 			else {
-				std::cout << BOLDGREEN << request_index << RESET << std::endl;
+				// std::cout << BOLDGREEN << request_index << RESET << std::endl;
 				size_t next_carr = containsCarriageNextLvl(received_data, carr + 1);
 				if (hasLineFeedAtPosition(received_data, next_carr + 1))
 				{
