@@ -257,7 +257,7 @@ void Server::handle_incoming_request(long client_socket)
 	else
 	{
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
-		feed_request(std::string(received_data), client_socket);
+		feed_request(std::string(received_data, bytes_read), client_socket);
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
 		{
 			match_client_request_to_server_block(client_socket);
