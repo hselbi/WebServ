@@ -1,12 +1,13 @@
 #include "../includes/response/Utils.hpp"
 
+size_t Utils::counter = 0;
 
 std::string Utils::getWebservRootPath() {
     int		bufferSize = 2048;
     char	buffer[bufferSize];
 
     if (getcwd(buffer, bufferSize) != NULL)
-        return std::string(buffer) + "/";
+        return std::string(buffer);
     return "";
 }
 
@@ -34,14 +35,22 @@ std::string	Utils::ResponseHeaderToString(const t_responseHeader &responseHeader
 	return ss.str();
 }
 
-bool	Utils::isValidURI(const std::string& uri) {
-    
-	std::string validChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~/?#[]@!$&'()*+,;=";
-	for (size_t i = 0; i < uri.length(); i++) {
-		if (validChar.find(uri[i]) == std::string::npos)
-			return false;
-	}
-    return true;
+std::string Utils::uriDecode(const std::string &uri) {
+	std::string result;
+    for (size_t i = 0; i < uri.length(); ++i) {
+        if (uri[i] == '%') {
+            if (i + 2 < uri.length()) {
+                std::istringstream iss(uri.substr(i + 1, 2));
+                int hexValue;
+                iss >> std::hex >> hexValue;
+                result += static_cast<char>(hexValue);
+                i += 2;
+            }
+        } else {
+            result += uri[i];
+        }
+    }
+    return result;
 }
 
 bool Utils::isDirectory(const std::string& path)
@@ -121,3 +130,21 @@ std::string Utils::getExtensionFile(const std::string &path)
 	return "";
 }
 
+bool	Utils::isValidURI(const std::string& uri) {
+    
+	std::string validChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~/?#[]@!$&'()*+,;=%";
+	for (size_t i = 0; i < uri.length(); i++) {
+		if (validChar.find(uri[i]) == std::string::npos)
+			return false;
+	}
+    return true;
+}
+
+
+std::string Utils::generateFileName()
+{
+	srand(time(NULL));
+	std::string name =  std::to_string(rand()) + std::to_string(rand()) + std::to_string(counter++);
+
+    return name;
+}

@@ -66,8 +66,7 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		result.push_back(server);
 	}
 
-	std::cout << YELLOW << "> config file parsing finish\n" << RESET;
-	// check_server_syntax(result); ! TODO : Check this 
+	// check_server_syntax(result); ! TODO : Check this
 	return result;
 }
 
@@ -180,7 +179,7 @@ int	checkHost(std::string host)
 		{
 			if (tmp[i].length() > 3)
 				return -1;
-			
+
 			for (unsigned long j = 0; j != tmp[i].length(); j++)
 			{
 				if (tmp[i][j] < '0' || tmp[i][j] > '9')
@@ -336,7 +335,7 @@ ConfLoca Config::parse_location(size_t *i)
 	{
 		// std::cout << "==> " << cur << std::endl;
 
-		// here is the problem 
+		// here is the problem
 
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
@@ -400,6 +399,16 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 		// std::cout << "autoindex: " << value << std::endl;
 		loca->autoindex = (value == "on" ? ON : OFF);
 	}
+	else if (key == "cgi_status")
+	{
+		// std::cout << "autoindex: " << value << std::endl;
+		loca->cgi_status = (value == "on" ? true : false);
+	}
+	else if (key == "upload_status")
+	{
+		// std::cout << "autoindex: " << value << std::endl;
+		loca->upload_status = (value == "on" ? true : false);
+	}
     else if (key == "index")
     {
 
@@ -454,6 +463,15 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 
 		loca->cgi_infos[tmp[0]] = tmp[1];
 	}
+	else if (key == "return")
+	{
+		std::vector<std::string> tmp = split(value, ' ');
+		loca->redirect_status = atoi(tmp[0].c_str());
+		if (tmp.size() == 2)
+			loca->redirect_url = tmp[1];
+		else
+			return -1;
+	}
 	else
 	{
 		return -1;
@@ -473,7 +491,7 @@ int Config::check_line_syntax(std::string line)
 		if (line.find_first_not_of(" \t\n") != std::string::npos)
 			return -2;
 	}
-	
+
 
     // line must be end with semicolon
 	size_t semicol;

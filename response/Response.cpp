@@ -12,26 +12,38 @@ Response::Response()
 
 Response::~Response()
 {
-	// std::cout << "Response destructor called" << std::endl;
 	if (_location)
 		delete _location;
 	_file.close();
 }
 
-void Response::setClient(Client &client)
+Response::Response(const Response &copy)
 {
-	this->_client = &client;
+	*this = copy;
+}
+
+Response &Response::operator=(const Response &copy)
+{
+	if (this != &copy)
+	{
+		_client = copy._client;
+		_location = copy._location;
+		_header_buffer = copy._header_buffer;
+		_cgi_file_path = copy._cgi_file_path;
+		_have_cgi = copy._have_cgi;
+	}
+	return *this;
 }
 
 void Response::processing()
 {
 
 	int buffer_size = RES_BUFFER_SIZE;
-
+	
 	if (_client->get_res_status() == NOT_STARTED)
 	{
-		if (_client->get_request().getCodeRet() == 400)
-			errorPages(400);
+		if (_client->get_request().getCodeRet() != 200)
+			errorPages(_client->get_request().getCodeRet());
 		else if (checkRequestIsFormed() && !isServerHaveRedirection() && getMatchedLocation())
 			checkWhichRequestedMethod();
 	}
@@ -59,46 +71,5 @@ void Response::processing()
 		}
 		else
 			setResStatus(DONE);
-	}
-}
-
-bool Response::get_cgi_status()
-{
-	return _have_cgi;
-}
-void Response::set_cgi_status(bool status)
-{
-	_have_cgi = status;
-}
-
-void Response::setResStatus(int status)
-{
-	if (status == DONE)
-	{
-
-		if (_have_cgi)
-		{
-			_client->get_cgi().reset();
-			remove(_cgi_file_path.c_str());
-		}
-		if (_location)
-		{
-			delete _location;
-			_location = NULL;
-		}
-		if (_file.is_open())
-			_file.close();
-		_cgi_file_path = "";
-		_have_cgi = false;
-		_header_buffer = "";
-		_buffer[0] = '\0';
-		_client->get_request().resetReq();
-		_client->set_res_status(DONE);
-		
-	}
-	else if (status == ON_PROCESS)
-	{
-
-		_client->set_res_status(ON_PROCESS);
 	}
 }

@@ -20,7 +20,8 @@ std::vector<std::string>		Request::initMethods()
 std::vector<std::string>	Request::methods = Request::initMethods();
 
 
-Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),  _req_status(REQUEST_NOT_COMPLETED)
+Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),
+	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary("")
 {
 	// std::cout << "Request Constructor" << std::endl;
 }
@@ -30,7 +31,6 @@ void Request::resetReq(){
 	chunked_size = 0;
 	rest_chunk = 0;
 	m_method = "";
-	m_body = "";
 	m_code_ret = 200;
 	m_version = "";
 	m_path = "";
@@ -42,9 +42,13 @@ void Request::resetReq(){
 	m_language.clear();
 	defaultReq();
 	_req_status = REQUEST_NOT_COMPLETED;
+	_bodyFlag = REQUEST_BODY_NOT_STARTED;
+	_tmp_file_name = "";
+	_boundary = "";
+	_tmp_file.close();
 }
 
-Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
+Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
 	// std::cout << "Request constructor" << std::endl;
 	resetReq();
@@ -123,13 +127,16 @@ void Request::defaultReq()
 
 }
 
+int	Request::getBodyFlag() {
+	return _bodyFlag;
+}
+
+void Request::setBodyFlag(int flag) {
+	_bodyFlag = flag;
+}
 
 std::string	Request::getMethod() const {
 	return m_method;
-}
-
-std::string	Request::getBody() const {
-	return m_body;
 }
 
 int	Request::getCodeRet() const {
@@ -173,6 +180,10 @@ void	Request::setMethod(const std::string &method) {
 	m_method = method;
 }
 
+void	Request::setPath(const std::string &path) {
+	m_path = path;
+}
+
 void	Request::setCodeRet(int code) {
 	m_code_ret = code;
 }
@@ -191,30 +202,38 @@ std::string	Request::getHost() const {
 	return m_host;
 }
 
-size_t	Request::getChunkedSize() const
-{
-	return chunked_size;
-}
-
-size_t Request::getRestChunk() const {
-	return rest_chunk;
-}
-
-size_t Request::getBodySize() const {
-	return body_size;
+std::string	Request::getBodyFileName() {
+	return _tmp_file_name;
 }
 
 void	Request::setBody(const std::string& str)
 {
-	// std::cout << str << "bodyy ==> "<< this->m_body << std::endl;
-	if (str.size() == 0)
-		return ;
-	char	strip[] = {'\n', '\r'};
+    if (getMethod() == "POST" &&  m_headers["Content-Length"] != "")
+	{
+		std::string tmp = str;
+		if (tmp.size() == 0)
+			return ;
+		else if (tmp.size() > REQUEST_BUFFER_SIZE)
+			tmp = tmp.substr(0, REQUEST_BUFFER_SIZE);
+		if (_tmp_file.is_open())
+			_tmp_file << tmp;
+		
+		if (_boundary != "" && tmp.find(_boundary) != std::string::npos)
+		{
+			_bodyFlag = REQUEST_BODY_COMPLETED;
+			_tmp_file.close();
+		}
+	}
+    else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
+	{
+		std::cout <<  str << std::endl;
+		// !!! body logic
 
-	this->m_body.assign(str);
 
-	if (m_body.find("\r\n\r\n") != std::string::npos)
-		m_body.resize(m_body.find("\r\n\r\n"));
+		// !! if done ==> _bodyFlag = REQUEST_BODY_COMPLETED;
+		_bodyFlag = REQUEST_BODY_COMPLETED;
+	}
+
 }
 
 void Request::setQuery()
@@ -263,7 +282,6 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 		if (it->second != "")
 			os << YELLOW << it->first << RED << ": " << it->second << RESET << '\n';
 	}
-	os << '\n' << "Request body :\n" << GREEN << re.getBody() << '\n' << RESET;
 
 	return os;
 }
@@ -275,7 +293,6 @@ Request &Request::operator=(const Request &other)
 		m_method = other.m_method;
 		m_path = other.m_path;
 		m_version = other.m_version;
-		m_body = other.m_body;
 		m_query = other.m_query;
 		m_raw = other.m_raw;
 		m_headers = other.m_headers;
@@ -295,7 +312,6 @@ Request::Request(const Request &other)
 		m_method = other.m_method;
 		m_path = other.m_path;
 		m_version = other.m_version;
-		m_body = other.m_body;
 		m_query = other.m_query;
 		m_raw = other.m_raw;
 		m_headers = other.m_headers;

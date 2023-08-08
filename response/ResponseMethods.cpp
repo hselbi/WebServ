@@ -11,13 +11,12 @@ void Response::Method_GET()
         if (Utils::isDirectory(filePath))
         {
             if (filePath[filePath.length() - 1] != '/')
-                return setRediration(_client->get_request().getPath() + "/");
+                return sendRediraction(_client->get_request().getPath() + "/");
             else
             {
                 if ((index = isDirHasIndexFiles()) != "")
                 {
-                    // TODO: Add python also to this condition  (if file extension is .py)
-                    if (_location && _location->cgi_infos.size() > 0 && (index.rfind(".php") != std::string::npos || index.rfind(".py") != std::string::npos))
+                    if (checkStatusCgi() && (index.rfind(".php") != std::string::npos || index.rfind(".py") != std::string::npos))
                     {
                         _have_cgi = true;
                         if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)
@@ -50,8 +49,7 @@ void Response::Method_GET()
         }
         else
         {
-            // TODO: Add python also to this condition  (if file extension is .py)
-            if (_location && _location->cgi_infos.size() > 0 && (filePath.rfind(".php") != std::string::npos || filePath.rfind(".py") != std::string::npos))
+            if (checkStatusCgi() && (filePath.rfind(".php") != std::string::npos || filePath.rfind(".py") != std::string::npos))
             {
                 _have_cgi = true;
                 if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)
@@ -247,7 +245,7 @@ void Response::Method_POST()
             {
                 if ((index = isDirHasIndexFiles()) != "")
                 {
-                    if (_location && _location->cgi_infos.size() > 0)
+                    if (checkStatusCgi())
                     {
                         _have_cgi = true;
                         if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)
@@ -274,7 +272,7 @@ void Response::Method_POST()
         }
         else
         {
-            if (_location && _location->cgi_infos.size() > 0)
+            if (checkStatusCgi())
             {
                 _have_cgi = true;
                 if (_client->get_cgi().get_cgi_status() == 0 && _client->get_cgi().get_ready_to_read_from_cgi() == 1)

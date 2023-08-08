@@ -1,9 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <string>
 #include <map>
-#include <unistd.h>
 #include <stdio.h>
 #include <sys/wait.h>
 #include <stdlib.h>
@@ -15,22 +12,16 @@
 #include "../../includes/request/Request.hpp"
 
 #include <cstdlib>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <signal.h>
-#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 
 struct Client;
 
-// wrapper for cgi execution and environment variables
 struct Cgi
 {
 	typedef std::map<std::string, std::string> env_vars_t;
@@ -43,12 +34,9 @@ struct Cgi
 	void clean_env_vars();
 
 	void set_body(std::string payload);
-	std::string get_path_info(std::string url);
 
 	void set_cgi_bin(std::string cgi_bin);
 	void set_cgi_script(std::string cgi_script);
-
-	std::string get_cgi_script_name(std::string path);
 
 	void setClient(Client &client);
 	void reset();
@@ -61,13 +49,9 @@ struct Cgi
 
 	int get_pid();
 
-	int get_time_out();
-	void set_time_out(int time_out);
-
-	int get_start_time();
-
 	int get_status();
 	void set_status(int status);
+	std::string generate_cgi_output_file_name();
 	static size_t _counter;
 
 private:
@@ -75,16 +59,12 @@ private:
 	char **_envp;
 	char **_argv;
 	Client *_client;
-	std::string _extension;
 	std::string _body;
 	std::string _cgi_bin;
 	std::string _cgi_script;
-	FILE *_cgi_output_file;
 	int _ready_to_read_from_cgi;
 	int _cgi_status;
 	pid_t _pid;
-	int _time_out;
-	int _start_time;
-		int _status;
+	int _status;
 
 };

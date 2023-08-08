@@ -47,7 +47,7 @@
 
 #include <unistd.h>
 #include <signal.h>
-
+#include "response/Utils.hpp"
 
 enum MethodType
 {

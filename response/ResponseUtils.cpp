@@ -26,6 +26,7 @@ bool Response::checkRequestIsFormed()
 		errorPages(414);
 		return false;
 	}
+	_client->get_request().setPath(Utils::uriDecode(_client->get_request().getPath()));
 	return true;
 }
 
@@ -40,7 +41,7 @@ void Response::checkWhichRequestedMethod()
 		Method_POST();
 }
 
-void Response::setRediration(std::string location)
+void Response::sendRediraction(std::string location)
 {
 	t_responseHeader responseHeader;
 	responseHeader.statusCode = 301;
@@ -89,7 +90,8 @@ void	Response::deleteFile()
 		responseHeader.m_headers["Content-Length"] = "0";
 		responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-		setResStatus(ON_PROCESS);
+		_client->append_response_data(_header_buffer);
+		setResStatus(DONE);
 	}
 }
 
@@ -140,7 +142,7 @@ std::string		Response::startCgi(std::string script_path)
 	for (std::map<std::string, std::string>::iterator it = cgi_infos.begin(); it != cgi_infos.end(); it++)
 	{
 		if (it->first == extension)
-			cgi_path = it->second;
+			cgi_path = getCorrectPath(it->second);
 	}
 
 	if (cgi_path == "" || !Utils::fileExists(cgi_path) || Utils::isDirectory(cgi_path)  ||  !Utils::isExecutable(cgi_path))

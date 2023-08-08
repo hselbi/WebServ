@@ -28,16 +28,21 @@ typedef struct ResponseHeader {
 
 class Utils
 {
+	private:
+		Utils();
 	public:
+		static size_t counter;
 		static std::string toString(int value);
 		static std::string getWebservRootPath();
 		static std::string getStatusMessage(int statusCode);
 		static std::string ResponseHeaderToString(const t_responseHeader &responseHeader);
 		static std::string getExtensionFile(const std::string &path);
-		static bool isValidURI(const std::string& uri);
+		static std::string uriDecode(const std::string &uri);
+		static std::string generateFileName();
 		static bool isDirectory(const std::string& path);
 		static bool fileExists(const std::string& path);
 		static bool isExecutable(const std::string& path);
+		static bool	isValidURI(const std::string& uri);
 };
 
 #endif

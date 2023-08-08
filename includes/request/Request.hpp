@@ -2,11 +2,19 @@
 
 #include "../includes.hpp"
 #include <map>
+#include <fstream>
+#define REQUEST_BUFFER_SIZE 2000
 // enum
 enum requestFlag {
     REQUEST_NOT_COMPLETED,
     REQUEST_COMPLETED,
 };
+enum requestBodyFlag {
+    REQUEST_BODY_NOT_STARTED,
+    REQUEST_BODY_STARTED,
+    REQUEST_BODY_COMPLETED,
+} ;
+
 
 class Request
 {
@@ -14,7 +22,6 @@ private:
         std::string m_method;
         std::string m_path;
         std::string m_version;
-        std::string m_body;
         std::string m_query;
         std::string m_raw;
         std::string m_host;
@@ -31,6 +38,10 @@ private:
         size_t chunked_size;
         size_t rest_chunk;
         size_t body_size;
+        int _bodyFlag;
+        std::fstream _tmp_file;
+        std::string _tmp_file_name;
+        std::string _boundary;
 
 public:
     Request();
@@ -42,6 +53,7 @@ public:
     /* setters */
     void setMethod(const std::string &method);
     void setBody(const std::string &body);
+    void setPath(const std::string &path);
     void setCodeRet(int code);
     void setLanguage();
     void setQuery();
@@ -107,7 +119,10 @@ public:
     bool isFinished(const std::string &str);
     bool isFinished();
     bool isFinished(std::string &str, size_t &i);
-
+    void setBodyFlag(int flag);
+    int getBodyFlag();
+    std::string getBodyFileName();
+    
 };
 
 std::string plunder(std::string &str, char c);

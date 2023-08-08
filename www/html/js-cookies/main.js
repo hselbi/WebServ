@@ -21,11 +21,11 @@ function getCookie(cname) {
     return "";
 }
 
-if (getCookie("test") == "test") {
+if (getCookie("school") == "1337") {
     document.getElementById("cookie").innerHTML = "Cookie is set";
 }
 else {
     document.getElementById("cookie").innerHTML = "Cookie is not set";
-    setCookie("test", "test", 1);
+    setCookie("school", "1337", 1);
 
 }

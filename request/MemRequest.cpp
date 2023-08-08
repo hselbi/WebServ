@@ -44,77 +44,6 @@ bool Request::isWhitespace(const std::string &str)
     return true;
 }
 
-// bool Request::isFinished(std::string &str, size_t &i)
-// {
-//     if (m_code_ret == 400)
-//         return true;
-//     if (!m_headers["Content-Length"].empty())
-//     {
-//         if (m_headers["Content-Length"] == "0")
-//             return true;
-//         if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-//             return true;
-//     }
-//     if (!m_headers["Transfer-Encoding"].empty())
-//     {
-//         if (m_headers["Transfer-Encoding"] == "chunked")
-//         {
-//             if (str.size() == 0)
-//                 return false;
-//             if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
-
-bool Request::isFinished()
-{
-    if (m_code_ret == 400)
-        return true;
-    if (!m_headers["Content-Length"].empty())
-    {
-        if (m_headers["Content-Length"] == "0")
-            return true;
-        if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-            return true;
-    }
-    if (!m_headers["Transfer-Encoding"].empty())
-    {
-        if (m_headers["Transfer-Encoding"] == "chunked")
-        {
-            if (m_body.size() == 0)
-                return false;
-            if (m_body[m_body.size() - 1] == '\n' && m_body[m_body.size() - 2] == '\r')
-                return true;
-        }
-    }
-    return false;
-}
-
-// bool Request::isFinished(const std::string &str)
-// {
-//     if (m_code_ret == 400)
-//         return true;
-//     if (!m_headers["Content-Length"].empty())
-//     {
-//         if (m_headers["Content-Length"] == "0")
-//             return true;
-//         if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-//             return true;
-//     }
-//     if (!m_headers["Transfer-Encoding"].empty())
-//     {
-//         if (m_headers["Transfer-Encoding"] == "chunked")
-//         {
-//             if (str.size() == 0)
-//                 return false;
-//             if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
 
 int								checkEnds(const std::string& str, const std::string& end)
 {
@@ -201,77 +130,74 @@ unsigned int hextodeci( const std::string &hex ) throw() {
 
 int Request::parseReq(const std::string &str)
 {
-	// std::cout << "here parser!!" << std::endl;
-
-    // * check if chunked or not
-    // if (checkRequ(str))
-    //     std::cout << "True" << std::endl;
-    // else
-    //     std::cout << "false" << std::endl;
-        
-    // std::cout << "here" << std::endl;
-
     std::string key;
     std::string value;
     std::string line;
     size_t i(0);
-    resetReq();
-    reqLine(lineNext(str, i));
-    /*
-    *   check if line is not equal to "\r\n" or "" or 400
-    */
-    // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret != 400)
-    while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret != 400)
-	{
-		key = keyReader(line);
-		value = valueReader(line);
-        if (m_headers.count(key))
-            m_headers[key] = value;
-        check_headers(key, value);
-		// if (key.find("Secret") != std::string::npos)
-		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
-	}
-    setLanguage();
-	// std::cout << "===>" << i << "/" << str.size() << std::endl;
-	// std::cout << "===>" << i << std::endl;
-
-
-    if (i != std::string::npos)
+    std::cout << "parseReq" << std::endl;
+    if (_bodyFlag == REQUEST_BODY_NOT_STARTED)
     {
-        if (m_headers["Transfer-Encoding"] == "chunked")
+        resetReq();
+        reqLine(lineNext(str, i));
+        /*
+        *   check if line is not equal to "\r\n" or "" or 400
+        */
+        // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret == 200)
+        while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret == 200)
         {
-            // 2001 - 194 - 5 - 
-            // get body
-            std::string bd = str.substr(i);
-            // get pos of \r\n
-            size_t cr = bd.find("\r\n");
-            // std::cout << "===> " << cr << std::endl; 
-            // get hex
-            std::string numb = bd.substr(0, cr);
-            // get size of body 
-            chunked_size = hextodeci(numb);
-            // std::cput
-            // get the rest of body
-            std::string _body = bd.substr(cr + 2, chunked_size + 1);
-            body_size = _body.size();
-            // std::cout << "size of str >> " << str.size() << "\npos of i >> " << i << "\npos of cr >> " << cr << "\nsize of chunked " << chunked_size  << "\nsize of body  >> " << body_size << std::endl;
-            rest_chunk = chunked_size - body_size;
-            // std::cout << "ends in >> " << rest_chunk << std::endl;
-            // std::cout << chunked_size << "/" << body_size << std::endl;
-            setBody(_body);
+            key = keyReader(line);
+            value = valueReader(line);
+            if (m_headers.count(key))
+                m_headers[key] = value;
+            check_headers(key, value);
+            // if (key.find("Secret") != std::string::npos)
+            // 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
         }
-        else
+        setLanguage();
+        setQuery();
+        // ! TODO: Add chunked transfer encoding to condition
+        if (getMethod() == "POST" &&  m_headers["Content-Length"] != "")
         {
-            setBody(str.substr(i));
+            if (i != std::string::npos)
+            {
+                _tmp_file_name = "/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt";
+                _tmp_file.open(_tmp_file_name, std::ios::out);
+                setBody(str.substr(i));
+            }
+            int pos_boundary = m_headers["Content-Type"].find("boundary=");
+            if (pos_boundary != std::string::npos)
+            {
+                _boundary = m_headers["Content-Type"].substr(pos_boundary + 9) + "--";
+                if (_boundary != "" && str.substr(i).find(_boundary) != std::string::npos)
+                {
+                    _bodyFlag = REQUEST_BODY_COMPLETED;
+                    _tmp_file.close();
+                }
+                else
+                    _bodyFlag = REQUEST_BODY_STARTED;
+            }
         }
+        else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
+        {
+        // ! this where i should do things with chunked
+            std::cout << "i=> " << str.substr(i) <<std::endl;
+            _bodyFlag = REQUEST_BODY_STARTED;
+        }
+
     }
-    setQuery();
-
-    // file.close();
-
+    else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Content-Length"] != "")
+    {
+        setBody(str);
+    } else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Transfer-Encoding"] == "chunked")
+    {
+        // ! this where i should do things with chunked
+        setBody(str);
+    }
 
     return m_code_ret;
 }
+
+
 
 std::vector<std::string>		split(const std::string& str, char c)
 {
@@ -452,7 +378,7 @@ int Request::methodChecker()
         if (methods[i] == m_method)
             return m_code_ret;
     }
-    m_code_ret = 400;
+    m_code_ret = 406;
     std::cerr << "Error: Invalid method [" << m_method << "]" << std::endl;
     return m_code_ret;
 }
