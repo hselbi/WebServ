@@ -231,7 +231,7 @@ void	Request::setBody(const std::string& str)
 
 
 		// !! if done ==> _bodyFlag = REQUEST_BODY_COMPLETED;
-		_bodyFlag = REQUEST_BODY_COMPLETED;
+		// _bodyFlag = REQUEST_BODY_COMPLETED;
 	}
 
 }

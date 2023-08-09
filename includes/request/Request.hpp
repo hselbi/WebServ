@@ -19,6 +19,7 @@ enum requestBodyFlag {
 class Request
 {
 private:
+        std::string bodyContent;
         std::string m_method;
         std::string m_path;
         std::string m_version;
@@ -122,6 +123,7 @@ public:
     void setBodyFlag(int flag);
     int getBodyFlag();
     std::string getBodyFileName();
+    void makeChunkedRequest(void);
     
 };
 
