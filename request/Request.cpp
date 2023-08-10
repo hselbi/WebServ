@@ -21,7 +21,7 @@ std::vector<std::string>	Request::methods = Request::initMethods();
 
 
 Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),
-	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary("")
+	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary(""), bodyContent(""), _carriageReturn(false), _lineFeed(false), _beforeHex(false), _hex("")
 {
 	// std::cout << "Request Constructor" << std::endl;
 }
@@ -46,6 +46,7 @@ void Request::resetReq(){
 	_tmp_file_name = "";
 	_boundary = "";
 	_tmp_file.close();
+	bodyContent = "";
 }
 
 Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
@@ -131,6 +132,11 @@ int	Request::getBodyFlag() {
 	return _bodyFlag;
 }
 
+size_t Request::getChunkedSize() const
+{
+	return chunked_size;
+}
+
 void Request::setBodyFlag(int flag) {
 	_bodyFlag = flag;
 }
@@ -196,7 +202,7 @@ void Request::set_size_body(size_t size)
 
 void	Request::set_rest_chunk(size_t stops)
 {
-	rest_chunk = stops;
+	chunked_size = stops;
 }
 std::string	Request::getHost() const {
 	return m_host;
@@ -226,12 +232,14 @@ void	Request::setBody(const std::string& str)
 	}
     else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
 	{
-		std::cout <<  str << std::endl;
+		// std::cout <<  str.size() << std::endl;
 		// !!! body logic
+		// bodyContent.clear();
 
+		makeChunkedRequest(str);
+		// _bodyFlag = REQUEST_BODY_COMPLETED;
 
 		// !! if done ==> _bodyFlag = REQUEST_BODY_COMPLETED;
-		// _bodyFlag = REQUEST_BODY_COMPLETED;
 	}
 
 }

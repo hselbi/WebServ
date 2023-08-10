@@ -40,9 +40,14 @@ private:
         size_t rest_chunk;
         size_t body_size;
         int _bodyFlag;
+        bool _carriageReturn;
+        bool _lineFeed;
+        bool _beforeHex;
+        std::string _hex;
         std::fstream _tmp_file;
         std::string _tmp_file_name;
         std::string _boundary;
+        std::fstream requestBody;
 
 public:
     Request();
@@ -123,7 +128,8 @@ public:
     void setBodyFlag(int flag);
     int getBodyFlag();
     std::string getBodyFileName();
-    void makeChunkedRequest(void);
+    // void makeChunkedRequest(void);
+    void makeChunkedRequest(const std::string &str);
     
 };
 

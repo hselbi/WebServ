@@ -244,6 +244,7 @@ void Server::handle_incoming_request(long client_socket)
 	memset(received_data, 0, BUFFER_SIZE);
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, MSG_DONTWAIT)) == -1)
 	{
+		std::cout << "Hafid ===> request!!!" << std::endl;
 		drop_client(client_socket);
 		return;
 	}
@@ -258,23 +259,12 @@ void Server::handle_incoming_request(long client_socket)
 		feed_request(std::string(received_data, bytes_read), client_socket);
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
 		{
-			if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
-			{
-				// std::cout << "hafid" << std::endl;
-				match_client_request_to_server_block(client_socket);
-				FD_CLR(client_socket, &_read_set_pool);
-				FD_SET(client_socket, &_write_set_pool);
-			}
+			match_client_request_to_server_block(client_socket);
+			FD_CLR(client_socket, &_read_set_pool);
+			FD_SET(client_socket, &_write_set_pool);
 		}
-		// std::cout << "================" << std::endl;
 	}
 }
-
-
-
-/*
-& **************************************** HAFID ***********************************************
-*/
 
 
 void Server::accept_new_connection(long server_socket)

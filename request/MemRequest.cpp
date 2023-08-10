@@ -134,15 +134,12 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
-    std::cout << "parseReq" << std::endl;
+    // std::cout << str << std::endl;
+    // std::cout << "======================================================================================================" << std::endl;
     if (_bodyFlag == REQUEST_BODY_NOT_STARTED)
     {
         resetReq();
         reqLine(lineNext(str, i));
-        /*
-        *   check if line is not equal to "\r\n" or "" or 400
-        */
-        // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret == 200)
         while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret == 200)
         {
             key = keyReader(line);
@@ -150,14 +147,13 @@ int Request::parseReq(const std::string &str)
             if (m_headers.count(key))
                 m_headers[key] = value;
             check_headers(key, value);
-            // if (key.find("Secret") != std::string::npos)
-            // 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
         }
         setLanguage();
         setQuery();
         // ! TODO: Add chunked transfer encoding to condition
         if (getMethod() == "POST" &&  m_headers["Content-Length"] != "")
         {
+            // std::cout << "hellow from post" << i << std::endl;
             if (i != std::string::npos)
             {
                 _tmp_file_name = "/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt";
@@ -180,18 +176,46 @@ int Request::parseReq(const std::string &str)
         else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
         {
         // ! this where i should do things with chunked
-            std::cout << "i=> " << str.substr(i) <<std::endl;
+            if (i != std::string::npos)
+            {
+                _tmp_file_name = "./hellow.txt";
+                std::string bd = str.substr(i);
+                // get pos of \r\n
+                size_t cr = bd.find("\r\n");
+                // std::cout << "===> " << bd << std::endl; 
+                // get hex
+                std::string numb = bd.substr(0, cr);
+                // std::cout << "numb >> " << numb << std::endl;
+                // get size of body 
+                chunked_size = hextodeci(numb);
+                // get the rest of body
+                std::string _body = bd.substr(cr + 2, bd.size() - cr - 2);
+                body_size = _body.size();
+                // std::cout << "size of str >> " << str.size() << "\npos of i >> " << i << "\npos of cr >> " << cr << "\nsize of chunked " << chunked_size  << "\nsize of body  >> " << body_size << std::endl;
+                rest_chunk = chunked_size - body_size;
+
+                set_rest_chunk(rest_chunk);
+                _tmp_file.open(_tmp_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::binary);
+                // requestBody.open("/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt", std::ios::out);
+                // setBody(str.substr(i));
+                _tmp_file.write(_body.c_str(), _body.size());
+            }
             _bodyFlag = REQUEST_BODY_STARTED;
         }
 
     }
     else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Content-Length"] != "")
     {
+        // std::cout << "i=> " << str.substr(i) <<std::endl;
         setBody(str);
     } else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Transfer-Encoding"] == "chunked")
     {
-        // ! this where i should do things with chunked
+            // std::cout << "hellow from chunked2" << std::endl;
+
+        // ~ this where i should do things with chunked
+        // std::cout << "i=> " << str.substr(i) <<std::endl;
         setBody(str);
+        
     }
 
     return m_code_ret;
@@ -391,11 +415,9 @@ std::string Request::lineNext(const std::string &str, size_t &i)
     if (i == std::string::npos)
         return "";
     j = str.find_first_of('\n', i);
-    // std::cout << "i = " << i << " j = " << j << std::endl;
     line = str.substr(i, j - i);
     if (line[line.size() - 1] == '\r')
     {
-        // std::cout << "line = " << line << std::endl;
         if (line.size())
 		    line.resize(line.size() - 1);
     }

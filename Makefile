@@ -9,7 +9,7 @@ SRC_RESPONSE	= ./response
 
 
 SRCS			= ./main.cpp \
-					$(addprefix $(SRCS_REQ)/, Request.cpp MemRequest.cpp) \
+					$(addprefix $(SRCS_REQ)/, Request.cpp MemRequest.cpp chunked.cpp) \
 					$(addprefix $(SRCS_CONF)/, ConfLoca.cpp ConfServer.cpp Config.cpp Tools.cpp) \
 					$(addprefix $(SRC_CORE)/, Client.cpp  Server.cpp  utils.cpp ) \
 					$(addprefix $(SRC_CGI)/, Cgi.cpp) \
@@ -18,7 +18,7 @@ SRCS			= ./main.cpp \
 OBJS			= $(SRCS:.cpp=.o)
 
 CXX				= clang++
-CWWFLAGS		= -Wall -Werror -Wextra -std=c++98
+CWWFLAGS		= -Wall -Werror -Wextra -std=c++98 -g3 -fsanitize=address
 CFAFLAGS		= -std=c++98  
 
 all:			$(NAME)
