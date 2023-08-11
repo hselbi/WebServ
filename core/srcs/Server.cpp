@@ -71,11 +71,11 @@ bool Server::is_request_completed(std::string &request, long client_socket)
         {
             if (transfer_encoding == "chunked")
             {
-                // !! check the flag
 				if (get_client(client_socket)->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
                 {
 					std::cout << BOLDGREEN << "chunked \n" << RESET; 
 					return true;
+				}
             }
         }
         else
@@ -266,8 +266,6 @@ void Server::accept_new_connection(long server_socket)
 	long client_socket;
 	if ((client_socket = accept(server_socket, 0, &client_len)) == -1)
 		throw std::runtime_error("accept failed");
-
-	std::cout << GREEN << "Accepted new client " << client_socket << " on Port: " << _server_port[server_socket] << RESET << "\n";
 
 	_clients.insert(std::make_pair(client_socket, create_client()));
 

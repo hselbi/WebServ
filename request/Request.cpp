@@ -51,7 +51,6 @@ Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_versi
     req_file.open(str, std::ios::in);
 	if (!req_file) {
 		std::cout << "No such file" << std::endl;
-        std::exit(0);
 	}
 	while(std::getline(req_file, line))
     {

@@ -131,7 +131,6 @@ std::string Cgi::exec_cgi()
 	FILE *read_body_from_file = NULL;
 	if (_client->get_request().getMethod() == "POST")
 	{
-		std::cout << "TMP FILE NAME: " << _client->get_request().getBodyFileName() << std::endl;
 		read_body_from_file = fopen(_client->get_request().getBodyFileName().c_str(), "r");
 		if (!read_body_from_file)
 			return "-1";
