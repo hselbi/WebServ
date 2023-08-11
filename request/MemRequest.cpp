@@ -1,50 +1,7 @@
 #include "../includes/request/Request.hpp"
 
-bool isWhitespace(const std::string& str) {
-    for (std::size_t i = 0; i < str.length(); i++) {
-        if (!std::isspace(str[i])) {
-            return false;
-        }
-    }
-    return true;
-}
 
-
-void    Request::check_headers(std::string key, std::string value)
-{
-
-    if (key == "Host")
-    {
-        size_t i;
-
-        i = value.find_first_of(':');
-        if (i == std::string::npos)
-        {
-            m_host = value;
-            m_port = 80;
-        }
-        else
-        {
-            std::string tmp(value, i + 1);
-            m_host = value.substr(0, i);
-            m_port = atoi(tmp.c_str());
-        }
-    }
-}
-
-
-// check if request finished or not
-bool Request::isWhitespace(const std::string &str)
-{
-    for (std::size_t i = 0; i < str.length(); i++)
-    {
-        if (!std::isspace(str[i]))
-            return false;
-    }
-    return true;
-}
-
-unsigned int hextodeci( const std::string &hex ) throw() {
+unsigned int                    hextodeci( const std::string &hex ) throw() {
  
     unsigned int dec;
     std::stringstream ss;
@@ -55,7 +12,21 @@ unsigned int hextodeci( const std::string &hex ) throw() {
     return dec;
 }
 
-std::string FileExtension(std::string path)
+std::string&					capitalize(std::string& str)
+{
+	size_t	i = 0;
+
+    std::transform(str.begin(), str.end(),str.begin(), ::tolower);
+	str[i] = std::toupper(str[i]);
+	while((i = str.find_first_of('-', i + 1)) != std::string::npos)
+	{
+		if (i + 1 < str.size())
+		str[i + 1] = std::toupper(str[i + 1]);
+	}
+	return str;
+}
+
+std::string                     FileExtension(std::string path)
 {
     if (path.find("text/css") != std::string::npos)
         return ".css";
@@ -89,7 +60,87 @@ std::string FileExtension(std::string path)
         return ".txt";
     return "";
 }
-int Request::parseReq(const std::string &str)
+
+bool                            langsComparition(const std::pair<std::string, float> first, const std::pair<std::string, float> second)
+{
+  return ( first.second < second.second );
+}
+
+std::vector<std::string>		split(const std::string& str, char c)
+{
+	std::vector<std::string> tokens;
+	std::string token;
+	std::istringstream tokenStream(str);
+
+	while (std::getline(tokenStream, token, c))
+		tokens.push_back(token);
+	return tokens;
+}
+
+/*      memeber functions       */
+
+void        Request::setLanguage()
+{
+    std::string header;
+    std::vector<std::string> vec;
+    size_t i;
+    std::string lang;
+    header = m_headers["Accept-Language"];
+
+    if (header != "")
+    {
+        vec = split(header, ',');
+        for (std::vector<std::string>::iterator it = vec.begin(); it < vec.end(); it++)
+        {
+            float w = 0.0;
+            std::string lang;
+            lang = (*it).substr(0, (*it).find_first_of('-'));
+            plunder(lang, ' ');
+            i = lang.find_first_of(';');
+            if (i != std::string::npos)
+                w = atof((*it).substr(i + 4).c_str());
+            if (i > 2)
+                lang.resize(2);
+            else
+                lang.resize(i);
+            m_language.push_back(std::pair<std::string, float>(lang, w));
+        }
+        m_language.sort(langsComparition);
+    }
+}
+
+void        Request::check_headers(std::string key, std::string value)
+{
+    if (key == "Host")
+    {
+        size_t i;
+
+        i = value.find_first_of(':');
+        if (i == std::string::npos)
+        {
+            m_host = value;
+            m_port = 80;
+        }
+        else
+        {
+            std::string tmp(value, i + 1);
+            m_host = value.substr(0, i);
+            m_port = atoi(tmp.c_str());
+        }
+    }
+}
+
+bool        Request::isWhitespace(const std::string &str)
+{
+    for (std::size_t i = 0; i < str.length(); i++)
+    {
+        if (!std::isspace(str[i]))
+            return false;
+    }
+    return true;
+}
+
+int         Request::parseReq(const std::string &str)
 {
     std::string key;
     std::string value;
@@ -156,83 +207,6 @@ int Request::parseReq(const std::string &str)
     return m_code_ret;
 }
 
-
-
-std::vector<std::string>		split(const std::string& str, char c)
-{
-	std::vector<std::string> tokens;
-	std::string token;
-	std::istringstream tokenStream(str);
-
-	while (std::getline(tokenStream, token, c))
-		tokens.push_back(token);
-	return tokens;
-}
-
-
-bool langsComparition (const std::pair<std::string, float> first, const std::pair<std::string, float> second)
-{
-  return ( first.second < second.second );
-}
-
-void    Request::setLanguage()
-{
-    std::string header;
-    std::vector<std::string> vec;
-    size_t i;
-    std::string lang;
-    header = m_headers["Accept-Language"];
-
-    if (header != "")
-    {
-        // std::cout << "header = " << header << std::endl;
-        vec = split(header, ',');
-        for (std::vector<std::string>::iterator it = vec.begin(); it < vec.end(); it++)
-        {
-            float w = 0.0;
-            std::string lang;
-            lang = (*it).substr(0, (*it).find_first_of('-'));
-            plunder(lang, ' ');
-            i = lang.find_first_of(';');
-            if (i != std::string::npos)
-                w = atof((*it).substr(i + 4).c_str());
-            if (i > 2)
-                lang.resize(2);
-            else
-                lang.resize(i);
-            m_language.push_back(std::pair<std::string, float>(lang, w));
-        }
-        m_language.sort(langsComparition);
-    }
-}
-
-std::string&					capitalize(std::string& str)
-{
-	size_t	i = 0;
-
-    std::transform(str.begin(), str.end(),str.begin(), ::tolower);
-	str[i] = std::toupper(str[i]);
-	while((i = str.find_first_of('-', i + 1)) != std::string::npos)
-	{
-		if (i + 1 < str.size())
-		str[i + 1] = std::toupper(str[i + 1]);
-	}
-	return str;
-}
-
-std::string plunder(std::string &str, char c)
-{
-	if (!str.size())
-		return str;
-	size_t j = str.size();
-	while (j && str[j - 1] == c)
-		j--;
-	str.resize(j);
-	for (j = 0; str[j] == c; j++);
-	str = str.substr(j, std::string::npos);
-	return str;
-}
-
 std::string Request::keyReader(std::string &line)
 {
     size_t i;
@@ -256,7 +230,7 @@ std::string Request::valueReader(std::string &line)
     return (plunder(value, ' '));
 }
 
-int Request::reqLine(const std::string &line)
+int         Request::reqLine(const std::string &line)
 {
     size_t i;
     std::string str;
@@ -275,7 +249,7 @@ int Request::reqLine(const std::string &line)
     return (readRequestLine(str, i));
 }
 
-int Request::readRequestLine(std::string str, size_t &i)
+int         Request::readRequestLine(std::string str, size_t &i)
 {
     if (readPath(str, i) == 400)
         return 400;
@@ -286,7 +260,7 @@ int Request::readRequestLine(std::string str, size_t &i)
     return 200;
 }
 
-int Request::readPath(std::string str, size_t &i)
+int         Request::readPath(std::string str, size_t &i)
 {
     size_t j;
 
@@ -308,8 +282,7 @@ int Request::readPath(std::string str, size_t &i)
     return 200;
 }
 
-
-int Request::readVersion(std::string str, size_t &i)
+int         Request::readVersion(std::string str, size_t &i)
 {
 
     i = str.find_first_not_of(' ', i);
@@ -330,7 +303,7 @@ int Request::readVersion(std::string str, size_t &i)
     return 200;
 }
 
-int Request::methodChecker()
+int         Request::methodChecker()
 {
     for (size_t i = 0; i < methods.size(); i++)
     {
@@ -383,4 +356,17 @@ std::string Request::myGetLine(std::string line, size_t &i)
     else
         i = j + 1;
     return str;
+}
+
+std::string plunder(std::string &str, char c)
+{
+	if (!str.size())
+		return str;
+	size_t j = str.size();
+	while (j && str[j - 1] == c)
+		j--;
+	str.resize(j);
+	for (j = 0; str[j] == c; j++);
+	str = str.substr(j, std::string::npos);
+	return str;
 }

@@ -18,7 +18,6 @@ ConfLoca::~ConfLoca()
 
 ConfLoca::ConfLoca(const ConfLoca &copy)
 {
-    // std::cout << "ConfLoca ÷copy constructor called\n";
     if (this != &copy)
     {
         this->path = copy.path;

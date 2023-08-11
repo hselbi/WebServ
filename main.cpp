@@ -11,7 +11,7 @@ int main(int ac, char *av[])
 {
 	signal(SIGPIPE, SIG_IGN);
 	Server server;
-	std::string config = (ac == 1) ? "./config/conf/test.config" : av[1];
+	std::string config = (ac == 1) ? "./config/conf/Defaults.config" : av[1];
 	try
 	{
 		if (ac  <= 2)

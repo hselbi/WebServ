@@ -1,8 +1,7 @@
 #include "../includes/config/Config.hpp"
 
 Config::Config()
-{
-}
+{}
 
 int Config::openfile(const char* filename)
 {
@@ -10,7 +9,6 @@ int Config::openfile(const char* filename)
 	std::ifstream fs;
 
 	content.clear();
-	// std::cout << filename <<std::endl;
 	fs.open(filename);
 	if (fs.is_open())
 	{
@@ -18,7 +16,6 @@ int Config::openfile(const char* filename)
 		{
 			getline(fs, read);
 			content.append(read + '\n');
-
 		}
 		fs.close();
 	}
@@ -32,8 +29,7 @@ int Config::openfile(const char* filename)
 
 
 Config::~Config()
-{
-}
+{}
 
 std::vector<ConfServer> Config::parser(const char* filename)
 {
@@ -41,7 +37,6 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		return std::vector<ConfServer>();
     std::vector<ConfServer> result;
 
-    // std::cout << "> config file parsing start\n";
 	size_t pre = 0;
 	size_t cur = content.find_first_not_of(" \t\n", pre);
 	if (cur == std::string::npos)
@@ -50,7 +45,6 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		exit(1);
     }
 	size_t id = 0;
-	// printf("%d", cur);
 	while (cur != std::string::npos)
 	{
 		id += 1;
@@ -65,8 +59,6 @@ std::vector<ConfServer> Config::parser(const char* filename)
 		ConfServer server = parse_server(&cur, id);
 		result.push_back(server);
 	}
-
-	// check_server_syntax(result); ! TODO : Check this
 	return result;
 }
 
@@ -77,7 +69,6 @@ int Config::check_server_syntax(std::vector<ConfServer>& servers) {
         itn = it;
         ++itn;
         for (; itn != servers.end(); ++itn) {
-			// std::cout << YELLOW << (*it).getServerId() << " <----> " <<  (*itn).getServerId() << RESET << std::endl;
             if ((*itn).getPort() == (*it).getPort()) {
                 std::cout << RED << "[ERROR] Config parsing failed. Port is not unique." << RESET << std::endl;
                 exit(1);
@@ -98,7 +89,6 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 	size_t pre = content.find_first_not_of(" \t\n", *t);
 	if (pre == std::string::npos || content[pre] != '{')
     {
-
         std::cout << "[ERROR] config parsing failed." << std::endl;
 		exit(1);
     }
@@ -129,14 +119,9 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 		}
 
 		if (key == "location")
-		{
-			// std::cout << "==> " << cur << std::endl;
 			result.locations.push_back(parse_location(&cur));
-			// std::cout << "============><=========" << std::endl;
-		}
 		else
 		{
-			// std::cout << "hafid ==> " << std::endl;
 			if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
 			{
                 std::cout << "[ERROR] config parsing failed." << std::endl;
@@ -163,13 +148,11 @@ ConfServer Config::parse_server(size_t *t, size_t id)
 		}
 		index++;
 	}
-
 	return result;
 }
 
 int	checkHost(std::string host)
 {
-	// std::cout << "host: " << host << std::endl;
 	std::vector<std::string> tmp = split(host, '.');
 	if (tmp.size() != 4  && tmp.size() != 1)
 		return -1;
@@ -179,7 +162,6 @@ int	checkHost(std::string host)
 		{
 			if (tmp[i].length() > 3)
 				return -1;
-
 			for (unsigned long j = 0; j != tmp[i].length(); j++)
 			{
 				if (tmp[i][j] < '0' || tmp[i][j] > '9')
@@ -199,11 +181,8 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 {
 
 	serv->server_id = id;
-
 	if (key == "server_name")
-	{
 		serv->server_name = value;
-	}
 	else if (key == "listen")
 	{
 		if (value.find_first_of(':') == std::string::npos)
@@ -215,27 +194,21 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 			}
 			serv->host = value;
 			serv->port = "8080";
-			// std::cout << " <----> " << value << std::endl;
 		}
 		else
 		{
-			// std::cout << serv->host << std::endl;
 			std::vector<std::string> tmp = split(value, ':');
-
 			if (tmp[0] == "")
 			{
 				std::cout << RED << "FAILED CONFIG: Host required" << RESET << std::endl;
 				return -1;
 			}
 			serv->host = tmp[0];
-			// std::cout << " <----> " << serv->host << std::endl;
 			if (checkHost(serv->host) == -1)
 			{
 				std::cout << RED << "FAILED CONFIG: Host(1st)" << RESET << std::endl;
 				return -1;
 			}
-			// std::cout << " <----> " << tmp[0] << std::endl;
-			//  port : 0 to 65535
 			if (isAllDigits(tmp[1]) || tmp[1] == "0")
 				serv->port = tmp[1];
 			else
@@ -243,14 +216,10 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 				std::cout << RED << "FAILED CONFIG: port(2nd)" << RESET << std::endl;
 				return -1;
 			}
-
-			// std::cout << tmp[0] << " <----> " << tmp[1] << std::endl;
 		}
 	}
 	else if (key == "root")
-	{
 		serv->root = value;
-	}
 	else if (key == "index")
 	{
 		std::vector<std::string> tmp = split(value, ' ');
@@ -264,9 +233,7 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 			serv->allow_methods.push_back(ConfServer::strtoMethod(tmp[i]));
 	}
 	else if (key == "autoindex")
-	{
 		serv->autoindex = value == "on" ? true : false;
-	}
 	else if (key == "client_body_limit")
 	{
 		if (isAllDigits(value))
@@ -278,13 +245,9 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 		}
 	}
 	else if (key == "recv_timeout")
-	{
 		serv->recv_timeout.tv_sec = atoi(value.c_str());
-	}
 	else if (key == "send_timeout")
-	{
 		serv->send_timeout.tv_sec = atoi(value.c_str());
-	}
 	else if (key == "return")
 	{
 		std::vector<std::string> tmp = split(value, ' ');
@@ -304,15 +267,12 @@ int Config::setServValue(ConfServer *serv, const std::string key, const std::str
 		}
 	}
     else
-    {
         return -1;
-    }
     return 1;
 }
 
 ConfLoca Config::parse_location(size_t *i)
 {
-	// std::cout << "==> " << *i << std::endl;
 	ConfLoca result;
 	size_t key_start;
 	size_t value_end;
@@ -320,23 +280,16 @@ ConfLoca Config::parse_location(size_t *i)
 	size_t pre = content.find_first_not_of(" \t\n", *i);
 	size_t cur = content.find_first_of(" \t\n", pre);
 	result.path = content.substr(pre, cur - pre);
-	// std::cout << "============> " << result.path <<" <=========" << std::endl;
-
 	pre = content.find_first_not_of(" \t\n", cur);
 	if (pre == std::string::npos || content[pre] != '{')
 	{
         std::cout << "[ERROR] config parsing failed." << std::endl;
         exit(1);
     }
-
 	pre++;
 	cur = content.find_first_not_of(" \t\n", pre);
 	while (cur != std::string::npos)
 	{
-		// std::cout << "==> " << cur << std::endl;
-
-		// here is the problem
-
 		if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
         {
             std::cout << "[ERROR] config parsing failed. 1" << std::endl;
@@ -349,9 +302,6 @@ ConfLoca Config::parse_location(size_t *i)
             exit(1);
         }
 		std::string key = content.substr(pre, cur - pre);
-		// std::cout << GREEN << key << RESET << std::endl;
-		// std::cout << GREEN << content.substr(pre, cur - pre) << RESET << std::endl;
-		// std::cout << "=====><============" << std::endl;
 		if (key == "}")
 		{
 			*i = cur;
@@ -359,7 +309,6 @@ ConfLoca Config::parse_location(size_t *i)
 		}
 		else
 		{
-
 			if ((pre = content.find_first_not_of(" \t\n", cur)) == std::string::npos)
             {
                 std::cout << "[ERROR] config parsing failed. 3" << std::endl;
@@ -391,34 +340,15 @@ ConfLoca Config::parse_location(size_t *i)
 int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::string value)
 {
     if (key == "root")
-    {
         loca->root = value;
-    }
 	else if (key == "autoindex")
-	{
-		// std::cout << "autoindex: " << value << std::endl;
 		loca->autoindex = (value == "on" ? ON : OFF);
-	}
 	else if (key == "cgi_status")
-	{
-		// std::cout << "autoindex: " << value << std::endl;
 		loca->cgi_status = (value == "on" ? true : false);
-	}
 	else if (key == "upload_status")
-	{
-		// std::cout << "autoindex: " << value << std::endl;
 		loca->upload_status = (value == "on" ? true : false);
-	}
     else if (key == "index")
     {
-
-
-
-        /*
-            std::vector<std::string> tmp = split(value, ' ');
-		    for (unsigned long i = 0; i != tmp.size(); i++)
-			    loca->index.push_back(tmp[i]);
-        */
         std::string tmp;
         size_t pre = 0;
         size_t cur = value.find_first_of(" \t\n", pre);
@@ -444,15 +374,12 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 	}
     else if (key == "allow_methods")
     {
-		// printf("hellow");
         std::vector<std::string> tmp = split(value, ' ');
         for (unsigned long i = 0; i < tmp.size(); i++)
             loca->allow_methods.push_back(ConfLoca::strtoMethod(tmp[i]));
     }
     else if (key == "client_body_limit")
-	{
 		loca->client_body_limit = atoi(value.c_str());
-	}
 	else if (key == "cgi_info")
 	{
 		int i;
@@ -460,7 +387,6 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 		std::vector<std::string> tmp = split(value, ' ');
 		if (tmp.size() != 2)
 			return -1;
-
 		loca->cgi_infos[tmp[0]] = tmp[1];
 	}
 	else if (key == "return")
@@ -473,16 +399,12 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 			return -1;
 	}
 	else
-	{
 		return -1;
-	}
     return 1;
 }
 
 int Config::check_line_syntax(std::string line)
 {
-	// std::cout << "line: " << line << std::endl;
-    // remove the comments
     size_t sharp;
 	sharp = line.find_first_of("#");
 	if (sharp != std::string::npos)
@@ -491,12 +413,8 @@ int Config::check_line_syntax(std::string line)
 		if (line.find_first_not_of(" \t\n") != std::string::npos)
 			return -2;
 	}
-
-
-    // line must be end with semicolon
 	size_t semicol;
 	size_t find;
-
 	semicol = line.find_first_of(";");
 	if (semicol == std::string::npos)
 		return -1;
@@ -505,5 +423,4 @@ int Config::check_line_syntax(std::string line)
 		return -1;
 	find = line.find_last_not_of(" \t", semicol - 1);
 	return find;
-
 }

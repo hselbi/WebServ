@@ -18,8 +18,6 @@ public:
     ~Config();
 
     std::vector<ConfServer> parser(const char* filename);
-
-    // hellow
     ConfServer parse_server(size_t *cur, size_t id);
     ConfLoca	parse_location(size_t *cur);
     int check_line_syntax(std::string line);

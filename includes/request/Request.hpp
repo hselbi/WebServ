@@ -59,7 +59,8 @@ public:
 
     static std::vector<std::string>    initMethods();
     
-    /* setters */
+    /*      setters         */
+
     void    setMethod(const std::string &method);
     void    setBody(const std::string &body);
     void    setPath(const std::string &path);
@@ -72,7 +73,8 @@ public:
     int     setPort();
     void    setBodyFlag(int flag);
 
-    /* getters  */
+    /*      getters     */
+    
     std::map<std::string, std::string>          getHeaders() const;
     std::map<std::string, std::string>          getEnvCgi() const;
     std::list<std::pair<std::string, float> >   getLanguage() const;
@@ -92,7 +94,8 @@ public:
     int                                         getPort() const;
     int                                         getBodyFlag();
 
-    /* member functions */
+    /*      member functions        */
+
     void        resetReq();
     void        defaultReq();
     int         parseReq(const std::string &str);

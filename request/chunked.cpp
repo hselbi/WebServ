@@ -1,17 +1,17 @@
 #include "../includes/request/Request.hpp"
 
-
+/*  all about CRLF  */
 bool containsCRLF(const std::string& input) {
     size_t found = input.find("\r\n");
     return (found != std::string::npos);
 }
-
 
 size_t crflFinder(const std::string& input, size_t pos) {
     size_t found = input.find("\r\n", pos);
     return found;
 }
 
+/*  all about CR    */
 bool containsCR(const std::string& input) {
     size_t found = input.find("\r");
     return (found != std::string::npos);
@@ -22,17 +22,19 @@ size_t posContainsCR(const std::string& input, size_t pos) {
     return (found != std::string::npos);
 }
 
+size_t containsCarriage(const std::string& input) {
+    size_t found = input.find("\r");
+    return found;
+}
+
+/*  all about LF    */
 
 size_t containsLF(const std::string& input) {
     size_t found = input.find("\n");
     return found;
 }
 
-size_t containsCarriage(const std::string& input) {
-    size_t found = input.find("\r");
-    return found;
-}
-
+/*  all about hexadecimal  */
 
 size_t hextodec(const std::string& hex) {
     size_t result = 0;
@@ -62,6 +64,8 @@ long extractHexaCR(const std::string& input, size_t pos) {
     return hextodec(hexa);
 }
 
+/*  chunked function */
+
 void Request::makeChunkedRequest(const std::string &str)
 {
     size_t buffer_size = getChunkedSize();
@@ -71,7 +75,6 @@ void Request::makeChunkedRequest(const std::string &str)
     {
         if (_rest == 1)
         {
-            std::cout << "A ==>";
             std::string tmp = str.substr(1);
             _tmp_file.write(tmp.c_str(), tmp.size());
             set_rest_chunk(buffer_size - tmp.size());
@@ -82,7 +85,6 @@ void Request::makeChunkedRequest(const std::string &str)
         }
         if (_rest == 2)
         {
-            std::cout << "B ==>";
             _beforeHex = false;
             _lineFeed = false;
             _carriageReturn = false;
@@ -93,7 +95,6 @@ void Request::makeChunkedRequest(const std::string &str)
         {
             if (!_hex.empty())
             {
-                std::cout << "C ==>";
                 size_t crlf = crflFinder(str, 0);
                 std::string tmp = str.substr(0, crlf);
                 _hex.append(tmp);
@@ -110,7 +111,6 @@ void Request::makeChunkedRequest(const std::string &str)
             }
             else
             {
-                std::cout << "D ==>";
                 size_t next_crlf = crflFinder(str, 0);
                 long hexa = extractHexaCRFL(str, 0);
                 std::string tmp = str.substr(next_crlf + 2);
@@ -127,7 +127,6 @@ void Request::makeChunkedRequest(const std::string &str)
 
     if (buffer_size > REQUEST_BUFFER_SIZE)
     {
-        std::cerr << "main E ==>" << std::endl;
         normal_state:
         size_t new_chunk = buffer_size - bytes_size;
         set_rest_chunk(new_chunk);
@@ -139,7 +138,6 @@ void Request::makeChunkedRequest(const std::string &str)
         size_t crlf = str.find("\r\n", buffer_size - 1);
         if (crlf != std::string::npos)
         {
-            std::cerr << "F ==>";
             _tmp_file.write(str.c_str(), buffer_size);
             size_t next_crlf = crflFinder(str, crlf + 2);
             if (next_crlf != std::string::npos)
@@ -147,7 +145,6 @@ void Request::makeChunkedRequest(const std::string &str)
                 long hexa_val = extractHexaCRFL(str, crlf + 1);
                 if (hexa_val == 0)
                 {
-                    std::cerr << "G ==>" << std::endl;
                     _bodyFlag = REQUEST_BODY_COMPLETED;
                     _tmp_file.close();
                     set_rest_chunk(0);
@@ -155,7 +152,6 @@ void Request::makeChunkedRequest(const std::string &str)
                 }
                 else
                 {
-                    std::cerr << "H ==>" << std::endl;
                     std::string tmp = str.substr(next_crlf + 2);
                     _tmp_file.write(tmp.c_str(), tmp.size());
                     set_rest_chunk(hexa_val - tmp.size());
@@ -167,10 +163,8 @@ void Request::makeChunkedRequest(const std::string &str)
                 size_t lf = str.find('\n', crlf + 2);
                 if (cr != std::string::npos)
                 {
-                    std::cerr << "I ==>";
                     if (lf != std::string::npos)
                     {
-                        std::cerr << "G ==>" << std::endl;
                         _rest = 2;
                         _beforeHex = false;
                         _carriageReturn = false;
@@ -178,7 +172,6 @@ void Request::makeChunkedRequest(const std::string &str)
                     }
                     else
                     {
-                        std::cerr << "K ==>" << std::endl;
                         std::cerr << BOLDGREEN  << str << RESET << std::endl;
                         _rest = 1;
                         _beforeHex = true;
@@ -190,7 +183,6 @@ void Request::makeChunkedRequest(const std::string &str)
                 }
                 else
                 {
-                    std::cerr << "L ==>" << std::endl;
                     _beforeHex = true;
                     _carriageReturn = false;
                     _lineFeed = false;
@@ -200,10 +192,6 @@ void Request::makeChunkedRequest(const std::string &str)
                         _hex = str.substr(crlf + 2);
                 }
             }
-        }
-        else {
-                    std::cerr << BOLDRED << "THIS IS FORBIDDEN !!!!!!!!!!!!" << RESET << std::endl;
-
         }
     }
 }

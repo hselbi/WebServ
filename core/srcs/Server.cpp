@@ -75,9 +75,9 @@ bool Server::is_request_completed(std::string &request, long client_socket)
             if (transfer_encoding == "chunked")
             {
                 // !! check the flag
-				 if (get_client(client_socket)->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
+				if (get_client(client_socket)->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
                 {
-					std::cout << "chunked \n"; 
+					std::cout << BOLDGREEN << "chunked \n" << RESET; 
 					return true;
 				}
             }

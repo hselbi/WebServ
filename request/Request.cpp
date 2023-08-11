@@ -109,6 +109,8 @@ void Request::defaultReq()
 	m_headers["Cookie"] = "";
 }
 
+/*		setters		*/
+
 void	Request::setBodyFlag(int flag) {	_bodyFlag = flag;	}
 
 void	Request::setMethod(const std::string &method) {	m_method = method;	}
@@ -175,6 +177,8 @@ int		Request::setPort()
 	return m_port;
 }
 
+/*		getters		*/
+
 std::map<std::string, std::string>			Request::getHeaders() const {	return m_headers;	}
 
 std::map<std::string, std::string>			Request::getEnvCgi() const {	return m_env_cgi;	}
@@ -205,7 +209,8 @@ int											Request::getPort() const {	return m_port;	}
 
 int											Request::get_req_status() { return _req_status; }
 
-/**/
+/*		operator assignements		*/
+
 std::ostream&		operator<<(std::ostream& os, const Request& re)
 {
 	std::map<std::string, std::string>::const_iterator	it;
@@ -224,7 +229,7 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 	return os;
 }
 
-Request &Request::operator=(const Request &other)
+Request			&Request::operator=(const Request &other)
 {
 	if (this != &other)
 	{
@@ -242,6 +247,3 @@ Request &Request::operator=(const Request &other)
 	}
 	return *this;
 }
-
-
-

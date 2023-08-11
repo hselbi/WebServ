@@ -16,11 +16,8 @@ std::ostream &operator<<(std::ostream &out, const std::vector<T> &op)
 		out << "(empty)";
 		return out;
 	}
-
 	for (unsigned long i = 0; i < op.size(); i++)
-	{
 		out << op[i] << "(" << i << ") ";
-	}
 	return out;
 }
 
@@ -34,9 +31,7 @@ std::ostream &operator<<(std::ostream &out, const std::map<T1, T2> &op)
 	}
 
 	for (typename std::map<T1, T2>::const_iterator i = op.begin(); i != op.end(); i++)
-	{
 		out << "[ " << (*i).first << " ] = " << (*i).second << "\n";
-	}
 	return out;
 }
 
