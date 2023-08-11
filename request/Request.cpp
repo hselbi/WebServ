@@ -18,7 +18,8 @@ Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_
 	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary(""), bodyContent(""), _carriageReturn(false), _lineFeed(false), _beforeHex(false), _hex(""), _rest(-1)
 {}
 
-void Request::resetReq(){
+void Request::resetReq()
+{
 	body_size = 0;
 	chunked_size = 0;
 	rest_chunk = 0;
@@ -62,8 +63,26 @@ Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_versi
 		std::cerr << "Parsing Error: " << m_code_ret << std::endl;
 }
 
-Request::~Request()
-{}
+Request::Request(const Request &other)
+{
+	if (this != &other)
+	{
+		m_method = other.m_method;
+		m_path = other.m_path;
+		m_version = other.m_version;
+		m_query = other.m_query;
+		m_raw = other.m_raw;
+		m_headers = other.m_headers;
+		m_env_cgi = other.m_env_cgi;
+		m_language = other.m_language;
+		m_code_ret = other.m_code_ret;
+		m_port = other.m_port;
+		m_host = other.m_host;
+	}
+	*this = other;
+}
+
+Request::~Request() {}
 
 void Request::defaultReq()
 {
@@ -90,72 +109,19 @@ void Request::defaultReq()
 	m_headers["Cookie"] = "";
 }
 
-int			Request::getBodyFlag() {	return _bodyFlag;	}
+void	Request::setBodyFlag(int flag) {	_bodyFlag = flag;	}
 
-size_t		Request::getChunkedSize() const {	return chunked_size;	}
+void	Request::setMethod(const std::string &method) {	m_method = method;	}
 
-void		Request::setBodyFlag(int flag) {	_bodyFlag = flag;	}
+void	Request::setPath(const std::string &path) {	m_path = path;	}
 
-std::string	Request::getMethod() const {	return m_method;	}
+void	Request::setCodeRet(int code) {	m_code_ret = code;	}
 
-int	Request::getCodeRet() const {	return m_code_ret;	}
+void	Request::set_size_body(size_t size) {	this->body_size = size;	}
 
-std::string	Request::getVersion() const {	return m_version;	}
+void	Request::set_rest_chunk(size_t stops) {	chunked_size = stops;	}
 
-std::string	Request::getPath() const {	return m_path;	}
-
-std::string	Request::getQuery() const {	return m_query;	}
-
-std::string	Request::getRaw() const {
-	return m_raw;
-}
-
-std::map<std::string, std::string>	Request::getHeaders() const {
-	return m_headers;
-}
-
-std::map<std::string, std::string>	Request::getEnvCgi() const {
-	return m_env_cgi;
-}
-
-std::list<std::pair<std::string, float> >	Request::getLanguage() const {
-	return m_language;
-}
-
-int		Request::getPort() const
-{
-	return m_port;
-}
-
-void	Request::setMethod(const std::string &method) {
-	m_method = method;
-}
-
-void	Request::setPath(const std::string &path) {
-	m_path = path;
-}
-
-void	Request::setCodeRet(int code) {
-	m_code_ret = code;
-}
-
-void Request::set_size_body(size_t size)
-{
-	this->body_size = size;
-}
-
-
-void	Request::set_rest_chunk(size_t stops)
-{
-	chunked_size = stops;
-}
-std::string	Request::getHost() const {
-	return m_host;
-}
-
-std::string	Request::getBodyFileName() {
-	return _tmp_file_name;
-}
+void	Request::set_req_status(int status) { _req_status = status; }
 
 void	Request::setBody(const std::string& str)
 {
@@ -182,7 +148,7 @@ void	Request::setBody(const std::string& str)
 
 }
 
-void Request::setQuery()
+void	Request::setQuery()
 {
 	size_t i;
 	
@@ -194,7 +160,7 @@ void Request::setQuery()
 	}
 }
 
-int Request::setPort()
+int		Request::setPort()
 {
 	size_t i;
 
@@ -209,8 +175,37 @@ int Request::setPort()
 	return m_port;
 }
 
+std::map<std::string, std::string>			Request::getHeaders() const {	return m_headers;	}
 
+std::map<std::string, std::string>			Request::getEnvCgi() const {	return m_env_cgi;	}
 
+std::list<std::pair<std::string, float> >	Request::getLanguage() const {	return m_language;	}
+
+std::string									Request::getMethod() const {	return m_method;	}
+
+std::string									Request::getVersion() const {	return m_version;	}
+
+std::string									Request::getPath() const {	return m_path;	}
+
+std::string									Request::getQuery() const {	return m_query;	}
+
+std::string									Request::getRaw() const {	return m_raw;	}
+
+std::string									Request::getHost() const {	return m_host;	}
+
+std::string									Request::getBodyFileName() {	return _tmp_file_name;	}
+
+size_t										Request::getChunkedSize() const {	return chunked_size;	}
+
+int											Request::getBodyFlag() {	return _bodyFlag;	}
+
+int											Request::getCodeRet() const {	return m_code_ret;	}
+
+int											Request::getPort() const {	return m_port;	}
+
+int											Request::get_req_status() { return _req_status; }
+
+/**/
 std::ostream&		operator<<(std::ostream& os, const Request& re)
 {
 	std::map<std::string, std::string>::const_iterator	it;
@@ -226,7 +221,6 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 		if (it->second != "")
 			os << YELLOW << it->first << RED << ": " << it->second << RESET << '\n';
 	}
-
 	return os;
 }
 
@@ -249,29 +243,5 @@ Request &Request::operator=(const Request &other)
 	return *this;
 }
 
-Request::Request(const Request &other)
-{
-	if (this != &other)
-	{
-		m_method = other.m_method;
-		m_path = other.m_path;
-		m_version = other.m_version;
-		m_query = other.m_query;
-		m_raw = other.m_raw;
-		m_headers = other.m_headers;
-		m_env_cgi = other.m_env_cgi;
-		m_language = other.m_language;
-		m_code_ret = other.m_code_ret;
-		m_port = other.m_port;
-		m_host = other.m_host;
-	}
-	*this = other;
-}
 
 
-void Request::set_req_status(int status) { _req_status = status; }
-int Request::get_req_status() { return _req_status; }
-
-
-// ! there's chencked it's shouldn't be length
-// ! need to
