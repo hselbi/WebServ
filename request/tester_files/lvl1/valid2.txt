@@ -1,1 +1,0 @@
-DELETE /p1.html HTTP/1.1

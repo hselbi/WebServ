@@ -1,11 +1,6 @@
 #include "../includes/request/Request.hpp"
 #include "../includes/includes.hpp"
 
-// done some if request its already is done
-
-
-
-
 std::vector<std::string>		Request::initMethods()
 {
 	std::vector<std::string>	methods;
@@ -19,12 +14,9 @@ std::vector<std::string>		Request::initMethods()
 
 std::vector<std::string>	Request::methods = Request::initMethods();
 
-
 Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),
 	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary(""), bodyContent(""), _carriageReturn(false), _lineFeed(false), _beforeHex(false), _hex(""), _rest(-1)
-{
-	// std::cout << "Request Constructor" << std::endl;
-}
+{}
 
 void Request::resetReq(){
 	body_size = 0;
@@ -51,10 +43,8 @@ void Request::resetReq(){
 
 Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
-	// std::cout << "Request constructor" << std::endl;
 	resetReq();
 	m_env_cgi.clear();
-
 	std::string line;
     std::ifstream req_file;
     req_file.open(str, std::ios::in);
@@ -65,45 +55,18 @@ Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_versi
 	while(std::getline(req_file, line))
     {
         if (!line.empty())
-        {
-			std::cout << "********" << std::endl;
-            std::cout << line << std::endl;
 			parseReq(line);
-			std::cout << "********" << std::endl;
-        }
 	}
-
     req_file.close();
 	if (m_code_ret != 200)
 		std::cerr << "Parsing Error: " << m_code_ret << std::endl;
-
 }
 
 Request::~Request()
-{
-
-}
+{}
 
 void Request::defaultReq()
 {
-
-	// Host: developer.mozilla.org
-	// User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0
-	// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-	// Accept-Language: en-US,en;q=0.5
-	// Accept-Encoding: gzip, deflate, br
-	// Referer: https://developer.mozilla.org/testpage.html
-	// Connection: keep-alive
-	// Upgrade-Insecure-Requests: 1
-	// If-Modified-Since: Mon, 18 Jul 2016 02:36:04 GMT
-	// If-None-Match: "c561c68d0ba92bbeb8b0fff2a9199f722e3a621a"
-	// Cache-Control: max-age=0
-
-
-	/*
-	* search more about the empty values
-	*/
-
 	m_headers["Allow"] = "";
 	m_headers["Content-Language"] = "";
 	m_headers["Content-Location"] = "";
@@ -125,41 +88,23 @@ void Request::defaultReq()
 	m_headers["Transfer-Encoding"] = "";
 	m_headers["Content-Disposition"] = "";
 	m_headers["Cookie"] = "";
-
 }
 
-int	Request::getBodyFlag() {
-	return _bodyFlag;
-}
+int			Request::getBodyFlag() {	return _bodyFlag;	}
 
-size_t Request::getChunkedSize() const
-{
-	return chunked_size;
-}
+size_t		Request::getChunkedSize() const {	return chunked_size;	}
 
-void Request::setBodyFlag(int flag) {
-	_bodyFlag = flag;
-}
+void		Request::setBodyFlag(int flag) {	_bodyFlag = flag;	}
 
-std::string	Request::getMethod() const {
-	return m_method;
-}
+std::string	Request::getMethod() const {	return m_method;	}
 
-int	Request::getCodeRet() const {
-	return m_code_ret;
-}
+int	Request::getCodeRet() const {	return m_code_ret;	}
 
-std::string	Request::getVersion() const {
-	return m_version;
-}
+std::string	Request::getVersion() const {	return m_version;	}
 
-std::string	Request::getPath() const {
-	return m_path;
-}
+std::string	Request::getPath() const {	return m_path;	}
 
-std::string	Request::getQuery() const {
-	return m_query;
-}
+std::string	Request::getQuery() const {	return m_query;	}
 
 std::string	Request::getRaw() const {
 	return m_raw;
@@ -240,7 +185,7 @@ void	Request::setBody(const std::string& str)
 void Request::setQuery()
 {
 	size_t i;
-	// std::cout << RED << "==> " << m_path << " <==" << std::endl;
+	
 	i = m_path.find_first_of('?');
 	if (i != std::string::npos)
 	{
@@ -275,8 +220,6 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 	os << YELLOW << ">Port : " << GREEN << re.getPort() << '\n' << RESET;
 	os << YELLOW << ">Path : " << GREEN << re.getPath() << '\n' << RESET;
 	os << YELLOW << ">Query : " << GREEN << re.getQuery() << '\n' << RESET;
-
-
 	std::map<std::string, std::string> tmp = re.getHeaders();
 	for (it = tmp.begin(); it != tmp.end(); it++)
 	{

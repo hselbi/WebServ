@@ -44,79 +44,6 @@ bool Request::isWhitespace(const std::string &str)
     return true;
 }
 
-
-int								checkEnds(const std::string& str, const std::string& end)
-{
-	size_t	i = str.size();
-	size_t	j = end.size();
-
-	while (j > 0)
-	{
-		i--;
-		j--;
-		if (i < 0 || str[i] != end[j])
-			return (1);
-	}
-	return (0);
-}
-
-bool checkRequ(const std::string &str)
-{
-    size_t	i = str.find("\r\n\r\n");
-	if (i != std::string::npos)
-	{
-		if (str.find("Content-Length: ") == std::string::npos)
-		{
-			if (str.find("Transfer-Encoding: chunked") != std::string::npos)
-			{
-				if (checkEnds(str, "0\r\n\r\n") == 0)
-					return (0);
-				else
-					return (1);
-			}
-			else
-				return (0);
-		}
-
-		size_t	len = std::atoi(str.substr(str.find("Content-Length: ") + 16, 10).c_str());
-		if (str.size() >= len + i + 4)
-			return (0);
-		else
-			return (1);
-	}
-
-	return (1);
-}
-
-
-void Request::chunkedProcess(const std::string &str)
-{
-
-    std::cout << str << std::endl;
-	std::string	head = str.substr(0, str.find("\r\n\r\n"));
-    std::cout << RED << head << RESET <<std::endl;
-	std::string	chunks = str.substr(str.find("\r\n\r\n") + 4, str.size() - 1);
-    std::cout << GREEN << chunks << RESET << std::endl;
-	// std::string	subchunk = chunks.substr(0, 100);
-    // std::cout << YELLOW << subchunk << RESET << std::endl;
-	// std::string	body = "";
-	// int			chunksize = strtol(subchunk.c_str(), NULL, 16);
-    // std::cout << BLUE << chunksize << RESET << std::endl;
-	// size_t		i = 0;
-
-	// while (chunksize)
-	// {
-	// 	i = chunks.find("\r\n", i) + 2;
-	// 	body += chunks.substr(i, chunksize);
-	// 	i += chunksize + 2;
-	// 	subchunk = chunks.substr(i, 100);
-	// 	chunksize = strtol(subchunk.c_str(), NULL, 16);
-	// }
-
-	// std::string req = head + "\r\n\r\n" + body + "\r\n\r\n";
-    // std::cout << PURPLE << req << std::endl;
-}
-
 unsigned int hextodeci( const std::string &hex ) throw() {
  
     unsigned int dec;
@@ -168,8 +95,6 @@ int Request::parseReq(const std::string &str)
     std::string value;
     std::string line;
     size_t i(0);
-    // std::cout << str << std::endl;
-    // std::cout << "======================================================================================================" << std::endl;
     if (_bodyFlag == REQUEST_BODY_NOT_STARTED)
     {
         resetReq();
@@ -184,10 +109,8 @@ int Request::parseReq(const std::string &str)
         }
         setLanguage();
         setQuery();
-        // ! TODO: Add chunked transfer encoding to condition
         if (getMethod() == "POST" &&  m_headers["Content-Length"] != "")
         {
-            // std::cout << "hellow from post" << i << std::endl;
             if (i != std::string::npos)
             {
                 _tmp_file_name = "/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt";
@@ -209,49 +132,27 @@ int Request::parseReq(const std::string &str)
         }
         else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
         {
-        // ! this where i should do things with chunked
             if (i != std::string::npos)
             {
                 _tmp_file_name = "/Users/hselbi/goinfre/webser_trash/" + Utils::generateFileName() + FileExtension(m_headers["Content-Type"]);
                 std::string bd = str.substr(i);
-                // get pos of \r\n
                 size_t cr = bd.find("\r\n");
-                // std::cout << "===> " << bd << std::endl; 
-                // get hex
                 std::string numb = bd.substr(0, cr);
-                // std::cout << "numb >> " << numb << std::endl;
-                // get size of body 
                 chunked_size = hextodeci(numb);
-                // get the rest of body
                 std::string _body = bd.substr(cr + 2, bd.size() - cr - 2);
                 body_size = _body.size();
-                // std::cout << "size of str >> " << str.size() << "\npos of i >> " << i << "\npos of cr >> " << cr << "\nsize of chunked " << chunked_size  << "\nsize of body  >> " << body_size << std::endl;
                 rest_chunk = chunked_size - body_size;
-
                 set_rest_chunk(rest_chunk);
                 _tmp_file.open(_tmp_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::binary);
-                // requestBody.open("/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt", std::ios::out);
-                // setBody(str.substr(i));
                 _tmp_file.write(_body.c_str(), _body.size());
             }
             _bodyFlag = REQUEST_BODY_STARTED;
         }
-
     }
     else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Content-Length"] != "")
-    {
-        // std::cout << "i=> " << str.substr(i) <<std::endl;
         setBody(str);
-    } else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Transfer-Encoding"] == "chunked")
-    {
-            // std::cout << "hellow from chunked2" << std::endl;
-
-        // ~ this where i should do things with chunked
-        // std::cout << "i=> " << str.substr(i) <<std::endl;
+    else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Transfer-Encoding"] == "chunked")
         setBody(str);
-        
-    }
-
     return m_code_ret;
 }
 
@@ -268,7 +169,7 @@ std::vector<std::string>		split(const std::string& str, char c)
 	return tokens;
 }
 
-// comparison,
+
 bool langsComparition (const std::pair<std::string, float> first, const std::pair<std::string, float> second)
 {
   return ( first.second < second.second );
