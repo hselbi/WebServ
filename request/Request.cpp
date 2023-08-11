@@ -232,14 +232,7 @@ void	Request::setBody(const std::string& str)
 	}
     else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
 	{
-		// std::cout <<  str.size() << std::endl;
-		// !!! body logic
-		// bodyContent.clear();
-
 		makeChunkedRequest(str);
-		// _bodyFlag = REQUEST_BODY_COMPLETED;
-
-		// !! if done ==> _bodyFlag = REQUEST_BODY_COMPLETED;
 	}
 
 }
