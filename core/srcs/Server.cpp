@@ -64,11 +64,8 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 
         if (!content_length.empty())
         {
-			// std::cout << get_client(client_socket)->get_request().getBodyFlag() << std::endl;
             if (content_length == "0" || get_client(client_socket)->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
-                {
-					return true;
-				}
+				return true;
         }
         else if (!transfer_encoding.empty())
         {
@@ -79,7 +76,6 @@ bool Server::is_request_completed(std::string &request, long client_socket)
                 {
 					std::cout << BOLDGREEN << "chunked \n" << RESET; 
 					return true;
-				}
             }
         }
         else
@@ -89,7 +85,6 @@ bool Server::is_request_completed(std::string &request, long client_socket)
                 return true;
         }
     }
-
     return false;
 }
 
@@ -175,10 +170,9 @@ void Server::create_server_socket()
 	if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) == -1) // socket, level, level options
 		throw_error("setsockopt SO_REUSEADDR failed");
 
-	// !! TODO: check if this is needed because not working on linux
-	// int nosigpipe = 1;
-	// if (setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == -1) // socket, level, level options
-	// 	throw_error("setsockopt SO_NOSIGPIPE failed");
+	int nosigpipe = 1;
+	if (setsockopt(server_socket, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(int)) == -1) // socket, level, level options
+		throw_error("setsockopt SO_NOSIGPIPE failed");
 
 	int flags;
 	if ((flags = fcntl(server_socket, F_GETFL, 0)) == -1) // get file status flags,
@@ -244,7 +238,6 @@ void Server::handle_incoming_request(long client_socket)
 	memset(received_data, 0, BUFFER_SIZE);
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, MSG_DONTWAIT)) == -1)
 	{
-		std::cout << "Hafid ===> request!!!" << std::endl;
 		drop_client(client_socket);
 		return;
 	}

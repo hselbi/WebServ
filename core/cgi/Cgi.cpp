@@ -1,5 +1,6 @@
 #include "../../includes/core/Cgi.hpp"
 #include "../../includes/core/Client.hpp"
+
 Cgi::Cgi() : _cgi_bin(""), _cgi_script(""), _body(""), _envp(NULL), _argv(NULL), _ready_to_read_from_cgi(1), _cgi_status(0), _pid(0), _status(0) {}
 
 size_t Cgi::_counter = 0;
@@ -28,55 +29,25 @@ std::string Cgi::generate_cgi_output_file_name()
 
 void Cgi::setClient(Client &client) { _client = &client; }
 
-void Cgi::set_body(std::string payload)
-{
-	_body = payload;
-}
+void Cgi::set_body(std::string payload) { _body = payload; }
 
-void Cgi::set_cgi_bin(std::string cgi_bin)
-{
-	_cgi_bin = cgi_bin;
-}
+void Cgi::set_cgi_bin(std::string cgi_bin) { _cgi_bin = cgi_bin; }
 
-void Cgi::set_cgi_script(std::string cgi_script)
-{
-	_cgi_script = cgi_script;
-}
+void Cgi::set_cgi_script(std::string cgi_script) { _cgi_script = cgi_script; }
 
-int Cgi::get_pid()
-{
-	return _pid;
-}
+int Cgi::get_pid() { return _pid; }
 
-int Cgi::get_ready_to_read_from_cgi()
-{
-	return _ready_to_read_from_cgi;
-}
+int Cgi::get_ready_to_read_from_cgi() { return _ready_to_read_from_cgi; }
 
-void Cgi::set_ready_to_read_from_cgi(int ready_to_read_from_cgi)
-{
-	_ready_to_read_from_cgi = ready_to_read_from_cgi;
-}
+void Cgi::set_ready_to_read_from_cgi(int ready_to_read_from_cgi) { _ready_to_read_from_cgi = ready_to_read_from_cgi; }
 
-int Cgi::get_cgi_status()
-{
-	return _cgi_status;
-}
+int Cgi::get_cgi_status() { return _cgi_status; }
 
-void Cgi::set_cgi_status(int cgi_status_code)
-{
-	_cgi_status = cgi_status_code;
-}
+void Cgi::set_cgi_status(int cgi_status_code) { _cgi_status = cgi_status_code; }
 
-int Cgi::get_status()
-{
-	return _status;
-}
+int Cgi::get_status() { return _status; }
 
-void Cgi::set_status(int status)
-{
-	_status = status;
-}
+void Cgi::set_status(int status) { _status = status; }
 
 void Cgi::clean_env_vars()
 {
@@ -190,7 +161,6 @@ std::string Cgi::exec_cgi()
 
 std::string Cgi::start_cgi(std::string binary, std::string script_path)
 {
-
 	set_cgi_bin(binary);
 	set_cgi_script(script_path);
 	init_env_vars();
