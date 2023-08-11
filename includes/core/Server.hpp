@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <vector>
 #include "Client.hpp"
-#include "utils.hpp"
 
 #include "../config/Config.hpp"
 #include "../config/ConfServer.hpp"
@@ -63,15 +62,11 @@ struct Server
 	void drop_client(long client_id);
 	bool is_connection_close(std::string &request);
 	void throw_error(std::string error_message);
-	bool isReqFinished(int client_socket);
 
 	Client *get_client(long client_id);
 	void match_client_request_to_server_block(long client_socket);
 	std::vector<long> &get_server_sockets();
 	void disconnect_connection(int client_socket);
-	void 	chunkedPost(const char received_data[], long client_socket, size_t request_index);
-	void    recursiveFindHex(const char received_data[], long client_socket, size_t pos);
-
 
 private:
 	Config _config;

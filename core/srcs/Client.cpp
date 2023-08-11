@@ -7,26 +7,15 @@ Client::~Client() {}
 
 std::string &Client::get_request_data() { return _request_buffer; }
 
-void Client::append_request_data(char *request_buffer, long read_bytes)
-{
-	_request_buffer.append(request_buffer, read_bytes);
-}
+void Client::append_request_data(char *request_buffer, long read_bytes) { _request_buffer.append(request_buffer, read_bytes); }
 
 std::string &Client::get_response_data() { return _response_buffer; }
 
-void Client::append_response_data(std::string &response_buffer)
-{
-	_response_buffer.append(response_buffer);
-}
+void Client::append_response_data(std::string &response_buffer) { _response_buffer.append(response_buffer); }
 
-void Client::reset_request_data()
-{
-	_request_buffer.clear();
-}
-void Client::reset_response_data()
-{
-	_response_buffer.clear();
-}
+void Client::reset_request_data() { _request_buffer.clear(); }
+
+void Client::reset_response_data() { _response_buffer.clear(); }
 
 int Client::get_res_status() { return _res_status; }
 
