@@ -35,15 +35,15 @@ bool Response::getAutoIndex()
 
 std::string Response::getErrorPagePath(int statusCode)
 {
-    // TODO: check if can location have also error_pages
 	if (_location && _location->error_pages.find(statusCode) != _location->error_pages.end()
-		&& Utils::fileExists(_location->error_pages[statusCode]))
+		&& Utils::fileExists(getCorrectPath(_location->error_pages[statusCode])))
 	{
-		return _location->error_pages[statusCode];
+		return getCorrectPath(_location->error_pages[statusCode]);
 	}
+	
     std::map<int, std::string>  pages = _client->get_server_block().getErrorPages();
-    if (pages.find(statusCode) != pages.end() && Utils::fileExists(pages[statusCode]))
-		return pages[statusCode];
+    if (pages.find(statusCode) != pages.end() && Utils::fileExists(getCorrectPath(pages[statusCode])))
+		return getCorrectPath(pages[statusCode]);
 	else if (Utils::fileExists("./default_pages/" + Utils::toString(statusCode) + ".html"))
 		return "./default_pages/" + Utils::toString(statusCode) + ".html";
 	else
@@ -102,7 +102,6 @@ std::string Response::getContentType(const std::string &filePath)
 
 bool	Response::getMatchedLocation()
 {
-	// TODO: Verify this function (!! High Priority)
 	std::vector<ConfLoca> locations = _client->get_server_block().getLocations();
 	std::string requestPath = _client->get_request().getPath();
 	size_t max_length = 0;
@@ -115,21 +114,16 @@ bool	Response::getMatchedLocation()
 			index = i;
 		}
 	}
-
 	if (index != -1)
 	{
 		if (_location == NULL)
 			_location = new ConfLoca(locations[index]);
-		if (isMethodAllowedInLocation())
-		{
-			// std::cout << "Allowed method in location" << std::endl;
-			return true;
-		}
-		else
+
+		if (isLocationHaveRedirection())
 			return false;
+		return isMethodAllowedInLocation();
 
 	}
-	// std::cout << "No matched location" << std::endl;
 	errorPages(404);
 	return false;
 }
@@ -145,15 +139,5 @@ std::string Response::getRequestPathFile()
 	return  root + path;
 }
 
-
-
-
-ConfLoca * Response::getLocation()
-{
-	return _location;
-}
-
-bool Response::get_cgi_status()
-{
-	return _have_cgi;
-}
+ConfLoca * Response::getLocation() { return _location; }
+bool Response::get_cgi_status() { return _have_cgi; }

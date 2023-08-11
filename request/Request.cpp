@@ -1,11 +1,6 @@
 #include "../includes/request/Request.hpp"
 #include "../includes/includes.hpp"
 
-// done some if request its already is done
-
-
-
-
 std::vector<std::string>		Request::initMethods()
 {
 	std::vector<std::string>	methods;
@@ -19,15 +14,15 @@ std::vector<std::string>		Request::initMethods()
 
 std::vector<std::string>	Request::methods = Request::initMethods();
 
-
-Request::Request(): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),  _req_status(REQUEST_NOT_COMPLETED)
-{
-	// std::cout << "Request Constructor" << std::endl;
-}
+Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),
+	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary(""), bodyContent(""), _carriageReturn(false), _lineFeed(false), _beforeHex(false), _hex(""), _rest(-1)
+{}
 
 void Request::resetReq(){
+	body_size = 0;
+	chunked_size = 0;
+	rest_chunk = 0;
 	m_method = "";
-	m_body = "";
 	m_code_ret = 200;
 	m_version = "";
 	m_path = "";
@@ -39,14 +34,17 @@ void Request::resetReq(){
 	m_language.clear();
 	defaultReq();
 	_req_status = REQUEST_NOT_COMPLETED;
+	_bodyFlag = REQUEST_BODY_NOT_STARTED;
+	_tmp_file_name = "";
+	_boundary = "";
+	_tmp_file.close();
+	bodyContent = "";
 }
 
-Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
+Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
 {
-	// std::cout << "Request constructor" << std::endl;
 	resetReq();
 	m_env_cgi.clear();
-
 	std::string line;
     std::ifstream req_file;
     req_file.open(str, std::ios::in);
@@ -57,45 +55,18 @@ Request::Request(const std::string &str): m_method(""), m_body(""), m_code_ret(2
 	while(std::getline(req_file, line))
     {
         if (!line.empty())
-        {
-			std::cout << "********" << std::endl;
-            std::cout << line << std::endl;
 			parseReq(line);
-			std::cout << "********" << std::endl;
-        }
 	}
-
     req_file.close();
 	if (m_code_ret != 200)
 		std::cerr << "Parsing Error: " << m_code_ret << std::endl;
-
 }
 
 Request::~Request()
-{
-
-}
+{}
 
 void Request::defaultReq()
 {
-
-	// Host: developer.mozilla.org
-	// User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0
-	// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
-	// Accept-Language: en-US,en;q=0.5
-	// Accept-Encoding: gzip, deflate, br
-	// Referer: https://developer.mozilla.org/testpage.html
-	// Connection: keep-alive
-	// Upgrade-Insecure-Requests: 1
-	// If-Modified-Since: Mon, 18 Jul 2016 02:36:04 GMT
-	// If-None-Match: "c561c68d0ba92bbeb8b0fff2a9199f722e3a621a"
-	// Cache-Control: max-age=0
-
-
-	/*
-	* search more about the empty values
-	*/
-
 	m_headers["Allow"] = "";
 	m_headers["Content-Language"] = "";
 	m_headers["Content-Location"] = "";
@@ -117,33 +88,23 @@ void Request::defaultReq()
 	m_headers["Transfer-Encoding"] = "";
 	m_headers["Content-Disposition"] = "";
 	m_headers["Cookie"] = "";
-
 }
 
+int			Request::getBodyFlag() {	return _bodyFlag;	}
 
-std::string	Request::getMethod() const {
-	return m_method;
-}
+size_t		Request::getChunkedSize() const {	return chunked_size;	}
 
-std::string	Request::getBody() const {
-	return m_body;
-}
+void		Request::setBodyFlag(int flag) {	_bodyFlag = flag;	}
 
-int	Request::getCodeRet() const {
-	return m_code_ret;
-}
+std::string	Request::getMethod() const {	return m_method;	}
 
-std::string	Request::getVersion() const {
-	return m_version;
-}
+int	Request::getCodeRet() const {	return m_code_ret;	}
 
-std::string	Request::getPath() const {
-	return m_path;
-}
+std::string	Request::getVersion() const {	return m_version;	}
 
-std::string	Request::getQuery() const {
-	return m_query;
-}
+std::string	Request::getPath() const {	return m_path;	}
+
+std::string	Request::getQuery() const {	return m_query;	}
 
 std::string	Request::getRaw() const {
 	return m_raw;
@@ -178,28 +139,53 @@ void	Request::setCodeRet(int code) {
 	m_code_ret = code;
 }
 
+void Request::set_size_body(size_t size)
+{
+	this->body_size = size;
+}
+
+
+void	Request::set_rest_chunk(size_t stops)
+{
+	chunked_size = stops;
+}
 std::string	Request::getHost() const {
 	return m_host;
 }
 
+std::string	Request::getBodyFileName() {
+	return _tmp_file_name;
+}
 
 void	Request::setBody(const std::string& str)
 {
-	// std::cout << str << "bodyy ==> "<< this->m_body << std::endl;
-	if (str.size() == 0)
-		return ;
-	char	strip[] = {'\n', '\r'};
+    if (getMethod() == "POST" &&  m_headers["Content-Length"] != "")
+	{
+		std::string tmp = str;
+		if (tmp.size() == 0)
+			return ;
+		else if (tmp.size() > REQUEST_BUFFER_SIZE)
+			tmp = tmp.substr(0, REQUEST_BUFFER_SIZE);
+		if (_tmp_file.is_open())
+			_tmp_file << tmp;
+		
+		if (_boundary != "" && tmp.find(_boundary) != std::string::npos)
+		{
+			_bodyFlag = REQUEST_BODY_COMPLETED;
+			_tmp_file.close();
+		}
+	}
+    else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
+	{
+		makeChunkedRequest(str);
+	}
 
-	this->m_body.assign(str);
-
-	if (m_body.find("\r\n\r\n") != std::string::npos)
-		m_body.resize(m_body.find("\r\n\r\n"));
 }
 
 void Request::setQuery()
 {
 	size_t i;
-	// std::cout << RED << "==> " << m_path << " <==" << std::endl;
+	
 	i = m_path.find_first_of('?');
 	if (i != std::string::npos)
 	{
@@ -207,7 +193,6 @@ void Request::setQuery()
 		m_path = m_path.substr(0, i);
 	}
 }
-
 
 int Request::setPort()
 {
@@ -224,7 +209,7 @@ int Request::setPort()
 	return m_port;
 }
 
-#include <map>
+
 
 std::ostream&		operator<<(std::ostream& os, const Request& re)
 {
@@ -235,15 +220,12 @@ std::ostream&		operator<<(std::ostream& os, const Request& re)
 	os << YELLOW << ">Port : " << GREEN << re.getPort() << '\n' << RESET;
 	os << YELLOW << ">Path : " << GREEN << re.getPath() << '\n' << RESET;
 	os << YELLOW << ">Query : " << GREEN << re.getQuery() << '\n' << RESET;
-
-
 	std::map<std::string, std::string> tmp = re.getHeaders();
 	for (it = tmp.begin(); it != tmp.end(); it++)
 	{
 		if (it->second != "")
 			os << YELLOW << it->first << RED << ": " << it->second << RESET << '\n';
 	}
-	os << '\n' << "Request body :\n" << GREEN << re.getBody() << '\n' << RESET;
 
 	return os;
 }
@@ -255,7 +237,6 @@ Request &Request::operator=(const Request &other)
 		m_method = other.m_method;
 		m_path = other.m_path;
 		m_version = other.m_version;
-		m_body = other.m_body;
 		m_query = other.m_query;
 		m_raw = other.m_raw;
 		m_headers = other.m_headers;
@@ -275,7 +256,6 @@ Request::Request(const Request &other)
 		m_method = other.m_method;
 		m_path = other.m_path;
 		m_version = other.m_version;
-		m_body = other.m_body;
 		m_query = other.m_query;
 		m_raw = other.m_raw;
 		m_headers = other.m_headers;
@@ -293,4 +273,5 @@ void Request::set_req_status(int status) { _req_status = status; }
 int Request::get_req_status() { return _req_status; }
 
 
+// ! there's chencked it's shouldn't be length
 // ! need to

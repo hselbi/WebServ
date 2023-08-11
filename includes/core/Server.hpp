@@ -69,6 +69,9 @@ struct Server
 	void match_client_request_to_server_block(long client_socket);
 	std::vector<long> &get_server_sockets();
 	void disconnect_connection(int client_socket);
+	void 	chunkedPost(const char received_data[], long client_socket, size_t request_index);
+	void    recursiveFindHex(const char received_data[], long client_socket, size_t pos);
+
 
 private:
 	Config _config;

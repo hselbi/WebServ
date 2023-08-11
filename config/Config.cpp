@@ -399,6 +399,16 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 		// std::cout << "autoindex: " << value << std::endl;
 		loca->autoindex = (value == "on" ? ON : OFF);
 	}
+	else if (key == "cgi_status")
+	{
+		// std::cout << "autoindex: " << value << std::endl;
+		loca->cgi_status = (value == "on" ? true : false);
+	}
+	else if (key == "upload_status")
+	{
+		// std::cout << "autoindex: " << value << std::endl;
+		loca->upload_status = (value == "on" ? true : false);
+	}
     else if (key == "index")
     {
 
@@ -452,6 +462,15 @@ int Config::setLocaValue(ConfLoca *loca, const std::string key, const std::strin
 			return -1;
 
 		loca->cgi_infos[tmp[0]] = tmp[1];
+	}
+	else if (key == "return")
+	{
+		std::vector<std::string> tmp = split(value, ' ');
+		loca->redirect_status = atoi(tmp[0].c_str());
+		if (tmp.size() == 2)
+			loca->redirect_url = tmp[1];
+		else
+			return -1;
 	}
 	else
 	{

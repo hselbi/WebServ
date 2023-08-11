@@ -3,7 +3,7 @@
 
 ConfServer::ConfServer()
 {
-	client_body_limit = 1024;
+	client_body_limit = -1;
 
 	struct timeval tv;
 	tv.tv_sec = 60;
@@ -27,7 +27,7 @@ int ConfServer::getServerId()
 
 std::string ConfServer::getServerName()
 {
-	return server_name;
+	return (server_name != "" ? server_name : host + ":" + port);
 }
 
 std::string ConfServer::getHost()
@@ -126,7 +126,6 @@ void ConfServer::print_server_info()
 					  << error_pages;
 		else
 			std::cout << GREEN << "(empty)\n";
-
 	}
 	else
 	{

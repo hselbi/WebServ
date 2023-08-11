@@ -90,7 +90,8 @@ void	Response::deleteFile()
 		responseHeader.m_headers["Content-Length"] = "0";
 		responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
 		_header_buffer = Utils::ResponseHeaderToString(responseHeader);
-		setResStatus(ON_PROCESS);
+		_client->append_response_data(_header_buffer);
+		setResStatus(DONE);
 	}
 }
 

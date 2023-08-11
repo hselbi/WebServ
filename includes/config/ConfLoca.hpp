@@ -26,8 +26,11 @@ class ConfLoca
 
         e_autoindex autoindex;
         std::map<int, std::string> error_pages;
-        // need to be done ...
-        // error_pages;
+        
+        int         redirect_status;
+        bool        cgi_status;
+        bool        upload_status;
+        std::string redirect_url;
 
 
         ConfLoca();
@@ -37,8 +40,12 @@ class ConfLoca
         ConfLoca(const ConfLoca &copy);
         ConfLoca &operator=(const ConfLoca &copy);
         static MethodType strtoMethod(std::string str);
-        static std::string MethodToStr(MethodType method);
         void print_loca_info();
+        int getClientBodyLimit();
+        int getRedirectStatus();
+        std::string getRedirectUrl();
+        bool getCgiStatus();
+        bool getUploadStatus();
 
 };
 

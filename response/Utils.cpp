@@ -1,5 +1,6 @@
 #include "../includes/response/Utils.hpp"
 
+size_t Utils::counter = 0;
 
 std::string Utils::getWebservRootPath() {
     int		bufferSize = 2048;
@@ -137,4 +138,13 @@ bool	Utils::isValidURI(const std::string& uri) {
 			return false;
 	}
     return true;
+}
+
+
+std::string Utils::generateFileName()
+{
+	srand(time(NULL));
+	std::string name =  std::to_string(rand()) + std::to_string(rand()) + std::to_string(counter++);
+
+    return name;
 }

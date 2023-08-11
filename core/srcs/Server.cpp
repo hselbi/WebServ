@@ -64,21 +64,22 @@ bool Server::is_request_completed(std::string &request, long client_socket)
 
         if (!content_length.empty())
         {
-            if (content_length == "0")
-                return true;
-            int expected_length = std::stoi(content_length);
-			// std::cout << RED  << "content_length: " << content_length << RESET << std::endl;
-			// std::cout << YELLOW << "get_client(client_socket)->get_request().getBody().size(): " << get_client(client_socket)->get_request().getBody().size() << RESET <<  std::endl;
-            // if (expected_length == get_client(client_socket)->get_request().getBody().size())
-                return true;
-             // !! check the flag
-
+			// std::cout << get_client(client_socket)->get_request().getBodyFlag() << std::endl;
+            if (content_length == "0" || get_client(client_socket)->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
+                {
+					return true;
+				}
         }
         else if (!transfer_encoding.empty())
         {
             if (transfer_encoding == "chunked")
             {
                 // !! check the flag
+				 if (get_client(client_socket)->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
+                {
+					std::cout << "chunked \n";
+					return true;
+				}
             }
         }
         else
@@ -222,6 +223,7 @@ void Server::send_response(long client_socket)
 
 void Server::handle_outgoing_response(long client_socket)
 {
+
 	build_response(get_client(client_socket)->get_request(), client_socket);
 
 	send_response(client_socket);
@@ -242,6 +244,7 @@ void Server::handle_incoming_request(long client_socket)
 	memset(received_data, 0, BUFFER_SIZE);
 	if ((bytes_read = recv(client_socket, received_data, BUFFER_SIZE, MSG_DONTWAIT)) == -1)
 	{
+		std::cout << "Hafid ===> request!!!" << std::endl;
 		drop_client(client_socket);
 		return;
 	}
@@ -253,7 +256,7 @@ void Server::handle_incoming_request(long client_socket)
 	else
 	{
 		get_client(client_socket)->append_request_data(received_data, bytes_read);
-		feed_request(std::string(received_data), client_socket);
+		feed_request(std::string(received_data, bytes_read), client_socket);
 		if (is_request_completed(get_client(client_socket)->get_request_data(), client_socket))
 		{
 			match_client_request_to_server_block(client_socket);
@@ -262,6 +265,7 @@ void Server::handle_incoming_request(long client_socket)
 		}
 	}
 }
+
 
 void Server::accept_new_connection(long server_socket)
 {

@@ -1,7 +1,6 @@
 #include "../includes/response/Response.hpp"
 #include "../includes/core/Client.hpp"
 
-
 std::string Response::isDirHasIndexFiles()
 {
     std::string dirPath = getRequestPathFile();
@@ -16,8 +15,6 @@ std::string Response::isDirHasIndexFiles()
 
     return "";
 }
-
-
 
 bool Response::isServerHaveRedirection()
 {
@@ -52,6 +49,42 @@ bool Response::isServerHaveRedirection()
 	return false;
 }
 
+bool Response::isLocationHaveRedirection()
+{
+	t_responseHeader	responseHeader;
+	int 				redirectStatus;
+	if (_location && _location->redirect_status != -1)
+	{
+		redirectStatus = _location->getRedirectStatus();
+		if (redirectStatus == 301 || redirectStatus == 302 || redirectStatus == 307)
+		{
+			responseHeader.statusCode = redirectStatus;
+			responseHeader.statusMessage = Utils::getStatusMessage(redirectStatus);
+			responseHeader.m_headers["Location"] = _location->getRedirectUrl();
+			responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
+
+			_header_buffer = Utils::ResponseHeaderToString(responseHeader);
+			_client->append_response_data(_header_buffer);
+			setResStatus(DONE);
+			return true;
+		}
+		else if (redirectStatus != -1)
+		{
+			responseHeader.statusCode = redirectStatus;
+			responseHeader.statusMessage = Utils::getStatusMessage(redirectStatus);
+			responseHeader.m_headers["Content-Type"] = "application/octet-stream";
+			responseHeader.m_headers["Content-Length"] = "0";
+			responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
+
+			_header_buffer = Utils::ResponseHeaderToString(responseHeader);
+			_client->append_response_data(_header_buffer);
+			setResStatus(DONE);
+			return true;
+		}
+	}
+
+	return false;
+}
 
 bool Response::isMethodAllowedInLocation()
 {
@@ -64,10 +97,17 @@ bool Response::isMethodAllowedInLocation()
 			return true;
 		else
 		{
-			// std::cout << "Method not allowed in location" << std::endl;
 			errorPages(405);
 			return false;
 		}
 	}
+	return false;
+}
+
+bool Response::checkStatusCgi()
+{
+	if (_location && _location->getCgiStatus() &&  _location->cgi_infos.size() > 0)
+		return true;
+	
 	return false;
 }

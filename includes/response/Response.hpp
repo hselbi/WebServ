@@ -29,6 +29,13 @@ class Response {
 
 
 	private:
+		std::string			_response;
+		std::string			_type;
+		std::string			_path;
+		std::string			_body;
+		int					_code;
+
+		
 		Client				*_client;
 		ConfLoca 			*_location;
 		std::ifstream		_file;
@@ -65,5 +72,7 @@ class Response {
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
 		void					setResStatus(int status);
+		bool					isLocationHaveRedirection();
+		bool					checkStatusCgi();
 
 };

@@ -44,118 +44,119 @@ bool Request::isWhitespace(const std::string &str)
     return true;
 }
 
-// bool Request::isFinished(std::string &str, size_t &i)
-// {
-//     if (m_code_ret == 400)
-//         return true;
-//     if (!m_headers["Content-Length"].empty())
-//     {
-//         if (m_headers["Content-Length"] == "0")
-//             return true;
-//         if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-//             return true;
-//     }
-//     if (!m_headers["Transfer-Encoding"].empty())
-//     {
-//         if (m_headers["Transfer-Encoding"] == "chunked")
-//         {
-//             if (str.size() == 0)
-//                 return false;
-//             if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
+unsigned int hextodeci( const std::string &hex ) throw() {
+ 
+    unsigned int dec;
+    std::stringstream ss;
 
-bool Request::isFinished()
-{
-    if (m_code_ret == 400)
-        return true;
-    if (!m_headers["Content-Length"].empty())
-    {
-        if (m_headers["Content-Length"] == "0")
-            return true;
-        if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-            return true;
-    }
-    if (!m_headers["Transfer-Encoding"].empty())
-    {
-        if (m_headers["Transfer-Encoding"] == "chunked")
-        {
-            if (m_body.size() == 0)
-                return false;
-            if (m_body[m_body.size() - 1] == '\n' && m_body[m_body.size() - 2] == '\r')
-                return true;
-        }
-    }
-    return false;
+    ss << std::hex << hex;
+    ss >> dec;
+
+    return dec;
 }
 
-// bool Request::isFinished(const std::string &str)
-// {
-//     if (m_code_ret == 400)
-//         return true;
-//     if (!m_headers["Content-Length"].empty())
-//     {
-//         if (m_headers["Content-Length"] == "0")
-//             return true;
-//         if (std::stoi(m_headers["Content-Length"]) == m_body.size())
-//             return true;
-//     }
-//     if (!m_headers["Transfer-Encoding"].empty())
-//     {
-//         if (m_headers["Transfer-Encoding"] == "chunked")
-//         {
-//             if (str.size() == 0)
-//                 return false;
-//             if (str[str.size() - 1] == '\n' && str[str.size() - 2] == '\r')
-//                 return true;
-//         }
-//     }
-//     return false;
-// }
-
-
+std::string FileExtension(std::string path)
+{
+    if (path.find("text/css") != std::string::npos)
+        return ".css";
+    if (path.find("text/csv") != std::string::npos)
+        return ".csv";
+    if (path.find("image/gif") != std::string::npos)
+        return "gif";
+    if (path.find("text/htm") != std::string::npos)
+        return ".html";
+    if (path.find("text/html") != std::string::npos)
+        return ".html";
+    if (path.find("video/mp4") != std::string::npos)
+        return ".mp4";
+    if (path.find("image/x-icon") != std::string::npos)
+        return ".ico";
+    if (path.find("image/jpeg") != std::string::npos)
+        return ".jpeg";
+    if (path.find("image/jpg") != std::string::npos)
+        return ".jpeg";
+    if (path.find("application/javascript") != std::string::npos)
+        return ".js";
+    if (path.find("application/json") != std::string::npos)
+        return ".json";
+    if (path.find("image/png") != std::string::npos)
+        return ".png";
+    if (path.find("application/pdf") != std::string::npos)
+        return ".pdf";
+    if (path.find("image/svg+xml") != std::string::npos)
+        return ".svg";
+    if (path.find("text/plain") != std::string::npos)
+        return ".txt";
+    return "";
+}
 int Request::parseReq(const std::string &str)
 {
-	// std::cout << "here parser!!" << std::endl;
-
     std::string key;
     std::string value;
     std::string line;
     size_t i(0);
-    resetReq();
-    reqLine(lineNext(str, i));
-    /*
-    *   check if line is not equal to "\r\n" or "" or 400
-    */
-    // while ((line = lineNext(tmp, i)) != "\r" && line != "" && this->m_code_ret != 400)
-    while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret != 400)
-	{
-		key = keyReader(line);
-		value = valueReader(line);
-        if (m_headers.count(key))
-            m_headers[key] = value;
-        check_headers(key, value);
-		// if (key.find("Secret") != std::string::npos)
-		// 	this->_env_for_cgi[formatHeaderForCGI(key)] = value;
-	}
-    setLanguage();
-	// std::cout << "===>" << i << std::endl;
-
-
-    if (i != std::string::npos)
+    if (_bodyFlag == REQUEST_BODY_NOT_STARTED)
     {
-		// std::cout << str << std::endl;
-        setBody(str.substr(i));
+        resetReq();
+        reqLine(lineNext(str, i));
+        while (!isWhitespace(line = lineNext(str, i)) && line != "" && this->m_code_ret == 200)
+        {
+            key = keyReader(line);
+            value = valueReader(line);
+            if (m_headers.count(key))
+                m_headers[key] = value;
+            check_headers(key, value);
+        }
+        setLanguage();
+        setQuery();
+        if (getMethod() == "POST" &&  m_headers["Content-Length"] != "")
+        {
+            if (i != std::string::npos)
+            {
+                _tmp_file_name = "/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt";
+                _tmp_file.open(_tmp_file_name, std::ios::out);
+                setBody(str.substr(i));
+            }
+            int pos_boundary = m_headers["Content-Type"].find("boundary=");
+            if (pos_boundary != std::string::npos)
+            {
+                _boundary = m_headers["Content-Type"].substr(pos_boundary + 9) + "--";
+                if (_boundary != "" && str.substr(i).find(_boundary) != std::string::npos)
+                {
+                    _bodyFlag = REQUEST_BODY_COMPLETED;
+                    _tmp_file.close();
+                }
+                else
+                    _bodyFlag = REQUEST_BODY_STARTED;
+            }
+        }
+        else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
+        {
+            if (i != std::string::npos)
+            {
+                _tmp_file_name = "/Users/hselbi/goinfre/webser_trash/" + Utils::generateFileName() + FileExtension(m_headers["Content-Type"]);
+                std::string bd = str.substr(i);
+                size_t cr = bd.find("\r\n");
+                std::string numb = bd.substr(0, cr);
+                chunked_size = hextodeci(numb);
+                std::string _body = bd.substr(cr + 2, bd.size() - cr - 2);
+                body_size = _body.size();
+                rest_chunk = chunked_size - body_size;
+                set_rest_chunk(rest_chunk);
+                _tmp_file.open(_tmp_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::binary);
+                _tmp_file.write(_body.c_str(), _body.size());
+            }
+            _bodyFlag = REQUEST_BODY_STARTED;
+        }
     }
-    setQuery();
-    // file.close();
-
-
+    else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Content-Length"] != "")
+        setBody(str);
+    else if (_bodyFlag == REQUEST_BODY_STARTED && m_headers["Transfer-Encoding"] == "chunked")
+        setBody(str);
     return m_code_ret;
 }
+
+
 
 std::vector<std::string>		split(const std::string& str, char c)
 {
@@ -168,7 +169,7 @@ std::vector<std::string>		split(const std::string& str, char c)
 	return tokens;
 }
 
-// comparison,
+
 bool langsComparition (const std::pair<std::string, float> first, const std::pair<std::string, float> second)
 {
   return ( first.second < second.second );
@@ -349,11 +350,9 @@ std::string Request::lineNext(const std::string &str, size_t &i)
     if (i == std::string::npos)
         return "";
     j = str.find_first_of('\n', i);
-    // std::cout << "i = " << i << " j = " << j << std::endl;
     line = str.substr(i, j - i);
     if (line[line.size() - 1] == '\r')
     {
-        // std::cout << "line = " << line << std::endl;
         if (line.size())
 		    line.resize(line.size() - 1);
     }
