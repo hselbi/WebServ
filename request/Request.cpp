@@ -21,7 +21,7 @@ std::vector<std::string>	Request::methods = Request::initMethods();
 
 
 Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),
-	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary(""), bodyContent(""), _carriageReturn(false), _lineFeed(false), _beforeHex(false), _hex("")
+	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary(""), bodyContent(""), _carriageReturn(false), _lineFeed(false), _beforeHex(false), _hex(""), _rest(-1)
 {
 	// std::cout << "Request Constructor" << std::endl;
 }

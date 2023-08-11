@@ -39,6 +39,7 @@ private:
         size_t chunked_size;
         size_t rest_chunk;
         size_t body_size;
+        int _rest;
         int _bodyFlag;
         bool _carriageReturn;
         bool _lineFeed;
