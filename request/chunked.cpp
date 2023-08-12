@@ -70,7 +70,6 @@ void Request::makeChunkedRequest(const std::string &str)
 {
     size_t buffer_size = getChunkedSize();
 	long bytes_size = str.size();
-    std::cerr << bytes_size <<" / " << buffer_size << std::endl;
     if (_beforeHex)
     {
         if (_rest == 1)

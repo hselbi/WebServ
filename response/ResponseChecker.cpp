@@ -4,7 +4,10 @@
 std::string Response::isDirHasIndexFiles()
 {
     std::string dirPath = getRequestPathFile();
-    std::vector<std::string> indexFiles = _client->get_server_block().getIndex();
+	std::vector<std::string> indexFiles;
+
+	indexFiles = (_location->index.size() > 0) ? _location->index : _client->get_server_block().getIndex();
+
     for (size_t i = 0; i < indexFiles.size(); i++)
     {
         if (Utils::fileExists(dirPath + indexFiles[i]))

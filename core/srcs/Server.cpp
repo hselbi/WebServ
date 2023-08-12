@@ -23,6 +23,7 @@ void Server::cleanup_by_closing_all_sockets()
 void Server::load_config_file(const char *config_file)
 {
 	_server_blocks = _config.parser(config_file);
+
 }
 
 std::vector<long> &Server::get_server_sockets() { return _server_sockets; }
@@ -73,7 +74,7 @@ bool Server::is_request_completed(std::string &request, long client_socket)
             {
 				if (get_client(client_socket)->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
                 {
-					std::cout << BOLDGREEN << "chunked \n" << RESET; 
+					std::cout << BOLDGREEN << "Uploading done. \n" << RESET; 
 					return true;
 				}
             }
@@ -157,7 +158,7 @@ void Server::bind_socket(long server_socket_id, std::string host, int port)
 	if (inet_aton(host.c_str(), (struct in_addr *)&_server_addr.sin_addr.s_addr) == 0) // !! host.c_str() should be valid ip address
 		throw_error("inet_aton failed, invalid ip address format");
 	if (bind(get_server_sockets()[server_socket_id], (struct sockaddr *)&_server_addr, sizeof(struct sockaddr_in)) == -1)
-		throw_error("server socket binding failed");
+		throw_error("Host or Port is invalid.");
 }
 
 void Server::create_server_socket()
@@ -198,6 +199,7 @@ void Server::disconnect_connection(int client_socket)
 void Server::build_response(Request &request, long client_socket) // generate a response
 {
 	get_client(client_socket)->get_response().processing();
+	
 }
 
 void Server::send_response(long client_socket)
@@ -242,10 +244,7 @@ void Server::handle_incoming_request(long client_socket)
 		return;
 	}
 	else if (bytes_read == 0)
-	{
-		std::cerr << "Connection closed by the client on socket " << client_socket << " on Port: " << _server_port[get_client(client_socket)->get_server_socket()] << "\n";
 		drop_client(client_socket);
-	}
 	else
 	{
 		get_client(client_socket)->append_request_data(received_data, bytes_read);

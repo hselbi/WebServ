@@ -104,7 +104,6 @@ void Response::Method_POST()
 {
     std::string filePath = getRequestPathFile();
     std::string index = "";
-
     if (Utils::fileExists(filePath))
     {
         if (Utils::isDirectory(filePath))

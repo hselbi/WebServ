@@ -122,7 +122,6 @@ void Cgi::init_env_vars()
 
 std::string Cgi::exec_cgi()
 {
-
 	std::string tmp_filename = generate_cgi_output_file_name();
 	FILE *cgi_output_file = fopen(tmp_filename.c_str(), "w+");
 	if (!cgi_output_file)
@@ -151,7 +150,6 @@ std::string Cgi::exec_cgi()
 	}
 
 	_ready_to_read_from_cgi = waitpid(_pid, &_status, WNOHANG); // if == 0, child process still running, if >-1 child process terminated
-
 	fclose(cgi_output_file);
 	if (read_body_from_file)
 		fclose(read_body_from_file);

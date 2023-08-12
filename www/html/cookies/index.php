@@ -22,7 +22,7 @@
         <hr>
         <h3>Create a cookies</h3>
 
-        <form action="cookies.php" method="post">
+        <form action="cookies.php" method="POST">
 
                 <table>
                     <tr>

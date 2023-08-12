@@ -15,7 +15,7 @@ std::vector<std::string>		Request::initMethods()
 std::vector<std::string>	Request::methods = Request::initMethods();
 
 Request::Request(): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query(""),
-	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary(""), bodyContent(""), _carriageReturn(false), _lineFeed(false), _beforeHex(false), _hex(""), _rest(-1)
+	  _req_status(REQUEST_NOT_COMPLETED), _bodyFlag(REQUEST_BODY_NOT_STARTED), _tmp_file_name(""), _boundary(""), bodyContent(""), _carriageReturn(false), _lineFeed(false), _beforeHex(false), _hex(""), _rest(-1), m_host("127.0.0.1")
 {}
 
 void Request::resetReq()
@@ -40,6 +40,7 @@ void Request::resetReq()
 	_boundary = "";
 	_tmp_file.close();
 	bodyContent = "";
+	m_host = "127.0.0.1";
 }
 
 Request::Request(const std::string &str): m_method(""), m_code_ret(200), m_version(""), m_path(""), m_port(80), m_raw(""), m_query("")
@@ -126,6 +127,7 @@ void	Request::set_req_status(int status) { _req_status = status; }
 
 void	Request::setBody(const std::string& str)
 {
+	
     if (getMethod() == "POST" &&  m_headers["Content-Length"] != "")
 	{
 		std::string tmp = str;
@@ -141,11 +143,21 @@ void	Request::setBody(const std::string& str)
 			_bodyFlag = REQUEST_BODY_COMPLETED;
 			_tmp_file.close();
 		}
+		else if (_boundary == "" && m_headers["Content-Type"].find("boundary=") == std::string::npos)
+		{
+			_tmp_file.seekg(0, std::ios::end);
+			std::streampos fileSize = _tmp_file.tellg();
+			_tmp_file.seekg(0, std::ios::beg);
+			
+			if ( fileSize == atol(m_headers["Content-Length"].c_str()))
+			{
+				_bodyFlag = REQUEST_BODY_COMPLETED;
+				_tmp_file.close();
+			}
+		}
 	}
     else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
-	{
 		makeChunkedRequest(str);
-	}
 
 }
 

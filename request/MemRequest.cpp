@@ -161,7 +161,12 @@ int         Request::parseReq(const std::string &str)
         setLanguage();
         setQuery();
         if (getMethod() == "POST" &&  m_headers["Content-Length"] != "")
-        {
+        {   
+            if (m_headers["Content-Length"] == "0")
+            {
+                m_code_ret = 411;
+                return m_code_ret;
+            } 
             if (i != std::string::npos)
             {
                 _tmp_file_name = "/tmp/cgi_body_output_" + Utils::generateFileName() + ".txt";
@@ -180,12 +185,15 @@ int         Request::parseReq(const std::string &str)
                 else
                     _bodyFlag = REQUEST_BODY_STARTED;
             }
+            else if (_bodyFlag != REQUEST_BODY_COMPLETED)
+                _bodyFlag = REQUEST_BODY_STARTED;
+                
         }
         else if (getMethod() == "POST" && m_headers["Transfer-Encoding"] == "chunked")
         {
             if (i != std::string::npos)
             {
-                _tmp_file_name = "/Users/hselbi/goinfre/webser_trash/" + Utils::generateFileName() + FileExtension(m_headers["Content-Type"]);
+                _tmp_file_name = "./www/html/uploads/" + Utils::generateFileName() + FileExtension(m_headers["Content-Type"]);
                 std::string bd = str.substr(i);
                 size_t cr = bd.find("\r\n");
                 std::string numb = bd.substr(0, cr);

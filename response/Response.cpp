@@ -37,7 +37,6 @@ Response &Response::operator=(const Response &copy)
 
 void Response::processing()
 {
-
 	int buffer_size = RES_BUFFER_SIZE;
 	
 	if (_client->get_res_status() == NOT_STARTED)

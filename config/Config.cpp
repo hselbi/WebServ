@@ -22,7 +22,7 @@ int Config::openfile(const char* filename)
 	else
 	{
 		std::cout << "\e[0;31m[ERROR] file open failed.\n\e[0m";
-		return 1;
+		exit(1);
 	}
 	return 0;
 }
@@ -334,6 +334,7 @@ ConfLoca Config::parse_location(size_t *i)
             }
 		}
 	}
+
 	return result;
 }
 

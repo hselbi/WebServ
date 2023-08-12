@@ -118,11 +118,10 @@ bool	Response::getMatchedLocation()
 	{
 		if (_location == NULL)
 			_location = new ConfLoca(locations[index]);
-
+		
 		if (isLocationHaveRedirection())
 			return false;
 		return isMethodAllowedInLocation();
-
 	}
 	errorPages(404);
 	return false;

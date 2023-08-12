@@ -10,6 +10,13 @@ bool Response::checkRequestIsFormed()
 		errorPages(501);
 		return false;
 	}
+	else if (!req["Transfer-Encoding"].empty() && !req["Content-Length"].empty())
+	{
+		errorPages(400);
+		return false;
+	}
+	else if (req["Transfer-Encoding"] == "chunked" && _client->get_request().getBodyFlag() == REQUEST_BODY_COMPLETED)
+		chunkedResponse();
 	else if (req["Transfer-Encoding"].empty() && req["Content-Length"].empty()
 		&& _client->get_request().getMethod() == "POST")
 	{
@@ -30,6 +37,20 @@ bool Response::checkRequestIsFormed()
 	return true;
 }
 
+void Response::chunkedResponse()
+{
+	t_responseHeader responseHeader;
+	responseHeader.statusCode = 200;
+	responseHeader.statusMessage = Utils::getStatusMessage(200);
+	responseHeader.m_headers["Content-Type"] = "application/html";
+	responseHeader.m_headers["Content-Length"] = "0";
+	responseHeader.m_headers["Server"] = _client->get_server_block().getServerName();
+
+	_header_buffer = Utils::ResponseHeaderToString(responseHeader);
+	_client->append_response_data(_header_buffer);
+	setResStatus(DONE);
+}
+
 void Response::checkWhichRequestedMethod()
 {
 	std::string method = _client->get_request().getMethod();
@@ -38,7 +59,25 @@ void Response::checkWhichRequestedMethod()
 	else if (method == "DELETE")
 		Method_DELETE();
 	else if (method == "POST")
+	{	
+		std::string content_length = _client->get_request().getHeaders()["Content-Length"];
+		if (!content_length.empty() && _location->getClientBodyLimit() != -1)
+		{
+			long content_length = atol(_client->get_request().getHeaders()["Content-Length"].c_str());
+			if (content_length == 0)
+			{
+				errorPages(411);
+				return ;
+			}
+			else if (content_length > _location->getClientBodyLimit())
+			{
+				errorPages(413);
+				return ;
+			}
+			
+		}
 		Method_POST();
+	}
 }
 
 void Response::sendRediraction(std::string location)

@@ -71,6 +71,7 @@ class Response {
 		bool 					getAutoIndex();
 		void					deleteFile();
 		void 					deleteAllFolderFiles();
+		void					chunkedResponse();
 		void					setResStatus(int status);
 		bool					isLocationHaveRedirection();
 		bool					checkStatusCgi();
