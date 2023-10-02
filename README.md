@@ -140,7 +140,7 @@ For a clearer understanding, an example file is often provided, illustrating the
 
 ```nginx
 server {
-	server_name webserv2;
+server_name webserv2;								     # specify server_name
 	listen 127.0.0.1:4141;                                                       # IP address or hostname (default is 127.0.0.1) and listening port, mandatory parameter
 	root [SERVER_PATH]/www/html;                                                 # root folder of site directory, full or relative path, mandatory parameter
 	allow_methods GET;                                                           # allowed methods in location, GET only by default
